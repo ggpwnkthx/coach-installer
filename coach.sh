@@ -931,9 +931,7 @@ preflight_ceph()
 	fi
 }
 install_ceph()
-{	
-	preflight_ceph
-	
+{
 	if [ -z "$(command -v ceph-deploy)" ]
 	then
 		install_ceph_deploy

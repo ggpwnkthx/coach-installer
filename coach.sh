@@ -1144,7 +1144,7 @@ ceph_rbd_resize()
 }
 ask_ceph_rbd_resize()
 {
-	read -p "Size: " size
+	read -p "Size [MB]: " size
 	ceph_rbd_resize $size $1
 }
 ceph_rbd_delete()

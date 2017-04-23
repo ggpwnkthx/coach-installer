@@ -1171,12 +1171,10 @@ ceph_fs_mount()
   done
   
   sudo mkdir /mnt
-  sudo mkdir /mnt/ceph
-  sudo mkdir /mnt/ceph/fs
-  sudo mkdir /mnt/ceph/fs/$1
+  sudo mkdir /mnt/ceph_fs
   ceph_authenticate $HOSTNAME
-  secret=$(ceph-authtool -p -n client.$HOSTNAME /etc/ceph/ceph.client.$HOSTNAME.keyring)
-  sudo mount -t ceph $ceph_mons:/ /mnt/ceph/fs/$1 -o name=$HOSTNAME,secret=$secret
+  secret=$(sudo ceph-authtool -p /etc/ceph/ceph.client.admin.keyring)
+  sudo mount -t ceph $ceph_mons:/ /mnt/ceph/fs -o name=admin,secret=$secret
   read -n 1 -s -p "Press any key to return to the previous menu..."
 }
 ceph_fs_unmount()
@@ -1237,9 +1235,10 @@ menu_ceph_fs()
       ((count++))
       echo "[$count]	$i"
     done
+  else
+    echo "[C]	Create CephFS"
   fi
-  echo ""
-  echo "[C]	Create CephFS"
+  
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo "[0]	BACK"
   echo ''
@@ -1250,11 +1249,11 @@ menu_ceph_fs()
   else
     if [ "$doit" == "C" ]
     then
-      ask_ceph_fs_create && menu_ceph_fs
+      ask_ceph_fs_create "ceph_fs" && menu_ceph_fs
     else
       if [ "$doit" == "c" ]
       then
-        ask_ceph_fs_create && menu_ceph_fs
+        ceph_fs_create "ceph_fs" && menu_ceph_fs
       else
         ceph_fs_details ${ceph_fs_ls[($doit - 1)]}
       fi

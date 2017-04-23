@@ -1277,27 +1277,21 @@ ceph_rbd_create()
 }
 ask_ceph_rbd_create()
 {
-  #ceph_pools=($(sudo ceph osd pool ls))
-  #printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
-  #count=0
-  #for i in ${ceph_pools[@]}
-  #do
-  #	((count++))
-  #	echo "[$count]	$i"
-  #done
-  #printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
-  #read -p "Which pool should the RBD be in? " pool_selected
-  #pool=${ceph_pools[($pool_selected - 1)]}
+  ceph_pools=($(sudo ceph osd pool ls))
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  count=0
+  for i in ${ceph_pools[@]}
+  do
+  	((count++))
+  	echo "[$count]	$i"
+  done
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  read -p "Which pool should the RBD be in? " pool_selected
+  pool=${ceph_pools[($pool_selected - 1)]}
   read -p "Name: " name
   read -p "Size: " size
-  #ceph_rbd_create $size $pool/$name
-  ceph_rbd_create $size rbd/$name
+  ceph_rbd_create $size $pool/$name
   echo ""
-  exists="$(rbd ls | grep -w $name)"
-  if [ -z $exists ]
-  then
-    echo "Something didn't work."
-  fi
   read -n 1 -s -p "Press any key to return to the previous menu..."
 }
 ceph_rbd_resize()
@@ -1370,7 +1364,23 @@ ceph_rbd_details()
 }
 menu_ceph_rbd()
 {
-  ceph_rbds=($(sudo rbd ls))
+  ceph_rbds=()
+  ceph_pools=($(sudo ceph osd pool ls))
+  if [ ! -z "${#ceph_pools[@]}" ]
+  then
+    for i in ${ceph_pools[@]}
+    do
+      pool_rbds=($(sudo rbd ls $i))
+	  if [ ! -z "${#pool_rbds[@]}" ]
+      then
+	    for j in ${pool_rbds[@]}
+		do
+		  ceph_rbds="${ceph_rbds[@]} $i/$j"
+		done
+	  fi
+    done
+  fi
+  ceph_rbds=($(echo "${ceph_rbds[@]}" | xargs))
   clear
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
   echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
@@ -1468,7 +1478,7 @@ menu_ceph()
     then
       echo "[F]	Manage CephFS"
     fi
-    #echo "[R]	Setup RADOS Gateway"
+    echo "[R]	Setup RADOS Gateway"
     echo "[D]	Manage RADOS Block Devices"
     echo "[B]	Benchmark"
   fi

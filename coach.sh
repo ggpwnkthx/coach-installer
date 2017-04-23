@@ -1015,13 +1015,11 @@ ceph_pool_details()
 	printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
 	echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
 	printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
-	echo "Ceph Pool - Manager || $HOSTNAME"
+	echo "Pool - Ceph - Manager || $HOSTNAME"
 	printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
-	echo ""
 	sudo ceph osd pool get $1 all
-	sudo ceph osd pool get-quota $1
-	sudo ceph osd pool stats $1
-	echo ""
+	#sudo ceph osd pool get-quota $1
+	#sudo ceph osd pool stats $1
 	printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
 	echo "[D]	Delete"
 	echo "[R]	Rename"

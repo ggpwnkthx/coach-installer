@@ -31,7 +31,8 @@ return_to_base()
 restart_script()
 {
 	return_to_base
-	./install.sh
+	script_name=$(basename $0)
+	./$script_name
 	exit
 }
 

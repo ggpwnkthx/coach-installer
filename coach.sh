@@ -960,7 +960,12 @@ install_ceph()
 
 ceph_authenticate()
 {
-  sudo ceph auth get-or-create client.$1 osd 'allow rwx' mon 'allow r' -o /etc/ceph/ceph.client.$1.keyring
+  if [ -z $2 ]
+  then
+    sudo ceph auth get-or-create client.$1 osd 'allow rwx' mon 'allow r' -o /etc/ceph/ceph.client.$1.keyring
+  else
+    sudo ceph auth get-or-create client.$1.$2 osd 'allow rwx pool=$1' mon 'allow r' -o /etc/ceph/ceph.client.$1.$2.keyring
+  fi
 }
 ask_ceph_authenticate()
 {
@@ -1129,7 +1134,6 @@ ceph_fs_create()
   ceph_pool_create $1_data $default_ceph_pg_num
   ceph_pool_create $1_meta $default_ceph_pg_num
   sudo ceph fs new $1 $1_meta $1_data
-  read -n 1 -s -p "Press any key to return to the previous menu..."
 }
 ask_ceph_fs_create()
 {
@@ -1138,6 +1142,8 @@ ask_ceph_fs_create()
 }
 ceph_fs_delete()
 {
+  sudo ceph mds cluster_down
+  sudo ceph mds fail 0
   sudo ceph fs rm $1 --yes-i-really-mean-it
   ceph_pool_remove $1_data
   ceph_pool_remove $1_meta
@@ -1150,6 +1156,34 @@ ask_ceph_fs_delete()
     *) ceph_fs_details $1 ;;
   esac
 }
+ceph_fs_mount()
+{
+  ceph_mon_ls=($(sudo ceph mon dump | grep mon | awk '{print $3}' | awk '{split($0,a,"."); print a[2]}'))
+  ceph_mons=""
+  for i in ${ceph_mon_ls[@]}
+  do
+    if [ -z $ceph_mons ]
+	then
+      ceph_mons="$(getent hosts $i | awk '{ print $1 }')"
+    else
+      ceph_mons="$ceph_mons,$(getent hosts $i | awk '{ print $1 }')"
+    fi
+  done
+  
+  sudo mkdir /mnt
+  sudo mkdir /mnt/ceph
+  sudo mkdir /mnt/ceph/fs
+  sudo mkdir /mnt/ceph/fs/$1
+  ceph_authenticate $HOSTNAME
+  secret=$(ceph-authtool -p -n client.$HOSTNAME /etc/ceph/ceph.client.$HOSTNAME.keyring)
+  sudo mount -t ceph $ceph_mons:/ /mnt/ceph/fs/$1 -o name=$HOSTNAME,secret=$secret
+  read -n 1 -s -p "Press any key to return to the previous menu..."
+}
+ceph_fs_unmount()
+{
+  sudo umount /mnt/ceph/fs/$1
+  sudo rm -r /mnt/ceph/fs/$1
+}
 ceph_fs_details()
 {
   clear
@@ -1161,17 +1195,34 @@ ceph_fs_details()
   echo $1
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo "[D]	Delete"
+  if [ -f /mnt/ceph/fs/$1 ]
+  then
+    echo "[U]	Unmount"
+  else
+    echo "[M]	Mount"
+  fi
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo "[0]	BACK"
+  echo ''
   read -p "What would you like to do? " doit
   case $doit in
     0) echo '' && menu_ceph_fs ;;
     d|D) echo '' && ask_ceph_fs_delete $1 && menu_ceph_fs ;;
+    m|M) echo '' && ceph_fs_mount $1 && ceph_fs_details $1 ;;
+    u|u) echo '' && ceph_fs_unmount $1 && ceph_fs_details $1 ;;
     *) ceph_fs_details $1 ;;
   esac
 }
 menu_ceph_fs()
 {
+  ceph_fs_ls=$(sudo ceph fs ls)
+  if [ "$ceph_fs_ls" == "No filesystems enabled" ]
+  then
+    is_ceph_fs=0
+  else
+    ceph_fs_ls=$(sudo ceph fs ls | awk '{print $2}' | sed 's/,//')
+    is_ceph_fs=1
+  fi
   count=0
   clear
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =

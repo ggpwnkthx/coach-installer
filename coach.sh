@@ -1387,7 +1387,7 @@ connect_to()
 	scp $script_path $scp_user@$1:/home/$scp_user/$script_name
 	echo ''
 	echo "Running preflight installer..."
-	ssh -t $scp_user@$1 ./install.sh
+	ssh -t $scp_user@$1 ./$script_name
 }
 ask_connect_to()
 {

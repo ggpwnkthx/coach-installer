@@ -1136,7 +1136,6 @@ ask_ceph_rbd_create()
 	then
 		echo "Something didn't work."
 	fi
-	read -n 1 -s -p "Press any key to return to the previous menu..."
 }
 ceph_rbd_resize()
 {
@@ -1168,7 +1167,6 @@ ceph_rbd_map()
 	sudo mkdir /mnt/rbd
 	sudo mkdir /mnt/rbd/$1
 	sudo mount $dev /mnt/rbd/$1
-	read -n 1 -s -p "Press any key to return to the previous menu..."
 }
 ceph_rbd_unmap()
 {
@@ -1187,8 +1185,12 @@ ceph_rbd_details()
 	printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
 	echo "[R]	Resize"
 	echo "[D]	Delete"
-	echo "[M]	Map & Mount"
-	echo "[U]	Unmount & Unmap"
+	if [ -z "$(sudo rbd showmapped | grep $1)" ]
+	then
+		echo "[M]	Map & Mount"
+	else
+		echo "[U]	Unmount & Unmap"
+	fi
 	printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
 	echo "[0]	BACK"
 	echo ''

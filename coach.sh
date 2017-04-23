@@ -960,7 +960,7 @@ menu_ceph_osd()
 	printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
 	echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
 	printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
-	echo "Ceph OSD - Manager || $HOSTNAME"
+	echo "OSD - Ceph - Manager || $HOSTNAME"
 	printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
 	echo "[A]	Add OSD"
 	echo "[R]	Remove OSD"
@@ -1294,7 +1294,7 @@ menu_ceph()
 		else
 			#echo "[M]	Setup Metadata Service"
 			#echo "[R]	Setup RADOS Gateway"
-			echo "[O]	Manage OSDs"
+			echo "[O]	Manage Local OSDs"
 			echo "[P]	Manage Pools"
 		fi
 		echo "[D]	Manage RADOS Block Devices"

@@ -885,6 +885,8 @@ install_ceph_deploy()
   fi
 }
 is_ceph_mon=""
+is_ceph_mds=""
+default_ceph_pg_num=512
 preflight_ceph()
 {
   if [ -z "$(command -v ceph-deploy)" ]
@@ -928,6 +930,15 @@ preflight_ceph()
   if [ ! -z "$(command -v ceph)" ]
   then
     is_ceph_mon="$(sudo ceph mon dump | grep $HOSTNAME)"
+    is_ceph_mds="$(sudo ls /var/lib/ceph/mds | grep $HOSTNAME)"
+    ceph_fs_ls=$(sudo ceph fs ls)
+    if [ $ceph_fs_ls == "No filesystems enabled" ]
+    then
+      is_ceph_fs=0
+    else
+	  ceph_fs_ls=$(sudo ceph fs ls | awk '{print $2}' | sed 's/,//')
+      is_ceph_fs=1
+    fi
   fi
 }
 install_ceph()
@@ -946,6 +957,21 @@ install_ceph()
     ssh -t $ceph_admin "cd ~/ceph && ceph-deploy install $HOSTNAME && ceph-deploy admin $HOSTNAME"
   fi
 }
+
+ceph_authenticate()
+{
+  sudo ceph auth get-or-create client.$1 osd 'allow rwx' mon 'allow r' -o /etc/ceph/ceph.client.$1.keyring
+}
+ask_ceph_authenticate()
+{
+  read -p "Client Hostname [$HOSTNAME]: " client
+  if [ -z $client ]
+  then
+    client=$HOSTNAME
+  fi
+  ceph_authenticate $client
+}
+
 scanned=0
 menu_ceph_osd()
 {
@@ -1041,7 +1067,11 @@ ceph_pool_create()
 ask_ceph_pool_create()
 {
   read -p "Pool name: " pool_name
-  read -p "Placement Group size: " pgs
+  read -p "Placement Group size [$default_ceph_pg_num]: " pgs
+  if [ -z $pgs ]
+  then
+    pgs=$default_ceph_pg_num
+  fi
   ceph_pool_create $pool_name $pgs
   menu_ceph_pool
 }
@@ -1094,6 +1124,93 @@ install_ceph_mds()
     ssh -t $ceph_admin "cd ~/ceph && ceph-deploy mds create $HOSTNAME"
   fi
 }
+ceph_fs_create()
+{
+  ceph_pool_create $1_data $default_ceph_pg_num
+  ceph_pool_create $1_meta $default_ceph_pg_num
+  sudo ceph fs new $1 $1_meta $1_data
+  read -n 1 -s -p "Press any key to return to the previous menu..."
+}
+ask_ceph_fs_create()
+{
+  read -p "Name: " doit
+  ceph_fs_create $doit
+}
+ceph_fs_delete()
+{
+  sudo ceph fs rm $1 --yes-i-really-mean-it
+  ceph_pool_remove $1_data
+  ceph_pool_remove $1_meta
+}
+ask_ceph_fs_delete()
+{
+  read -p "Are you sure? [y,n]" doit
+  case $doit in
+    y|Y) echo '' && ceph_fs_delete $1 && menu_ceph_fs;;
+    *) ceph_fs_details $1 ;;
+  esac
+}
+ceph_fs_details()
+{
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "FileSystem - Ceph - Manager || $HOSTNAME"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  echo $1
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  echo "[D]	Delete"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  echo "[0]	BACK"
+  read -p "What would you like to do? " doit
+  case $doit in
+    0) echo '' && menu_ceph_fs ;;
+    d|D) echo '' && ask_ceph_fs_delete $1 && menu_ceph_fs ;;
+    *) ceph_fs_details $1 ;;
+  esac
+}
+menu_ceph_fs()
+{
+  count=0
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "FileSystem - Ceph - Manager || $HOSTNAME"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  if [ $is_ceph_fs -eq 1 ]
+  then
+    for i in ${ceph_fs_ls[@]}
+    do
+      ((count++))
+      echo "[$count]	$i"
+    done
+  fi
+  echo ""
+  echo "[C]	Create CephFS"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  echo "[0]	BACK"
+  echo ''
+  read -p "What would you like to do? " doit
+  if [ "$doit" == "0" ]
+  then
+    echo '' && menu_ceph
+  else
+    if [ "$doit" == "C" ]
+    then
+      ask_ceph_fs_create && menu_ceph_fs
+    else
+      if [ "$doit" == "c" ]
+      then
+        ask_ceph_fs_create && menu_ceph_fs
+      else
+        ceph_fs_details ${ceph_fs_ls[($doit - 1)]}
+      fi
+    fi
+  fi
+}
+
 install_ceph_rgw()
 {
   no_root
@@ -1103,19 +1220,6 @@ install_ceph_rgw()
   else
     ssh -t $ceph_admin "cd ~/ceph && ceph-deploy rgw create $HOSTNAME"
   fi
-}
-ceph_authenticate()
-{
-  sudo ceph auth get-or-create client.$1 osd 'allow rwx' mon 'allow r' -o /etc/ceph/ceph.client.$1.keyring
-}
-ask_ceph_authenticate()
-{
-  read -p "Client Hostname [$HOSTNAME]: " client
-  if [ -z $client ]
-  then
-    client=$HOSTNAME
-  fi
-  ceph_authenticate $client
 }
 ceph_rbd_create()
 {
@@ -1300,12 +1404,20 @@ menu_ceph()
   else
     if [ -z "$is_ceph_mon" ]
     then
-      echo "[MO]	Setup Monitor Service"
+      echo "[MO]	Install Monitor Service"
     else
       echo "[O]	Manage Local OSDs"
     fi
     echo "[P]	Manage Pools"
-    echo "[ME]	Setup Metadata Service"
+    if [ -z $is_ceph_mds ]
+    then
+	  echo "[ME]	Install Metadata Service"
+    fi
+    is_mds_up=$(sudo ceph mds stat | grep up)
+    if [ ! -z "$is_mds_up" ]
+    then
+      echo "[F]	Manage CephFS"
+    fi
     #echo "[R]	Setup RADOS Gateway"
     echo "[D]	Manage RADOS Block Devices"
     echo "[B]	Benchmark"
@@ -1322,6 +1434,7 @@ menu_ceph()
     r|R) echo '' && install_ceph_rgw && menu_ceph ;;
     o|O) echo '' && menu_ceph_osd ;;
     p|P) echo '' && menu_ceph_pool ;;
+    f|F) echo '' && menu_ceph_fs ;;
     d|D) echo '' && menu_ceph_rbd ;;
     b|B) echo '' && ask_ceph_test && menu_ceph ;;
     *) menu_ceph ;;

@@ -1300,12 +1300,12 @@ menu_ceph()
   else
     if [ -z "$is_ceph_mon" ]
     then
-      echo "[M]	Setup Monitor Service"
+      echo "[MO]	Setup Monitor Service"
     else
       echo "[O]	Manage Local OSDs"
     fi
     echo "[P]	Manage Pools"
-    echo "[M]	Setup Metadata Service"
+    echo "[ME]	Setup Metadata Service"
     #echo "[R]	Setup RADOS Gateway"
     echo "[D]	Manage RADOS Block Devices"
     echo "[B]	Benchmark"
@@ -1317,8 +1317,9 @@ menu_ceph()
   case $doit in
     0) echo '' && menu_main ;;
     c|C) echo '' && install_ceph && menu_ceph;;
-    m|M) echo '' && ( [[ ! -f /etc/ceph/ceph.conf ]] && install_ceph_mon || install_ceph_mds ) && menu_ceph ;;
-    r|R) echo '' && install_ceph_rgw ;;
+    mo|MO) echo '' && install_ceph_mon && menu_ceph ;;
+    me|ME) echo '' && install_ceph_mds && menu_ceph ;;
+    r|R) echo '' && install_ceph_rgw && menu_ceph ;;
     o|O) echo '' && menu_ceph_osd ;;
     p|P) echo '' && menu_ceph_pool ;;
     d|D) echo '' && menu_ceph_rbd ;;

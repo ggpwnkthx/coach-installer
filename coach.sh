@@ -1127,7 +1127,7 @@ ask_ceph_rbd_create()
 	#read -p "Which pool should the RBD be in? " pool_selected
 	#pool=${ceph_pools[($pool_selected - 1)]}
 	read -p "Name: " name
-	read -p "Size: " size
+	read -p "Size [MB]: " size
 	#ceph_rbd_create $size $pool/$name
 	ceph_rbd_create $size rbd/$name
 	echo ""

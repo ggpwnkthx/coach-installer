@@ -1,5 +1,17 @@
 # COACH
-
+## Prerequisites
+* wget
+* sshd
+## How To
+First time use:
+```bash
+wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/coach.sh && chmod +x coach.sh && ./coach.sh
+```
+Consecutive uses:
+```bash
+./coach.sh
+```
+## About
 Maybe I have a unique situation, but I wrote a script to help me deploy my new servers into my cluster.
 
 I call it "COACH - Cluster Of Arbitrary, Cheap, Hardware", and this is what it does so far:
@@ -26,8 +38,7 @@ I call it "COACH - Cluster Of Arbitrary, Cheap, Hardware", and this is what it d
 
 There is also a feature to connect to remote machines. It will self replicate on the remote machine and run itself. Technically, it can use itself as it's own proxy!
 
-Roadmap:
-
+## Roadmap
 * Get away from static IPs. Add in a DHCP and DNS server
 * Add menu system for DHCP and DNS managment.
 * Rewrite some of the older functions so that the script can have a proper API
@@ -35,6 +46,5 @@ Roadmap:
 * Integrate SquidViz for ceph into that web GUI https://github.com/TheSov/squidviz
 * Add PXE booting and provisioning
 
-Current caveats:
-
+## Known Issues
 * Only tested on Ubuntu 16.04 (mini). Might work on Debian, but will not work on RedHat distros. It relies heavily on apt-get right now.

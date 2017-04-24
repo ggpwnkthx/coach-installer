@@ -393,12 +393,15 @@ menu_network()
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
   echo "Network Manager || $HOSTNAME"
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
-  fmt="%-8s%-12s%-18s%-6s\n"
-  printf "$fmt" " " "NAME" "ADDRESS" "STATE"
+  fmt="%-8s%-12s%-18s%-6s%-12s\n"
+  printf "$fmt" " " "NAME" "ADDRESS" "STATE" "TYPE"
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   for i in ${net_links[@]}
   do
-    printf "$fmt" "[$[$counter +1]]" "$i" "$(ip addr show $i | grep -w inet | awk '{print $2}')" "$(sudo cat /sys/class/net/$i/operstate)"
+    net_addr=$(ip addr show $i | grep -w inet | awk '{print $2}')
+    net_state=$(sudo cat /sys/class/net/$i/operstate)
+    net_type=$(ip link | awk '/ib0/{getline; print}' | awk '{print $1}' | awk -F "/" '{print $2}')
+    printf "$fmt" "[$[$counter +1]]" "$i" "$net_addr" "$net_state" "$net_type"
     counter=$[$counter +1]
   done
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -

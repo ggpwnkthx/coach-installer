@@ -383,6 +383,29 @@ ask_drives()
   fi
 }
 
+menu_network()
+{
+  net_links=($(ip link | grep mtu | awk '{print $2}' | sed 's/://' | grep -v lo))
+  counter=0
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "Network Manager || $HOSTNAME"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  fmt="%-8s%-12s%-18s%-6s\n"
+  printf "$fmt" " " "NAME" "ADDRESS" "STATE"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  for i in ${net_links[@]}
+  do
+    printf "$fmt" "[$[$counter +1]]" "$i" "$(ip addr show $i | grep -w inet | awk '{print $2}')" "$(sudo cat /sys/class/net/$i/operstate)"
+    counter=$[$counter +1]
+  done
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  echo "[0]       BACK"
+  echo ''
+}
+
 # System Preparation
 sys_prep()
 {
@@ -936,7 +959,7 @@ preflight_ceph()
     then
       is_ceph_fs=0
     else
-	  ceph_fs_ls=$(sudo ceph fs ls | awk '{print $2}' | sed 's/,//')
+      ceph_fs_ls=$(sudo ceph fs ls | awk '{print $2}' | sed 's/,//')
       is_ceph_fs=1
     fi
   fi
@@ -1163,13 +1186,13 @@ ceph_fs_mount()
   for i in ${ceph_mon_ls[@]}
   do
     if [ -z $ceph_mons ]
-	then
+    then
       ceph_mons="$(getent hosts $i | awk '{ print $1 }')"
     else
       ceph_mons="$ceph_mons,$(getent hosts $i | awk '{ print $1 }')"
     fi
   done
-  
+
   sudo mkdir /mnt
   sudo mkdir /mnt/ceph_fs
   ceph_authenticate $HOSTNAME
@@ -1238,7 +1261,7 @@ menu_ceph_fs()
   else
     echo "[C]	Create CephFS"
   fi
-  
+
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo "[0]	BACK"
   echo ''
@@ -1282,8 +1305,8 @@ ask_ceph_rbd_create()
   count=0
   for i in ${ceph_pools[@]}
   do
-  	((count++))
-  	echo "[$count]	$i"
+    ((count++))
+    echo "[$count]	$i"
   done
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   read -p "Which pool should the RBD be in? " pool_selected
@@ -1371,13 +1394,13 @@ menu_ceph_rbd()
     for i in ${ceph_pools[@]}
     do
       pool_rbds=($(sudo rbd ls $i))
-	  if [ ! -z "${#pool_rbds[@]}" ]
+      if [ ! -z "${#pool_rbds[@]}" ]
       then
-	    for j in ${pool_rbds[@]}
-		do
-		  ceph_rbds="${ceph_rbds[@]} $i/$j"
-		done
-	  fi
+        for j in ${pool_rbds[@]}
+        do
+          ceph_rbds="${ceph_rbds[@]} $i/$j"
+        done
+      fi
     done
   fi
   ceph_rbds=($(echo "${ceph_rbds[@]}" | xargs))
@@ -1471,7 +1494,7 @@ menu_ceph()
     echo "[P]	Manage Pools"
     if [ -z $is_ceph_mds ]
     then
-	  echo "[ME]	Install Metadata Service"
+      echo "[ME]	Install Metadata Service"
     fi
     is_mds_up=$(sudo ceph mds stat | grep up)
     if [ ! -z "$is_mds_up" ]
@@ -1591,6 +1614,7 @@ menu_main()
   echo "Main Menu || $HOSTNAME"
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo "[A]	Auto-Installers"
+  echo "[N]	Network Manager"
   echo "[C]	Ceph Manager"
   echo ""
   echo "[R]	Connect to Remote System"
@@ -1601,6 +1625,7 @@ menu_main()
   case $doit in
     0) echo '' && exit ;;
     a|A) echo '' && menu_auto_installer ;;
+    n|N) echo '' && menu_network ;;
     c|C) echo '' && menu_ceph ;;
     r|R) echo '' && ask_connect_to ;;
     *) menu_main ;;

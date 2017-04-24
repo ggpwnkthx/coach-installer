@@ -3,9 +3,7 @@
 * wget
 * sshd
 ## How To
-'''
-wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/coach.sh && chmod +x coach.sh && ./coach.sh
-'''
+'''wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/coach.sh && chmod +x coach.sh && ./coach.sh'''
 ## About
 Maybe I have a unique situation, but I wrote a script to help me deploy my new servers into my cluster.
 

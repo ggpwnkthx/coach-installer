@@ -307,7 +307,7 @@ build_megaraid()
   done
 }
 use_megaraid=0
-ask_megaraid()
+ask_megaraid_ceph()
 {
   no_it_mode=$(sudo megaclisas-status | grep "PERC H700\|NonJBODCard")
   if [ ! -z "$no_it_mode" ]
@@ -363,11 +363,10 @@ ask_megacli()
       sudo ln -s /opt/MegaRAID/MegaCli/MegaCli64 /bin/MegaCli
       echo "MegaCLI alias was not found, so it was added."
     fi
-    ask_megaraid
   else
     read -n1 -p "Install MegaCLI? [y,n]" doit
     case $doit in
-      y|Y) echo '' && install_megacli && ask_megaraid ;;
+      y|Y) echo '' && install_megacli ;;
       n|N) echo '' && echo 'MegaCLI will not be installed.' ;;
       *) ask_megacli ;;
     esac
@@ -1760,6 +1759,10 @@ ceph_test()
   echo ''
   read -n 1 -s -p "Press any key to return to the previous menu..."
 }
+ask_repair_raid_ceph()
+{
+  ask_megaraid_ceph
+}
 ask_ceph_test()
 {
   read -n1 -p "Would you like to benchmark your ceph cluster? [y,n]" doit
@@ -1812,8 +1815,9 @@ menu_ceph()
     then
       echo "[F]	Manage CephFS"
     fi
-    echo "[R]	Setup RADOS Gateway"
+    echo "[G]	Setup RADOS Gateway"
     echo "[D]	Manage RADOS Block Devices"
+	echo "[R]	Repair RAID Arrays"
     echo "[B]	Benchmark"
   fi
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
@@ -1825,11 +1829,12 @@ menu_ceph()
     c|C) echo '' && install_ceph && menu_ceph;;
     mo|MO) echo '' && install_ceph_mon && menu_ceph ;;
     me|ME) echo '' && install_ceph_mds && menu_ceph ;;
-    r|R) echo '' && install_ceph_rgw && menu_ceph ;;
+    g|G) echo '' && install_ceph_rgw && menu_ceph ;;
     o|O) echo '' && menu_ceph_osd ;;
     p|P) echo '' && menu_ceph_pool ;;
     f|F) echo '' && menu_ceph_fs ;;
     d|D) echo '' && menu_ceph_rbd ;;
+	r|R) echo '' && ask_repair_raid_ceph && menu_ceph ;;
     b|B) echo '' && ask_ceph_test && menu_ceph ;;
     *) menu_ceph ;;
   esac

@@ -426,11 +426,17 @@ set_network_local()
   else
     preflight_network_local
     sudo cp /etc/network/interfaces /etc/network/interfaces.bak
+	if [ -z $(cat /etc/network/interfaces | grep $1) ]
+	then
+      net_exists="action=add"
+    else
+	  net_exists=""
+	fi
     if [ "$2" == "mode" ]
     then
-      awk -f changeInterface.awk /etc/network/interfaces.bak "dev=$1" "$2=$3" | sudo tee /etc/network/interfaces
+      awk -f changeInterface.awk /etc/network/interfaces.bak "dev=$1" $net_exists "$2=$3" | sudo tee /etc/network/interfaces
     else
-     awk -f changeInterface.awk /etc/network/interfaces.bak "dev=$1" "mode=static" "$2=$3" | sudo tee /etc/network/interfaces
+      awk -f changeInterface.awk /etc/network/interfaces.bak "dev=$1" $net_exists "mode=static" "$2=$3" | sudo tee /etc/network/interfaces
     fi
 	if [ $(sudo cat /sys/class/net/$1/operstate) == "up" ]
 	then
@@ -442,6 +448,8 @@ set_network_local()
       sudo ifup $1
 	fi
   fi
+  sudo service networking restart
+  exit
 }
 ask_network_local_mode()
 {
@@ -498,9 +506,89 @@ ask_network_local_gateway()
   set_network_local $1 gateway $doit
   network_local_details $1
 }
+add_network_local()
+{
+  preflight_network_local
+  sudo cp /etc/network/interfaces /etc/network/interfaces.bak
+  awk -f changeInterface.awk /etc/network/interfaces.bak "device=$1" "action=add" "mode=static" "address=$2" "netmask=$3" "gateway=$4" | sudo tee /etc/network/interfaces
+  sudo service networking restart
+}
+ask_network_local_child()
+{
+  max=${net_links[0]}
+  if [ -z $max ]
+  then
+    max=0
+  fi
+  for n in "${net_links[@]}" ; do
+    ((n > max)) && max=$n
+  done
+  child=$[$max +1]
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  echo ''
+  read -p "Address: " address
+  read -p "Netmask: " netmask
+  read -p "Gateway: " gateway
+  add_network_local $1:$child $address $netmask $gateway
+}
+menu_network_local_child() {
+  net_links=($(cat /etc/network/interfaces | grep "iface $1:" | awk '{print $2}' | awk -F ":" '{print $2}'))
+  counter=0
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "Network Manager || $HOSTNAME"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  fmt="%-8s%-12s%-18s%-18s%-18s\n"
+  printf "$fmt" "" "NAME" "ADDRESS" "NETMASK" "GATEWAY"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  for i in ${net_links[@]}
+  do
+    printf "$fmt" "[$[$counter +1]]" "$1:$i" "$(get_network_local_address $1:$i)" "$(get_network_local_netmask $1:$i)" "$(get_network_local_gateway $1:$i)"
+    counter=$[$counter +1]
+  done
+  echo ''
+  printf "$fmt" "[C]" "Create Child Interface"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  printf "$fmt" "[0]" "BACK"
+  echo ''
+  read -p "What would you like to do? " doit
+  if [ "$doit" == "0" ]
+  then
+    echo '' && network_local_details $1
+  else
+    if [ "$doit" == "C" ]
+    then
+      ask_network_local_child $1 && menu_network_local_child $1
+    else
+      if [ "$doit" == "c" ]
+      then
+        ask_network_local_child $1 && menu_network_local_child $1
+      else
+        network_local_details $1:${net_links[$doit - 1]}
+      fi
+    fi
+  fi
+}
+network_local_delete() 
+{
+  sudo cp /etc/network/interfaces /etc/network/interfaces.bak
+  awk -f changeInterface.awk /etc/network/interfaces.bak "device=$1" "action=remove" | sudo tee /etc/network/interfaces
+  sudo service networking restart
+}
+ask_network_local_child_delete() {
+  read -p "Are you absolutely sure you want to delete this child interface? [y,n]" doit
+  case $doit in
+    y|Y) echo '' && network_local_delete $1 ;;
+    n|N) network_local_details $1 ;;
+    *) ask_network_local_child_delete $1 ;;
+  esac
+}
 network_local_details()
 {
   net_inet=$(cat /etc/network/interfaces | grep "$1 inet" | awk '{print $4}')
+  net_state=$(sudo cat /sys/class/net/$1/operstate)
   clear
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
   echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
@@ -515,26 +603,36 @@ network_local_details()
   then
     printf "$fmt" "[A]" "Address" $(get_network_local_address $1)
     printf "$fmt" "[N]" "Netmask" $(get_network_local_netmask $1)
-    printf "$fmt" "[B]" "Broadcast" $(ifconfig | awk "/$1/{getline; print}" | awk '{print $3}' | awk -F ":" '{print $2}')
     printf "$fmt" "[G]" "Gateway" $(get_network_local_gateway $1)
+    printf "$fmt" "[B]" "Broadcast" $(ifconfig | awk "/$1/{getline; print}" | awk '{print $3}' | awk -F ":" '{print $2}' | xargs | awk '{print $1}')
   else
     printf "$fmt" " " "Address" $(get_network_local_address $1)
     printf "$fmt" " " "Netmask" $(get_network_local_netmask $1)
-    printf "$fmt" " " "Broadcast" $(ifconfig | awk "/$1/{getline; print}" | awk '{print $3}' | awk -F ":" '{print $2}')
     printf "$fmt" " " "Gateway" $(get_network_local_gateway $1)
+    printf "$fmt" " " "Broadcast" $(ifconfig | awk "/$1/{getline; print}" | awk '{print $3}' | awk -F ":" '{print $2}' | xargs | awk '{print $1}')
   fi
-  printf "$fmt" "[S]" "State" $(sudo cat /sys/class/net/$1/operstate)
+  if [ ! -z $net_state ]
+  then
+    printf "$fmt" "[S]" "State" $net_state
+    echo ''
+    printf "$fmt" "[C]" "Manage Child Interfaces"
+  else
+    echo ''
+	printf "$fmt" "[D]" "Delete Interfaces"
+  fi
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo "[0]	BACK"
   echo ''
   read -p "What would you like to do? " doit
   case $doit in
     0) menu_network_local ;;
-	m|M) echo '' && ask_network_local_mode $1 ;;
-	a|A) echo '' && ask_network_local_address $1 ;;
-	n|N) echo '' && ask_network_local_netmask $1 ;;
-	b|B) echo '' && ask_network_local_broadcast $1 ;;
-	g|G) echo '' && ask_network_local_gateway $1 ;;
+	m|M) echo '' && ask_network_local_mode $1 && network_local_details $1 ;;
+	a|A) echo '' && ask_network_local_address $1 && network_local_details $1 ;;
+	n|N) echo '' && ask_network_local_netmask $1 && network_local_details $1 ;;
+	b|B) echo '' && ask_network_local_broadcast $1 && network_local_details $1 ;;
+	g|G) echo '' && ask_network_local_gateway $1 && network_local_details $1 ;;
+	c|C) echo '' && menu_network_local_child $1 ;;
+	d|D) echo '' && ask_network_local_child_delete $1 && menu_network_local ;;
 	*) network_local_details $1 ;;
   esac
 }

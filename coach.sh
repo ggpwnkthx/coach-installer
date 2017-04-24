@@ -382,8 +382,163 @@ ask_drives()
     ask_megacli
   fi
 }
-
-menu_network()
+preflight_network_local()
+{
+  return_to_base
+  if [ ! -f "changeInterface.awk" ]
+  then
+    wget https://raw.githubusercontent.com/JoeKuan/Network-Interfaces-Script/master/changeInterface.awk
+  fi
+  if [ ! -f "readInterfaces.awk" ]
+  then
+    wget https://raw.githubusercontent.com/JoeKuan/Network-Interfaces-Script/master/readInterfaces.awk
+  fi
+}
+get_network_local()
+{
+  preflight_network_local
+  awk -f readInterfaces.awk /etc/network/interfaces "device=$1"
+}
+get_network_local_mode()
+{
+  echo "???"
+}
+get_network_local_address()
+{
+  echo $(get_network_local $1 | awk '{print $1}')
+}
+get_network_local_netmask()
+{
+  echo $(get_network_local $1 | awk '{print $2}')
+}
+get_network_local_gateway()
+{
+  echo $(get_network_local $1 | awk '{print $3}')
+}
+set_network_local()
+{
+  if [ -z "$2" ]
+  then
+    case $(sudo cat /sys/class/net/$1/operstate) in
+	  up) sudo ifdown $1 ;;
+	  down) sudo ifup $1 ;;
+	esac
+  else
+    preflight_network_local
+    sudo cp /etc/network/interfaces /etc/network/interfaces.bak
+    if [ "$2" == "mode" ]
+    then
+      awk -f changeInterface.awk /etc/network/interfaces.bak "dev=$1" "$2=$3" | sudo tee /etc/network/interfaces
+    else
+     awk -f changeInterface.awk /etc/network/interfaces.bak "dev=$1" "mode=static" "$2=$3" | sudo tee /etc/network/interfaces
+    fi
+	if [ $(sudo cat /sys/class/net/$1/operstate) == "up" ]
+	then
+      sudo ifdown $1
+      if [ $(ip link | awk "/$1/{getline; print}" | awk '{print $1}' | awk -F "/" '{print $2}') == "infiniband" ]
+      then
+        sudo service openibd restart
+      fi
+      sudo ifup $1
+	fi
+  fi
+}
+ask_network_local_mode()
+{
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "$1 - Network Manager || $HOSTNAME"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  fmt="%-8s%-12s\n"
+  printf "$fmt" "[D]" "DHCP"
+  printf "$fmt" "[S]" "Static"
+  printf "$fmt" "[M]" "Manual"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  echo ''
+  read -p "Which mode? " doit
+  case $doit in
+	d|D) echo '' && set_network_local $1 mode dhcp ;;
+	s|S) echo '' && set_network_local $1 mode static ;;
+	m|M) echo '' && set_network_local $1 mode manual ;;
+	*) ask_network_local_mode $1 ;;
+  esac
+  network_local_details $1
+}
+ask_network_local_address()
+{
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  echo ''
+  read -p "IP Address: " doit
+  set_network_local $1 address $doit
+  network_local_details $1
+}
+ask_network_local_netmask()
+{
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  echo ''
+  read -p "Netmask: " doit
+  set_network_local $1 netmask $doit
+  network_local_details $1
+}
+ask_network_local_broadcast()
+{
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  echo ''
+  read -p "Broadcast: " doit
+  set_network_local $1 broadcast $doit
+  network_local_details $1
+}
+ask_network_local_gateway()
+{
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  echo ''
+  read -p "Gateway: " doit
+  set_network_local $1 gateway $doit
+  network_local_details $1
+}
+network_local_details()
+{
+  net_inet=$(cat /etc/network/interfaces | grep "$1 inet" | awk '{print $4}')
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "$1 - Network Manager || $HOSTNAME"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  fmt="%-8s%-12s%-18s%-8s%-12s\n"
+  printf "$fmt" " " "PROPERTY" "VALUE"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  printf "$fmt" "[M]" "Mode" $net_inet
+  if [ "$net_inet" == "static" ]
+  then
+    printf "$fmt" "[A]" "Address" $(get_network_local_address $1)
+    printf "$fmt" "[N]" "Netmask" $(get_network_local_netmask $1)
+    printf "$fmt" "[B]" "Broadcast" $(ifconfig | awk "/$1/{getline; print}" | awk '{print $3}' | awk -F ":" '{print $2}')
+    printf "$fmt" "[G]" "Gateway" $(get_network_local_gateway $1)
+  else
+    printf "$fmt" " " "Address" $(get_network_local_address $1)
+    printf "$fmt" " " "Netmask" $(get_network_local_netmask $1)
+    printf "$fmt" " " "Broadcast" $(ifconfig | awk "/$1/{getline; print}" | awk '{print $3}' | awk -F ":" '{print $2}')
+    printf "$fmt" " " "Gateway" $(get_network_local_gateway $1)
+  fi
+  printf "$fmt" "[S]" "State" $(sudo cat /sys/class/net/$1/operstate)
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  echo "[0]	BACK"
+  echo ''
+  read -p "What would you like to do? " doit
+  case $doit in
+    0) menu_network_local ;;
+	m|M) echo '' && ask_network_local_mode $1 ;;
+	a|A) echo '' && ask_network_local_address $1 ;;
+	n|N) echo '' && ask_network_local_netmask $1 ;;
+	b|B) echo '' && ask_network_local_broadcast $1 ;;
+	g|G) echo '' && ask_network_local_gateway $1 ;;
+	*) network_local_details $1 ;;
+  esac
+}
+menu_network_local()
 {
   net_links=($(ip link | grep mtu | awk '{print $2}' | sed 's/://' | grep -v lo))
   counter=0
@@ -393,20 +548,75 @@ menu_network()
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
   echo "Network Manager || $HOSTNAME"
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
-  fmt="%-8s%-12s%-18s%-6s%-12s\n"
+  fmt="%-8s%-12s%-18s%-8s%-12s\n"
   printf "$fmt" " " "NAME" "ADDRESS" "STATE" "TYPE"
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   for i in ${net_links[@]}
   do
-    net_addr=$(ip addr show $i | grep -w inet | awk '{print $2}')
     net_state=$(sudo cat /sys/class/net/$i/operstate)
-    net_type=$(ip link | awk '/ib0/{getline; print}' | awk '{print $1}' | awk -F "/" '{print $2}')
-    printf "$fmt" "[$[$counter +1]]" "$i" "$net_addr" "$net_state" "$net_type"
+    net_type=$(ip link | awk "/$i/{getline; print}" | awk '{print $1}' | awk -F "/" '{print $2}')
+    printf "$fmt" "[$[$counter +1]]" "$i" "$(get_network_local_address $i)" "$net_state" "$net_type"
     counter=$[$counter +1]
   done
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
-  echo "[0]       BACK"
+  echo "[0]	BACK"
   echo ''
+  read -p "What would you like to do? " doit
+  if [ "$doit" == "0" ]
+  then
+    echo '' && menu_network
+  else
+    if [ "$doit" == "C" ]
+    then
+      menu_network_local
+    else
+      if [ "$doit" == "c" ]
+      then
+        menu_network_local
+      else
+        network_local_details  ${net_links[$doit - 1]}
+      fi
+    fi
+  fi
+}
+menu_network_cluster()
+{
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "Network Manager || $HOSTNAME"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  echo "[0]	BACK"
+  echo ''
+  read -p "What would you like to do? " doit
+  case $doit in
+    0) menu_network ;;
+	*) menu_network_cluster ;;
+  esac
+}
+menu_network()
+{
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "Network Manager || $HOSTNAME"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  echo "[L]	Local Network Settings"
+  echo "[C]	Cluster Network Manager"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  echo "[0]	BACK"
+  echo ''
+  read -p "What would you like to do? " doit
+  case $doit in
+    0) menu_main ;;
+    l|L) echo '' && menu_network_local ;;
+	c|C) echo '' && menu_network_cluster ;;
+	*) menu_network ;;
+  esac
 }
 
 # System Preparation
@@ -733,7 +943,7 @@ menu_ceph_osd()
     fi
   done
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
-  echo "[0]       BACK"
+  echo "[0]	BACK"
   echo ''
 }
 install_ceph_osd()

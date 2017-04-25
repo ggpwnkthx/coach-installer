@@ -1537,7 +1537,7 @@ ceph_fs_mount()
   ceph_authenticate $HOSTNAME
   secret=$(sudo ceph-authtool -p /etc/ceph/ceph.client.admin.keyring)
   sudo mount -t ceph $ceph_mons:/ /mnt/ceph/fs -o name=admin,secret=$secret	
-  echo "$ceph_mons:/	/mnt/ceph/fs	ceph	name=admin,secret=$secret,noatime,_netdev	0	2" | sudo tee --append /etc/fstab
+  echo "$ceph_mons:/  ceph name=admin,secret=$secret,noatime,_netdev,x-systemd.automount 0 2" | sudo tee --append /etc/fstab
   read -n 1 -s -p "Press any key to return to the previous menu..."
 }
 ceph_fs_unmount()
@@ -1558,11 +1558,11 @@ ceph_fs_details()
   echo $1
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo "[D]	Delete"
-  if [ -f /mnt/ceph/fs/$1 ]
+  if [ -z "$(df -h | grep '/mnt/ceph/fs')" ]
   then
-    echo "[U]	Unmount"
-  else
     echo "[M]	Mount"
+  else
+    echo "[U]	Unmount"
   fi
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo "[0]	BACK"

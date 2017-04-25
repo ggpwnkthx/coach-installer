@@ -1,7 +1,4 @@
 # COACH
-## Prerequisites
-* wget
-* sshd
 ## How To
 First time use:
 ```bash
@@ -11,11 +8,16 @@ Consecutive uses:
 ```bash
 ./coach.sh
 ```
+### Prerequisites
+* wget
+* sshd
+
 ## About
 Maybe I have a unique situation, but I wrote a script to help me deploy my new servers into my cluster.
 
 I call it "COACH - Cluster Of Arbitrary, Cheap, Hardware", and this is what it does so far:
 
+### Auto-Isntaller
 * If run on a Dell system, install Dell OMSA
 * If Mellanox devices detected, install MLNX OFED (4.0) [will update firmware from source code and flash latest PXE ROM if ConnectX2]
 * Reconfigures opemsm service and sets the service up to start on boot
@@ -25,6 +27,12 @@ I call it "COACH - Cluster Of Arbitrary, Cheap, Hardware", and this is what it d
 * Clear foreign status of all disks on all MegaRAID controllers
 * Automatically create single disk spans in RAID0 for every unconfigured disk on all MegaRAID controllers
 * Keep track of HDDs and SSDs in individual RAID0 spans [credit: https://github.com/omame/megaclisas-status]
+
+### Networking
+* Manage interface (mode, ip, netmask, gateway, state)
+* Add, edit, and remove sub-interfaces
+
+### Ceph
 * Install ceph-deploy
 * Install ceph monitor role
 * Set up OSDs on local disks

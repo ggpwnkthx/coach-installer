@@ -41,7 +41,7 @@ I call it "COACH - Cluster Of Arbitrary, Cheap, Hardware", and this is what it d
 * Properly remove local OSDs from the cluster
 * Add, remove, and update pools
 * Add, remove, resize, map and mount, unmount and unmap RBDs
-* Add, remove, and mount ceph filesystem
+* Add, remove, and mount ceph filesystem (persistant)
 * Benchmark the ceph cluster
 
 There is also a feature to connect to remote machines. It will self replicate on the remote machine and run itself. Technically, it can use itself as it's own proxy!

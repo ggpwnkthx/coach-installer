@@ -1495,20 +1495,24 @@ ceph_fs_mount()
   ceph_mons=""
   for i in ${ceph_mon_ls[@]}
   do
-    if [ -z $ceph_mons ]
+	ping=$(ping $i -c 1 | grep -w PING | awk '{print $3}' | tr -d '()')
+	if [ "$ping" != "ping: unknown host cdeph01" ]
     then
-      ceph_mons="$(getent hosts $i | awk '{ print $1 }')"
-    else
-      ceph_mons="$ceph_mons,$(getent hosts $i | awk '{ print $1 }')"
+      if [ -z $ceph_mons ]
+      then
+        ceph_mons="$ping"
+      else
+        ceph_mons="$ceph_mons,$ping"
+      fi
     fi
   done
 
   sudo mkdir /mnt
-  sudo mkdir /mnt/ceph_fs
+  sudo mkdir /mnt/ceph
+  sudo mkdir /mnt/ceph/fs
   ceph_authenticate $HOSTNAME
   secret=$(sudo ceph-authtool -p /etc/ceph/ceph.client.admin.keyring)
   sudo mount -t ceph $ceph_mons:/ /mnt/ceph/fs -o name=admin,secret=$secret
-  read -n 1 -s -p "Press any key to return to the previous menu..."
 }
 ceph_fs_unmount()
 {
@@ -1654,14 +1658,18 @@ ceph_rbd_map()
   sudo rbd feature disable $1 exclusive-lock object-map fast-diff deep-flatten
   dev=$(sudo rbd map $1)
   sudo mkdir /mnt
-  sudo mkdir /mnt/rbd
-  sudo mkdir /mnt/rbd/$1
-  sudo mount $dev /mnt/rbd/$1
+  sudo mkdir /mnt/ceph
+  sudo mkdir /mnt/ceph/rbd
+  pool=$(echo $1 | awk -F "/" '{print $1}')
+  rbd=$(echo $1 | awk -F "/" '{print $2}')
+  sudo mkdir "/mnt/ceph/rbd/$pool"
+  sudo mkdir "/mnt/ceph/rbd/$pool/$rbd"
+  sudo mount $dev "/mnt/ceph/rbd/$1"
   read -n 1 -s -p "Press any key to return to the previous menu..."
 }
 ceph_rbd_unmap()
 {
-  sudo umount /mnt/rbd/$1
+  sudo umount /mnt/ceph/rbd/$1
   sudo rbd unmap $1
 }
 ceph_rbd_details()

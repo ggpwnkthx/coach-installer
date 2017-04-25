@@ -676,6 +676,23 @@ menu_network_local()
     fi
   fi
 }
+
+network_cluster_install()
+{
+  sudo apt-get -y install dnsmasq
+}
+ask_network_cluster_install()
+{
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  echo ''
+  if [ -f /mnt/ceph/fs/$1 ]
+  then
+    echo network_cluster_install
+  else
+    echo "You must have CephFS mounted to start the installation process."
+    read -n 1 -s -p "Press any key to return to the previous menu..."
+  fi
+}
 menu_network_cluster()
 {
   clear
@@ -684,13 +701,20 @@ menu_network_cluster()
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
   echo "Network Manager || $HOSTNAME"
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
-  
+  fmt="%-8s%-12s%-18s%-8s%-12s\n"
+  if [ -z $(command -v dnsmasq) ]
+  then
+    printf "$fmt" "[I]" "Install DHCP and DNS Service"
+  else
+    
+  fi
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo "[0]	BACK"
   echo ''
   read -p "What would you like to do? " doit
   case $doit in
     0) menu_network ;;
+	i|I) echo '' && ask_network_cluster_install && menu_network_cluster ;;
 	*) menu_network_cluster ;;
   esac
 }

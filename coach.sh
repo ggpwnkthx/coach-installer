@@ -1519,19 +1519,24 @@ ceph_fs_mount()
   ceph_mons=""
   for i in ${ceph_mon_ls[@]}
   do
-    if [ -z $ceph_mons ]
-    then
-      ceph_mons="$(getent hosts $i | awk '{ print $1 }')"
-    else
-      ceph_mons="$ceph_mons,$(getent hosts $i | awk '{ print $1 }')"
+	ping=$(ping $i -c 1 | grep -w PING | awk '{print $3}' | tr -d '()')
+	if [ "$ping" != "ping: unknown host $i" ]
+	then
+      if [ -z $ceph_mons ]
+      then
+        ceph_mons="$ping"
+      else
+        ceph_mons="$ceph_mons,$ping"
+      fi
     fi
   done
 
   sudo mkdir /mnt
-  sudo mkdir /mnt/ceph_fs
+  sudo mkdir /mnt/ceph
+  sudo mkdir /mnt/ceph/fs
   ceph_authenticate $HOSTNAME
   secret=$(sudo ceph-authtool -p /etc/ceph/ceph.client.admin.keyring)
-  sudo mount -t ceph $ceph_mons:/ /mnt/ceph/fs -o name=admin,secret=$secret
+  sudo mount -t ceph $ceph_mons:/ /mnt/ceph/fs -o name=admin,secret=$secret	
   echo "$ceph_mons:/	/mnt/ceph/fs	ceph	name=admin,secret=$secret,noatime,_netdev	0	2" | sudo tee --append /etc/fstab
   read -n 1 -s -p "Press any key to return to the previous menu..."
 }

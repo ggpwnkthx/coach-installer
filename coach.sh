@@ -706,7 +706,7 @@ menu_network_cluster()
   then
     printf "$fmt" "[I]" "Install DHCP and DNS Service"
   else
-    
+    print "$fmt"
   fi
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo "[0]	BACK"

@@ -17,7 +17,7 @@ Maybe I have a unique situation, but I wrote a script to help me deploy my new s
 
 I call it "COACH - Cluster Of Arbitrary, Cheap, Hardware", and this is what it does so far:
 
-### Auto-Isntaller
+### Auto-Installer
 * If run on a Dell system, install Dell OMSA
 * If Mellanox devices detected, install MLNX OFED (4.0) [will update firmware from source code and flash latest PXE ROM if ConnectX2]
 * Reconfigures opemsm service and sets the service up to start on boot

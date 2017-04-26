@@ -679,19 +679,189 @@ menu_network_local()
 
 network_cluster_install()
 {
+  sudo mkdir /mnt/ceph/fs/networking
+  sudo mkdir /mnt/ceph/fs/networking/dhcp
   sudo apt-get -y install dnsmasq
+  sudo sed -i '/^#dhcp-leasefile/s/^#//' /etc/dnsmasq.conf
+  sudo sed -i '/^dhcp-leasefile/s/=.*/=\/mnt\/ceph\/fs\/networking\/dhcp\/leases/' /etc/dnsmasq.conf
+  sudo sed -i '/^#conf-file=\etc\dnsmasq.more.conf/s/^#//' /etc/dnsmasq.conf
+  sudo sed -i '/^conf-file/s/=.*/=\/mnt\/ceph\/fs\/networking\/dhcp\/cluster.conf/' /etc/dnsmasq.conf
 }
 ask_network_cluster_install()
 {
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo ''
-  if [ -f /mnt/ceph/fs/$1 ]
+  is_ceph_mon="$(sudo ceph mon dump | grep $HOSTNAME)"
+  is_ceph_mds="$(sudo ceph mds stat | grep $HOSTNAME)"
+  if [ -z "$is_ceph_mon" ]
   then
-    echo network_cluster_install
+    echo "This node must have be an active Ceph Monitor before installing the DHCP role."
+    read -n1 -p "Would you like to install it now? [y,n]" doit
+    case $doit in
+      y|Y) echo '' && install_ceph_mon && ask_network_cluster_install ;;
+      n|N) echo '' && echo 'Returning to previous menu.' ;;
+      *) ask_network_cluster_install ;;
+    esac
   else
-    echo "You must have CephFS mounted to start the installation process."
-    read -n 1 -s -p "Press any key to return to the previous menu..."
+    if [ -z "$is_ceph_mds" ]
+	then
+      echo "This node must have be an active Ceph Metadata Server before installing the DHCP role."
+      read -n 1 -s -p "Press any key to return to the previous menu..."
+	else
+      if [ -f /mnt/ceph/fs ]
+      then
+        echo network_cluster_install
+      else
+        echo "You must have CephFS mounted to start the installation process."
+        read -n 1 -s -p "Press any key to return to the previous menu..."
+      fi
+	
+	fi
   fi
+}
+network_cluster_dhcp_interface()
+{
+  if [ -z $(cat /etc/dnsmasq.conf | grep "interface=$1") ]
+  then
+    echo "interface=$1" | sudo tee --append /etc/dnsmasq.conf
+  else
+    sudo sed -i "/interface=$1/d" /etc/dnsmasq.conf
+  fi
+  sudo service dnsmasq restart
+}
+menu_network_cluster_dhcp_interface()
+{
+  net_links=($(ip link | grep mtu | awk '{print $2}' | sed 's/://' | grep -v lo))
+  counter=0
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "DHCP - Network Manager || $HOSTNAME"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  fmt="%-8s%-12s%-18s%-8s%-12s\n"
+  for i in ${net_links[@]}
+  do
+	if [ -z $(cat /etc/dnsmasq.conf | grep "interface=$i") ]
+	then
+	  enabled=""
+	else
+	  enabled="Enabled"
+	fi
+    printf "$fmt" "[$[$counter +1]]" "$i" $enabled
+    counter=$[$counter +1]
+  done
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  printf "$fmt" "[0]" "BACK"
+  echo ''
+  read -p "What would you like to do? " doit
+  if [ "$doit" == "0" ]
+  then
+    echo '' && menu_network_dhcp
+  else
+    echo '' && network_cluster_dhcp_interface ${net_links[$doit-1]} && menu_network_cluster_dhcp_interface
+  fi
+}
+network_cluster_dhcp_scope()
+{
+  echo "dhcp-range=$1,$2,$3h" | sudo tee --append /mnt/ceph/fs/networking/dhcp/cluster.conf
+  sudo service dnsmasq restart
+}
+ask_network_cluster_dhcp_scope()
+{
+  read -p "Starting IP: " start
+  read -p "Ending IP: " end
+  read -p "Lease Hours: " lease
+  network_cluster_dhcp_scope $start $end $lease
+}
+menu_network_cluster_dhcp_scope()
+{
+  scopes=($(cat /mnt/ceph/fs/networking/dhcp/cluster.conf | grep "dhcp-range" | awk '{split($0,a,"="); print a[2]}'))
+  counter=0
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "DHCP - Network Manager || $HOSTNAME"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  fmt="%-8s%-18s%-18s%-8s%-12s\n"
+  printf "$fmt" "" "START" "END" "LEASE"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  for i in ${scopes[@]}
+  do
+    counter=$[$counter +1]
+	start=$(echo $i | awk '{split($0,a,","); print a[1]}')
+	end=$(echo $i | awk '{split($0,a,","); print a[2]}')
+	lease=$(echo $i | awk '{split($0,a,","); print a[3]}')
+    printf "$fmt" "[$counter]" $start $end $lease
+  done
+  echo ''
+  printf "$fmt" "[C]" "Create New Scope"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  printf "$fmt" "[0]" "BACK"
+  echo ''
+  read -p "What would you like to do? " doit
+  if [ "$doit" == "0" ]
+  then
+    echo '' && menu_network_dhcp
+  else
+    if [ "$doit" == "C" ]
+    then
+      ask_network_cluster_dhcp_scope
+    else
+      if [ "$doit" == "c" ]
+      then
+        ask_network_cluster_dhcp_scope
+      else
+        details_network_cluster_dhcp_scope ${net_links[$doit - 1]}
+      fi
+    fi
+  fi
+}
+menu_network_dhcp()
+{
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "DHCP - Network Manager || $HOSTNAME"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  fmt="%-8s%-12s%-18s%-8s%-12s\n"
+  printf "$fmt" "[I]" "Interfaces"
+  printf "$fmt" "[S]" "Scopes"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  printf "$fmt" "[0]" "BACK"
+  echo ''
+  read -p "What would you like to do? " doit
+  case $doit in
+    0) menu_network_cluster ;;
+	i|I) echo '' && menu_network_cluster_dhcp_interface && menu_network_cluster ;;
+	s|S) echo '' && menu_network_cluster_dhcp_scope && menu_network_cluster ;;
+	*) menu_network_dhcp ;;
+  esac
+}
+menu_network_dns()
+{
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "DNS - Network Manager || $HOSTNAME"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  fmt="%-8s%-12s%-18s%-8s%-12s\n"
+  printf "$fmt" "[I]" "Interfaces"
+  printf "$fmt" "[S]" "Scopes"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  echo "[0]	BACK"
+  echo ''
+  read -p "What would you like to do? " doit
+  case $doit in
+    0) menu_network ;;
+	i|I) echo '' && ask_network_cluster_install && menu_network_cluster ;;
+	h|H) echo '' && menu_network_dhcp ;;
+	n|N) echo '' && menu_network_dns ;;
+	*) menu_network_cluster ;;
+  esac
 }
 menu_network_cluster()
 {
@@ -706,7 +876,9 @@ menu_network_cluster()
   then
     printf "$fmt" "[I]" "Install DHCP and DNS Service"
   else
-    print "$fmt"
+    printf "$fmt" "[H]" "DHCP"
+    printf "$fmt" "[N]" "DNS"
+    printf "$fmt" "[P]" "PXE"
   fi
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo "[0]	BACK"
@@ -715,6 +887,8 @@ menu_network_cluster()
   case $doit in
     0) menu_network ;;
 	i|I) echo '' && ask_network_cluster_install && menu_network_cluster ;;
+	h|H) echo '' && menu_network_dhcp ;;
+	n|N) echo '' && menu_network_dns ;;
 	*) menu_network_cluster ;;
   esac
 }
@@ -780,8 +954,8 @@ ask_ceph_journal_size()
   osd_journal_size=$(cat /etc/ceph/ceph.conf | sed -n -e 's/^.*osd journal size = //p')
   if [ -z "$osd_journal_size" ]
   then
-    set_ceph_journal_size 5000
-    echo "osd journal size = 5000" | sudo tee --append /etc/ceph/ceph.conf
+    set_ceph_journal_size $ceph_default_journal_size
+    echo "osd journal size = $ceph_default_journal_size" | sudo tee --append /etc/ceph/ceph.conf
     osd_journal_size=$(cat /etc/ceph/ceph.conf | sed -n -e 's/^.*osd journal size = //p')
   fi
   echo "According to /etc/ceph/ceph.conf, your ceph journal size is set to $osd_journal_size MB."
@@ -1188,7 +1362,8 @@ ask_ceph_osd_remove()
   remove_ceph_osd
   menu_ceph
 }
-
+ceph_default_journal_size=2000
+ceph_seed_osd_size=3000
 ceph_admin=""
 install_ceph_mon()
 {
@@ -1222,6 +1397,7 @@ install_ceph_mon()
     ceph-deploy new $HOSTNAME
     echo "osd pool default size = 2" >> ceph.conf
     echo "public network = $ceph_pub_net" >> ceph.conf
+    echo "osd journal size = $ceph_default_journal_size" >> ceph.conf
     ceph-deploy mon create-initial
     ceph-deploy admin $HOSTNAME
     sudo chmod +r /etc/ceph/ceph.client.admin.keyring
@@ -1488,9 +1664,12 @@ install_ceph_mds()
 }
 ceph_fs_create()
 {
-  ceph_pool_create $1_data $default_ceph_pg_num
-  ceph_pool_create $1_meta $default_ceph_pg_num
-  sudo ceph fs new $1 $1_meta $1_data
+  if [ -z "$(sudo ceph fs ls | grep -w $1)" ]
+  then
+    ceph_pool_create $1_data $default_ceph_pg_num
+    ceph_pool_create $1_meta $default_ceph_pg_num
+    sudo ceph fs new $1 $1_meta $1_data
+  fi
 }
 ask_ceph_fs_create()
 {
@@ -1538,7 +1717,6 @@ ceph_fs_mount()
   secret=$(sudo ceph-authtool -p /etc/ceph/ceph.client.admin.keyring)
   sudo mount -t ceph $ceph_mons:/ /mnt/ceph/fs -o name=admin,secret=$secret	
   echo "$ceph_mons:/  ceph name=admin,secret=$secret,noatime,_netdev,x-systemd.automount 0 2" | sudo tee --append /etc/fstab
-  read -n 1 -s -p "Press any key to return to the previous menu..."
 }
 ceph_fs_unmount()
 {
@@ -1875,7 +2053,13 @@ menu_ceph()
     *) menu_ceph ;;
   esac
 }
-
+auto_install()
+{
+  ask_system_admin
+  ask_networking
+  ask_drives
+  sys_prep
+}
 menu_auto_installer()
 {
   clear
@@ -1900,10 +2084,41 @@ menu_auto_installer()
     n|N) echo '' && ask_networking && menu_main;;
     d|D) echo '' && ask_drives && menu_main ;;
     p|P) echo '' && sys_prep && menu_main ;;
-    a|A) echo '' && ask_system_admin && ask_networking && ask_drives && sys_prep && menu_main ;;
+    a|A) echo '' && auto_install && menu_main ;;
     *) menu_auto_installer ;;
   esac
 }
+
+coach_bootstrap()
+{
+  auto_install
+  install_ceph
+  install_ceph_mon
+  
+  if [ ! -f ~/ceph/coach_seed ]
+  then
+    cd ~/ceph
+    fallocate -l 4G coach_seed
+    mkfs.xfs coach_seed
+  fi
+  mkdir /mnt
+  mkdir /mnt/ceph
+  mkdir /mnt/ceph/seed
+  sudo chmod 777 /mnt/ceph/seed
+  echo "/home/$(whoami)/ceph/coach_seed /mnt/ceph/seed xfs loop" | sudo tee --append /etc/fstab
+  sudo mount -o loop=$(losetup -f) coach_seed /mnt/ceph/seed
+  sudo ceph-deploy osd prepare $HOSTNAME:/mnt/ceph/seed
+  sudo ceph-deploy osd activate $HOSTNAME:/mnt/ceph/seed
+  systemctl enable ceph.target
+  
+  install_ceph_mds
+  ceph_fs_create "ceph_fs"
+  ceph_fs_mount
+  
+  network_cluster_install
+  menu_network_cluster_dhcp_interface
+}
+
 connect_to()
 {
   clear
@@ -1969,6 +2184,8 @@ menu_main()
   echo "[N]	Network Manager"
   echo "[C]	Ceph Manager"
   echo ""
+  echo "[B]	Bootstrap (Setup as Seed Node)"
+  echo ""
   echo "[R]	Connect to Remote System"
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo "[0]	EXIT"
@@ -1979,6 +2196,7 @@ menu_main()
     a|A) echo '' && menu_auto_installer ;;
     n|N) echo '' && menu_network ;;
     c|C) echo '' && menu_ceph ;;
+	b|B) echo '' && coach_bootstrap ;;
     r|R) echo '' && ask_connect_to ;;
     *) menu_main ;;
   esac

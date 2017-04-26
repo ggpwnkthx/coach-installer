@@ -134,6 +134,7 @@ set_infiniband_ip()
     case $host_type in
       ceph) ip=$((host_number * 2 - 1)) ;;
       blade) ip=$((host_number * 2 + 15)) ;;
+	  *) return ;;
     esac
 
     x=0

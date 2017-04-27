@@ -35,6 +35,11 @@ restart_script()
   ./$script_name
   exit
 }
+containsElement () {
+  local e
+  for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
+  return 1
+}
 
 # Install Dell OpenManage Server Administrator
 install_dell_omsa()
@@ -117,17 +122,21 @@ ask_mellanox_firmware()
 }
 
 # Set up IP addresses
+reset_infiniband()
+{
+    sudo service opensm stop
+    sudo service openibd stop
+    sudo service openibd start
+    sudo service openibd restart
+    sudo service opensm start
+}
 set_infiniband_ip()
 {
   ip_added=$(sudo cat /etc/network/interfaces | grep ib0)
   if [ -z "$ip_added" ]
   then
     echo "Making sure OpenFabric services are running..."
-    sudo service opensm stop
-    sudo service openibd stop
-    sudo service openibd start
-    sudo service openibd restart
-    sudo service opensm start
+    reset_infiniband
 
     host_type=$(hostname | grep -o '[^0-9]*')
     host_number=$(hostname | grep -o '[0-9]*')
@@ -155,11 +164,7 @@ set_infiniband_ip()
     done
 
     echo "Resetting OpenFabric services..."
-    sudo service opensm stop
-    sudo service openibd stop
-    sudo service openibd start
-    sudo service openibd restart
-    sudo service opensm start
+    reset_infiniband
   fi
   restart_script
 }
@@ -253,11 +258,7 @@ update_hostnames()
   echo "192.168.0.47   blade16" | sudo tee --append /etc/hosts
   echo "#AutoUpdated" | sudo tee --append /etc/hosts
 
-  sudo service opensm stop
-  sudo service openibd stop
-  sudo service openibd start
-  sudo service openibd restart
-  sudo service opensm start
+  reset_infiniband
 
   restart_script
 }
@@ -283,12 +284,7 @@ ask_networking()
   if [ ! -z "$mellanox" ]
   then
     ask_mellanox_install
-    if [ $use_infiniband = 1 ]
-    then
-      ask_infiniband_ip
-    fi
   fi
-  ask_hostnames
 }
 
 # Build out MegaRAID devices
@@ -385,6 +381,7 @@ ask_drives()
 preflight_network_local()
 {
   return_to_base
+  sudo apt-get -y install ipcalc nmap dhcping
   if [ ! -f "changeInterface.awk" ]
   then
     wget https://raw.githubusercontent.com/JoeKuan/Network-Interfaces-Script/master/changeInterface.awk
@@ -396,7 +393,6 @@ preflight_network_local()
 }
 get_network_local()
 {
-  preflight_network_local
   awk -f readInterfaces.awk /etc/network/interfaces "device=$1"
 }
 get_network_local_mode()
@@ -420,8 +416,8 @@ set_network_local()
   if [ -z "$2" ]
   then
     case $(sudo cat /sys/class/net/$1/operstate) in
-	  up) sudo ifdown $1 ;;
-	  down) sudo ifup $1 ;;
+	  up) sudo ifconfig $1 down ;;
+	  down) sudo ifconfig $1 up;;
 	esac
   else
     preflight_network_local
@@ -434,22 +430,22 @@ set_network_local()
 	fi
     if [ "$2" == "mode" ]
     then
-      awk -f changeInterface.awk /etc/network/interfaces.bak "dev=$1" $net_exists "$2=$3" | sudo tee /etc/network/interfaces
+      awk -f changeInterface.awk /etc/network/interfaces.bak "dev=$1" $net_exists "$2=$3" | sudo tee /etc/network/interfaces >/dev/null 2>/dev/null
     else
-      awk -f changeInterface.awk /etc/network/interfaces.bak "dev=$1" $net_exists "mode=static" "$2=$3" | sudo tee /etc/network/interfaces
+      awk -f changeInterface.awk /etc/network/interfaces.bak "dev=$1" $net_exists "mode=static" "$2=$3" | sudo tee /etc/network/interfaces >/dev/null 2>/dev/null
     fi
 	if [ $(sudo cat /sys/class/net/$1/operstate) == "up" ]
 	then
-      sudo ifdown $1
+      sudo ifconfig $1 down
+	  sudo ifdown $1
       if [ $(ip link | awk "/$1/{getline; print}" | awk '{print $1}' | awk -F "/" '{print $2}') == "infiniband" ]
       then
-        sudo service openibd restart
+	    echo "Clearing OpenFabric Settings"
+        reset_infiniband
       fi
-      sudo ifup $1
+      sudo ifconfig $1 up
 	fi
   fi
-  sudo service networking restart
-  exit
 }
 ask_network_local_mode()
 {
@@ -472,7 +468,6 @@ ask_network_local_mode()
 	m|M) echo '' && set_network_local $1 mode manual ;;
 	*) ask_network_local_mode $1 ;;
   esac
-  network_local_details $1
 }
 ask_network_local_address()
 {
@@ -480,7 +475,6 @@ ask_network_local_address()
   echo ''
   read -p "IP Address: " doit
   set_network_local $1 address $doit
-  network_local_details $1
 }
 ask_network_local_netmask()
 {
@@ -488,7 +482,6 @@ ask_network_local_netmask()
   echo ''
   read -p "Netmask: " doit
   set_network_local $1 netmask $doit
-  network_local_details $1
 }
 ask_network_local_broadcast()
 {
@@ -496,7 +489,6 @@ ask_network_local_broadcast()
   echo ''
   read -p "Broadcast: " doit
   set_network_local $1 broadcast $doit
-  network_local_details $1
 }
 ask_network_local_gateway()
 {
@@ -504,13 +496,12 @@ ask_network_local_gateway()
   echo ''
   read -p "Gateway: " doit
   set_network_local $1 gateway $doit
-  network_local_details $1
 }
 add_network_local()
 {
   preflight_network_local
   sudo cp /etc/network/interfaces /etc/network/interfaces.bak
-  awk -f changeInterface.awk /etc/network/interfaces.bak "device=$1" "action=add" "mode=static" "address=$2" "netmask=$3" "gateway=$4" | sudo tee /etc/network/interfaces
+  awk -f changeInterface.awk /etc/network/interfaces.bak "device=$1" "action=add" "mode=static" "address=$2" "netmask=$3" "gateway=$4" | sudo tee /etc/network/interfaces >/dev/null 2>/dev/null
   sudo service networking restart
 }
 ask_network_local_child()
@@ -574,7 +565,7 @@ menu_network_local_child() {
 network_local_delete() 
 {
   sudo cp /etc/network/interfaces /etc/network/interfaces.bak
-  awk -f changeInterface.awk /etc/network/interfaces.bak "device=$1" "action=remove" | sudo tee /etc/network/interfaces
+  awk -f changeInterface.awk /etc/network/interfaces.bak "device=$1" "action=remove" | sudo tee /etc/network/interfaces >/dev/null 2>/dev/null
   sudo service networking restart
 }
 ask_network_local_child_delete() {
@@ -918,7 +909,7 @@ menu_network()
 # System Preparation
 sys_prep()
 {
-  apt-get -y install parted gdisk ntp apt-transport-https
+  sudo apt-get -y install parted gdisk ntp apt-transport-https
   echo "$(whoami) ALL = (root) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/$(whoami)
   sudo chmod 0440 /etc/sudoers.d/$(whoami)
 }
@@ -1387,11 +1378,17 @@ install_ceph_mon()
 
     if [ -z "$ceph_pub_net" ]
     then
-      read -p "Ceph Public Network [192.168.0.0/24]: " ceph_pub_net
+	  if [ -z "$bootstrap_network" ]
+	  then
+	    default_ceph_public_network="192.168.0.0/24"
+	  else
+	    default_ceph_public_network=$bootstrap_network
+	  fi
+      read -p "Ceph Public Network [$default_ceph_public_network]: " ceph_pub_net
     fi
     if [ -z "$ceph_pub_net" ]
     then
-      ceph_pub_net="192.168.0.0/24"
+      ceph_pub_net=$default_ceph_public_network
     fi
 
     cd ~/ceph
@@ -1477,6 +1474,7 @@ preflight_ceph()
 }
 install_ceph()
 {
+  preflight_ceph
   if [ -z "$(command -v ceph-deploy)" ]
   then
     install_ceph_deploy
@@ -2089,10 +2087,144 @@ menu_auto_installer()
     *) menu_auto_installer ;;
   esac
 }
-
+cluster_cidr=""
+bootstrap_network()
+{
+  if [ -z $1 ]
+  then
+    preflight_network_local
+    net_links=($(ip link | grep mtu | awk '{print $2}' | sed 's/://' | grep -v lo))
+    counter=0
+    clear
+    printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+    echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+    printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+    echo "Network Manager || $HOSTNAME"
+    printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+    fmt="%-8s%-12s%-18s%-8s%-12s\n"
+    printf "$fmt" " " "NAME" "ADDRESS" "STATE" "TYPE"
+    printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+    for i in ${net_links[@]}
+    do
+      net_state=$(sudo cat /sys/class/net/$i/operstate)
+      net_type=$(ip link | awk "/$i/{getline; print}" | awk '{print $1}' | awk -F "/" '{print $2}')
+      printf "$fmt" "[$[$counter +1]]" "$i" "$(get_network_local_address $i)" "$net_state" "$net_type"
+      counter=$[$counter +1]
+    done
+    printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+    echo ''
+    read -p "Select your primary clustering network card: " doit
+    if [ ! -z "${net_links[$doit -1]}" ]
+    then
+      bootstrap_network ${net_links[$doit -1]}
+    else
+      bootstrap_network
+    fi
+  else
+    clear
+    printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+    echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+    printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+    echo "Bootstrap || $HOSTNAME"
+    printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+	echo
+    read -p "Cluster CIDR [192.168.0.0/24]: " cidr
+	if [ -z "$cidr" ]
+	then
+	  cidr="192.168.0.0/24"
+	fi
+	cluster_cidr=$cidr
+	netmin="$(ipcalc -n $cidr | grep HostMin | awk '{print $2}')"
+	netmax="$(ipcalc -n $cidr | grep HostMax | awk '{print $2}')"
+	netmask="$(ipcalc -n $cidr | grep Netmask | awk '{print $2}')"
+	echo "Lower: $netmin"
+	echo "Upper: $netmax"
+	echo "Mask:  $netmask"
+	echo ""
+	echo "Scanning the network for any existing DHCP servers..."
+	echo ""
+	network_local_delete $1
+	sudo ifconfig $1 down
+	sudo ifconfig $1 up
+	dhcp_search=$(sudo nmap --script broadcast-dhcp-discover -e $1 | grep "Server Identifier" | awk '{print $4}')
+	echo ""
+	if [ -z $dhcp_search ]
+	then
+      echo "No DHCP server was found."
+	  echo "We are assuming this is a brand new deployment."
+	  echo "This node will be treated as the initial seed."
+      baseaddr="$(echo $netmin | cut -d. -f1-3)"
+      lsv="$(echo $netmin | cut -d. -f4)"
+      address="$baseaddr.$[$lsv + 1]"
+	else
+      echo "We found an existing DHCP server at $dhcp_search"
+	  echo "This node will be added as a seed to the existing network."
+	  echo ""
+	  echo "Setting up network adapter temporarily."
+	  set_network_local $1 mode dhcp
+	  clear
+      printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+      echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+      printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+      echo "Bootstrap || $HOSTNAME"
+      printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+	  echo
+	  echo "Scanning network for available slots..."
+	  baseaddr="$(echo $netmin | cut -d. -f1-3)"
+      lsv="$(echo $netmin | cut -d. -f4)"
+      address="$baseaddr.$[$lsv + 1]"
+	  echo ""
+	  echo "Waiting for a reliable connection..."
+	  pongs=$[$(ping $address -c 3 | grep received | awk '{print $4}')]
+	  while [ $pongs -lt 1 ]
+	  do
+	    pongs=$[$(ping $address -c 3 | grep received | awk '{print $4}')]
+	    echo "$address hasn't reponded yet. It may take a little while for the network settings to kick in. Stand by..."
+	  done
+	  while [ $pongs -gt 0 ]
+	  do
+	    baseaddr="$(echo $address | cut -d. -f1-3)"
+        lsv="$(echo $address | cut -d. -f4)"
+        address="$baseaddr.$[$lsv + 1]"
+		echo "Seeing if $address is online..."
+		pongs=$[$(ping $address -c 3 | grep received | awk '{print $4}')]
+	  done
+	fi
+	echo ""
+	echo "Done scanning. We're going to go with $address for the static address of this node."
+	
+	add_network_local $1 $address $netmask $netmax
+	
+	#ANYCAST for DNS
+	net_links=($(cat /etc/network/interfaces | grep "iface $1:" | awk '{print $2}' | awk -F ":" '{print $2}'))
+	net_child=${net_links[0]}
+    if [ -z $net_child ]
+    then
+      net_child=1
+	else
+	  for n in "${net_links[@]}" ; do
+        ((n > net_child)) && net_child=$n
+      done
+    fi
+	add_network_local $1:$net_child $netmin $netmask $netmax
+	
+	clear
+	echo "NOTES:"
+	echo "UNICAST is set up on interface: $1"
+	echo "Using the IP address: $address"
+	echo "ANYCAST is set up on sub-interface: $1:$net_child"
+	echo "Using the IP sddress: $netmin"
+	echo "If you decide to have put gateway on this network, it must have the IP address: $netmax"
+	echo ""
+	
+	read -n 1 -s -p "Press any key to continue..."
+  fi
+}
 coach_bootstrap()
 {
   auto_install
+  bootstrap_network
+  
   install_ceph
   install_ceph_mon
   
@@ -2116,8 +2248,8 @@ coach_bootstrap()
   ceph_fs_create "ceph_fs"
   ceph_fs_mount
   
-  network_cluster_install
-  menu_network_cluster_dhcp_interface
+  #network_cluster_install
+  #menu_network_cluster_dhcp_interface
 }
 
 connect_to()
@@ -2185,7 +2317,7 @@ menu_main()
   echo "[N]	Network Manager"
   echo "[C]	Ceph Manager"
   echo ""
-  echo "[B]	Bootstrap (Setup as Seed Node)"
+  #echo "[B]	Bootstrap (Setup as Seed Node)"
   echo ""
   echo "[R]	Connect to Remote System"
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
@@ -2197,7 +2329,7 @@ menu_main()
     a|A) echo '' && menu_auto_installer ;;
     n|N) echo '' && menu_network ;;
     c|C) echo '' && menu_ceph ;;
-	b|B) echo '' && coach_bootstrap ;;
+  #  b|B) echo '' && coach_bootstrap ;;
     r|R) echo '' && ask_connect_to ;;
     *) menu_main ;;
   esac

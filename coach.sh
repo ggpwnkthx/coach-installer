@@ -643,7 +643,7 @@ menu_network_local()
   read -p "What would you like to do? " doit
   if [ "$doit" == "0" ]
   then
-    echo '' && menu_network
+    echo '' && menu_main
   else
     if [ "$doit" == "C" ]
     then
@@ -876,24 +876,29 @@ menu_network_cluster()
 }
 menu_network()
 {
-  clear
-  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
-  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
-  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
-  echo "Network Manager || $HOSTNAME"
-  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
-  echo "[L]	Local Network Settings"
-  echo "[C]	Cluster Network Manager"
-  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
-  echo "[0]	BACK"
-  echo ''
-  read -p "What would you like to do? " doit
-  case $doit in
-    0) menu_main ;;
-    l|L) echo '' && menu_network_local ;;
-	c|C) echo '' && menu_network_cluster ;;
-	*) menu_network ;;
-  esac
+  if [ -z "$(command -v dnsmasq)" ]
+  then
+    menu_network_local
+  else
+    clear
+    printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+    echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+    printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+    echo "Network Manager || $HOSTNAME"
+    printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+    echo "[L]	Local Network Settings"
+    echo "[C]	Cluster Network Manager"
+    printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+    echo "[0]	BACK"
+    echo ''
+    read -p "What would you like to do? " doit
+    case $doit in
+      0) menu_main ;;
+      l|L) echo '' && menu_network_local ;;
+      c|C) echo '' && menu_network_cluster ;;
+      *) menu_network ;;
+    esac
+  fi
 }
 
 # System Preparation
@@ -2109,9 +2114,9 @@ bootstrap_local_network()
     read -p "Select your primary clustering network card: " doit
     if [ ! -z "${net_links[$doit -1]}" ]
     then
-      bootstrap_network ${net_links[$doit -1]}
+      bootstrap_local_network ${net_links[$doit -1]}
     else
-      bootstrap_network
+      bootstrap_local_network
     fi
   else
     clear
@@ -2271,6 +2276,8 @@ bootstrap_ceph()
 bootstrap_cluster_network()
 {
   network_cluster_install
+  sudo sed -i "/^interface/s/=.*/=$bootstrap_net_iface/" /etc/dnsmasq.conf
+  sudo service dnsmasq restart
 }
 coach_bootstrap()
 {
@@ -2344,11 +2351,14 @@ menu_main()
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
   echo "Main Menu || $HOSTNAME"
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  echo "[B]	Bootstrap (Setup as Seed Node)"
+  echo ""
   echo "[A]	Auto-Installers"
   echo "[N]	Network Manager"
-  echo "[C]	Ceph Manager"
-  echo ""
-  echo "[B]	Bootstrap (Setup as Seed Node)"
+  if [ ! -z "$(command -v ceph)" ]
+  then
+    echo "[C]	Ceph Manager"
+  fi
   echo ""
   echo "[R]	Connect to Remote System"
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -

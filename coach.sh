@@ -1,44 +1,9 @@
 #!/bin/bash
-am_i_root()
-{
-  i_am_root=$(whoami | grep "root")
-  if [ ! -z "$i_am_root" ]
-  then
-    echo ""
-  else
-    echo "This script makes changes to your system. It must be run with root privileges."
-    echo ""
-    exit
-  fi
-}
-no_root()
-{
-  i_am_root=$(whoami | grep "root")
-  if [ ! -z "$i_am_root" ]
-  then
-    echo ''
-    echo "You can't be root for this part."
-    exit
-  else
-    echo ''
-  fi
-}
+
 return_to_base()
 {
   dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
   cd $dirs
-}
-restart_script()
-{
-  return_to_base
-  script_name=$(basename $0)
-  ./$script_name
-  exit
-}
-containsElement () {
-  local e
-  for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
-  return 1
 }
 
 # Install Dell OpenManage Server Administrator
@@ -1255,7 +1220,6 @@ ceph_admin=""
 install_ceph_mon()
 {
   preflight_ceph
-  no_root
   if [ "$HOSTNAME" == "$ceph_admin" ]
   then
     if [ ! -z "$1" ]
@@ -1549,7 +1513,6 @@ menu_ceph_pool()
 install_ceph_mds()
 {
   preflight_ceph
-  no_root
   if [ "$HOSTNAME" == "$ceph_admin" ]
   then
     ceph-deploy mds create $HOSTNAME
@@ -1701,7 +1664,6 @@ menu_ceph_fs()
 
 install_ceph_rgw()
 {
-  no_root
   if [ "$HOSTNAME" == "$ceph_admin" ]
   then
     ceph-deploy rgw create $HOSTNAME

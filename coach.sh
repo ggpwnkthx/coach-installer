@@ -2330,7 +2330,7 @@ bootstrap_cluster_network()
   address="$(get_network_local_address $bootstrap_net_iface)"
   netmask="$(get_network_local_netmask $bootstrap_net_iface)"
   nodes="$(ipcalc -n $address/$netmask | grep Hosts | awk '{print $2}')"
-  seeds=$[$[$(ipcalc -n 10.0.0.0/255.255.255.0 | grep Hosts | awk '{print $2}')/16]+1]
+  seeds=$[$[$nodes/16]+1]
   echo $seeds
   if [ $seeds -gt 254 ]
   then

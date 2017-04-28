@@ -2084,6 +2084,8 @@ bootstrap_local_network()
 	echo ""
 	echo "Done scanning. We're going to go with $address for the static address of this node."
 	
+	sed -i "/$HOSTNAME/ s/.*/$address\t$HOSTNAME/g" /etc/hosts
+	
 	add_network_local $1 $address $netmask $netmax
 	cluster_mon_ip=$address
 	

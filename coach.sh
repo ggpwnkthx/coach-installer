@@ -54,8 +54,6 @@ install_dell_omsa()
   sudo service dsm_om_connsvc start
   sudo update-rc.d dsm_om_connsvc defaults
   sudo service dataeng start
-
-  restart_script
 }
 ask_dell_omsa()
 {
@@ -108,8 +106,6 @@ update_mellanox_firmware()
   wget http://www.mellanox.com/downloads/Drivers/PXE/FlexBoot-3.4.306_VPI.tar
   tar -xvf FlexBoot-3.4.306_VPI.tar
   sudo flint -d $DEVICE brom FlexBoot-3.4.306_VPI_26428.mrom
-
-  restart_script
 }
 ask_mellanox_firmware()
 {
@@ -166,7 +162,6 @@ set_infiniband_ip()
     echo "Resetting OpenFabric services..."
     reset_infiniband
   fi
-  restart_script
 }
 ask_infiniband_ip()
 {
@@ -205,11 +200,9 @@ install_mellanox_drivers()
   sudo mv /etc/init.d/opensmd /etc/init.d/opensm
   sudo update-rc.d opensm defaults
   sudo update-rc.d opensm enable
-
+  
   return_to_base
   ask_mellanox_firmware
-
-  restart_script
 }
 use_infiniband=0
 ask_mellanox_install()
@@ -227,6 +220,7 @@ ask_mellanox_install()
     echo "Infiniband drivers detected. Ignoring Mellanox installation."
     use_infiniband=1
   fi
+  reset_infiniband
 }
 
 # Update local hostname resoltion
@@ -259,8 +253,6 @@ update_hostnames()
   echo "#AutoUpdated" | sudo tee --append /etc/hosts
 
   reset_infiniband
-
-  restart_script
 }
 ask_hostnames()
 {
@@ -345,8 +337,6 @@ install_megacli()
   sudo wget http://step.polymtl.ca/~coyote/dist/megaclisas-status/megaclisas-status
   sudo chmod +x megaclisas-status
   sudo ln -s /opt/MegaRAID/MegaCli/megaclisas-status /bin/megaclisas-status
-
-  restart_script
 }
 ask_megacli()
 {
@@ -1359,6 +1349,7 @@ ceph_seed_osd_size=3000
 ceph_admin=""
 install_ceph_mon()
 {
+  preflight_ceph
   no_root
   if [ "$HOSTNAME" == "$ceph_admin" ]
   then
@@ -1381,10 +1372,10 @@ install_ceph_mon()
 	  if [ -z "$bootstrap_network" ]
 	  then
 	    default_ceph_public_network="192.168.0.0/24"
+        read -p "Ceph Public Network [$default_ceph_public_network]: " ceph_pub_net
 	  else
 	    default_ceph_public_network=$bootstrap_network
 	  fi
-      read -p "Ceph Public Network [$default_ceph_public_network]: " ceph_pub_net
     fi
     if [ -z "$ceph_pub_net" ]
     then
@@ -1395,7 +1386,13 @@ install_ceph_mon()
     ceph-deploy new $HOSTNAME
     echo "osd pool default size = 2" >> ceph.conf
     echo "public network = $ceph_pub_net" >> ceph.conf
-    echo "osd journal size = $ceph_default_journal_size" >> ceph.conf
+	read -p "Ceph Journal Size (MB) [$ceph_default_journal_size]: " ceph_journal_size
+	if [ -z $ceph_journal_size ]
+	then
+	  ceph_journal_size=$ceph_default_journal_size
+    fi
+    echo "osd journal size = $ceph_journal_size" >> ceph.conf
+	ceph-deploy install $HOSTNAME
     ceph-deploy mon create-initial
     ceph-deploy admin $HOSTNAME
     sudo chmod +r /etc/ceph/ceph.client.admin.keyring
@@ -1407,13 +1404,10 @@ install_ceph_mon()
 # Install Ceph
 install_ceph_deploy()
 {
-  if [ "$ceph_admin" == "$HOSTNAME" ]
-  then
-    wget -q -O- 'https://download.ceph.com/keys/release.asc' | sudo apt-key add -
-    echo deb https://download.ceph.com/debian-kraken/ $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list
-    sudo apt-get update
-    sudo apt-get -y install ceph-deploy
-  fi
+  wget -q -O- 'https://download.ceph.com/keys/release.asc' | sudo apt-key add -
+  echo deb https://download.ceph.com/debian-kraken/ $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list
+  sudo apt-get update
+  sudo apt-get -y install ceph-deploy
 }
 is_ceph_mon=""
 is_ceph_mds=""
@@ -1475,10 +1469,6 @@ preflight_ceph()
 install_ceph()
 {
   preflight_ceph
-  if [ -z "$(command -v ceph-deploy)" ]
-  then
-    install_ceph_deploy
-  fi
   if [ "$ceph_admin" == "$HOSTNAME" ]
   then
     mkdir ~/ceph
@@ -1653,6 +1643,7 @@ menu_ceph_pool()
 }
 install_ceph_mds()
 {
+  preflight_ceph
   no_root
   if [ "$HOSTNAME" == "$ceph_admin" ]
   then
@@ -2087,8 +2078,10 @@ menu_auto_installer()
     *) menu_auto_installer ;;
   esac
 }
+bootstrap_net_iface=""
+cluster_mon_ip=""
 cluster_cidr=""
-bootstrap_network()
+bootstrap_local_network()
 {
   if [ -z $1 ]
   then
@@ -2194,6 +2187,7 @@ bootstrap_network()
 	echo "Done scanning. We're going to go with $address for the static address of this node."
 	
 	add_network_local $1 $address $netmask $netmax
+	cluster_mon_ip=$address
 	
 	#ANYCAST for DNS
 	net_links=($(cat /etc/network/interfaces | grep "iface $1:" | awk '{print $2}' | awk -F ":" '{print $2}'))
@@ -2208,6 +2202,7 @@ bootstrap_network()
     fi
 	add_network_local $1:$net_child $netmin $netmask $netmax
 	
+    bootstrap_net_iface=$1
 	clear
 	echo "NOTES:"
 	echo "UNICAST is set up on interface: $1"
@@ -2220,33 +2215,69 @@ bootstrap_network()
 	read -n 1 -s -p "Press any key to continue..."
   fi
 }
-coach_bootstrap()
+bootstrap_ceph()
 {
-  auto_install
-  bootstrap_network
+  install_ceph_deploy
+  ceph-deploy purge $HOSTNAME
+  ceph-deploy purgedata $HOSTNAME
+  ceph-deploy forgetkeys
+  sudo rm -r ~/ceph
   
-  install_ceph
-  install_ceph_mon
+  #install_ceph
+  mkdir ~/ceph
+  cd ~/ceph
+  ceph-deploy new $HOSTNAME
+  sed -i "/^mon_host = /s/ = .*/ = $cluster_mon_ip/" ceph.conf
+  echo "osd pool default size = 2" | tee --append ceph.conf
+  echo "public network = $cluster_cidr" | tee --append ceph.conf
+  read -p "Ceph Journal Size (MB) [$ceph_default_journal_size]: " ceph_journal_size
+  if [ -z $ceph_journal_size ]
+  then
+    ceph_journal_size=$ceph_default_journal_size
+  fi
+  echo "osd journal size = $ceph_journal_size" | tee --append ceph.conf
   
+  ceph-deploy install $HOSTNAME
+  ceph-deploy mon create-initial
+  ceph-deploy admin $HOSTNAME
+  sudo chmod +r /etc/ceph/ceph.client.admin.keyring
   if [ ! -f ~/ceph/coach_seed ]
   then
     cd ~/ceph
+	rm coach_seed
     fallocate -l 4G coach_seed
     mkfs.xfs coach_seed
   fi
-  mkdir /mnt
-  mkdir /mnt/ceph
-  mkdir /mnt/ceph/seed
-  sudo chmod 777 /mnt/ceph/seed
+  sudo mkdir /mnt
+  sudo mkdir /mnt/ceph
+  sudo mkdir /mnt/ceph/seed
   echo "/home/$(whoami)/ceph/coach_seed /mnt/ceph/seed xfs loop" | sudo tee --append /etc/fstab
   sudo mount -o loop=$(losetup -f) coach_seed /mnt/ceph/seed
+  sudo chmod 777 /mnt/ceph/seed
   sudo ceph-deploy osd prepare $HOSTNAME:/mnt/ceph/seed
   sudo ceph-deploy osd activate $HOSTNAME:/mnt/ceph/seed
   systemctl enable ceph.target
   
   install_ceph_mds
   ceph_fs_create "ceph_fs"
-  ceph_fs_mount
+  sudo mkdir /mnt
+  sudo mkdir /mnt/ceph
+  sudo mkdir /mnt/ceph/fs
+  ceph_authenticate $HOSTNAME
+  secret=$(sudo ceph-authtool -p /etc/ceph/ceph.client.admin.keyring)
+  sudo mount -t ceph $cluster_mon_ip:/ /mnt/ceph/fs -o name=admin,secret=$secret	
+  echo "$cluster_mon_ip:/  ceph name=admin,secret=$secret,noatime,_netdev,x-systemd.automount 0 2" | sudo tee --append /etc/fstab
+}
+bootstrap_cluster_network()
+{
+  network_cluster_install
+}
+coach_bootstrap()
+{
+  auto_install
+  bootstrap_local_network
+  bootstrap_ceph
+  bootstrap_cluster_network
   
   #network_cluster_install
   #menu_network_cluster_dhcp_interface
@@ -2317,7 +2348,7 @@ menu_main()
   echo "[N]	Network Manager"
   echo "[C]	Ceph Manager"
   echo ""
-  #echo "[B]	Bootstrap (Setup as Seed Node)"
+  echo "[B]	Bootstrap (Setup as Seed Node)"
   echo ""
   echo "[R]	Connect to Remote System"
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
@@ -2329,7 +2360,7 @@ menu_main()
     a|A) echo '' && menu_auto_installer ;;
     n|N) echo '' && menu_network ;;
     c|C) echo '' && menu_ceph ;;
-  #  b|B) echo '' && coach_bootstrap ;;
+    b|B) echo '' && coach_bootstrap ;;
     r|R) echo '' && ask_connect_to ;;
     *) menu_main ;;
   esac

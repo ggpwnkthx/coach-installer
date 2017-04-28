@@ -2050,9 +2050,33 @@ menu_ceph()
 }
 auto_install()
 {
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "Installing System Administrative Software"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   ask_system_admin
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "Installing Network Drivers"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   ask_networking
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "Installing Storage Drivers"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   ask_drives
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "Installing Prerequisets"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   sys_prep
 }
 menu_auto_installer()
@@ -2088,6 +2112,12 @@ cluster_mon_ip=""
 cluster_cidr=""
 bootstrap_local_network()
 {
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "Bootstrapping this node's Network"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   if [ -z $1 ]
   then
     preflight_network_local
@@ -2208,8 +2238,14 @@ bootstrap_local_network()
 	add_network_local $1:$net_child $netmin $netmask $netmax
 	
     bootstrap_net_iface=$1
-	clear
-	echo "NOTES:"
+	
+    clear
+    printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+    echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+    printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+    echo "Local Networking Notes"
+    printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+	echo ""
 	echo "UNICAST is set up on interface: $1"
 	echo "Using the IP address: $address"
 	echo "ANYCAST is set up on sub-interface: $1:$net_child"
@@ -2222,6 +2258,12 @@ bootstrap_local_network()
 }
 bootstrap_ceph()
 {
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "Bootstrapping the Cluster's Storage System"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   install_ceph_deploy
   ceph-deploy purge $HOSTNAME
   ceph-deploy purgedata $HOSTNAME
@@ -2261,7 +2303,7 @@ bootstrap_ceph()
   sudo chmod 777 /mnt/ceph/seed
   sudo ceph-deploy osd prepare $HOSTNAME:/mnt/ceph/seed
   sudo ceph-deploy osd activate $HOSTNAME:/mnt/ceph/seed
-  systemctl enable ceph.target
+  sudo systemctl enable ceph.target
   
   install_ceph_mds
   ceph_fs_create "ceph_fs"
@@ -2275,8 +2317,32 @@ bootstrap_ceph()
 }
 bootstrap_cluster_network()
 {
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "Bootstrapping the Cluster's Network"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  bootstrap_net_iface="ib0"
   network_cluster_install
-  sudo sed -i "/^interface/s/=.*/=$bootstrap_net_iface/" /etc/dnsmasq.conf
+  sudo echo "interface=$bootstrap_net_iface" | sudo tee --append /etc/dnsmasq.conf
+  
+  address="$(get_network_local_address $bootstrap_net_iface)"
+  netmask="$(get_network_local_netmask $bootstrap_net_iface)"
+  nodes="$(ipcalc -n $address/$netmask | grep Hosts | awk '{print $2}')"
+  seeds=$[$[$(ipcalc -n 10.0.0.0/255.255.255.0 | grep Hosts | awk '{print $2}')/16]+1]
+  echo $seeds
+  if [ $seeds -gt 254 ]
+  then
+    baseaddr="$(echo $address | cut -d. -f1-2)"
+    ip_min="$baseaddr.1.0"
+  else
+    baseaddr="$(echo $address | cut -d. -f1-3)"
+    ip_min="$baseaddr.$seeds"
+  fi
+  ip_max="$(ipcalc -n $address/$netmask | grep HostMax | awk '{print $2}')"
+  sudo echo "dhcp-range=$ip_min,$ip_max,12h" | sudo tee --append /etc/dnsmasq.conf
+  
   sudo service dnsmasq restart
 }
 coach_bootstrap()
@@ -2286,8 +2352,6 @@ coach_bootstrap()
   bootstrap_ceph
   bootstrap_cluster_network
   
-  #network_cluster_install
-  #menu_network_cluster_dhcp_interface
 }
 
 connect_to()

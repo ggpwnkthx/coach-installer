@@ -17,6 +17,14 @@ Maybe I have a unique situation, but I wrote a script to help me deploy my new s
 
 I call it "COACH - Cluster Of Arbitrary, Cheap, Hardware", and this is what it does so far:
 
+### Bootstrap
+* Runs the Auto-Installer
+* Sets up a static IP (will check if is in use) based on a given CIDR
+* Initialized the ceph cluster.
+* Creates a cephFS instance
+* Sets up DHCP for the given CIDR
+* Sets up DNS for the DHCP clients.
+
 ### Auto-Installer
 * If run on a Dell system, install Dell OMSA
 * If Mellanox devices detected, install MLNX OFED (4.0) [will update firmware from source code and flash latest PXE ROM if ConnectX2]
@@ -47,7 +55,6 @@ I call it "COACH - Cluster Of Arbitrary, Cheap, Hardware", and this is what it d
 There is also a feature to connect to remote machines. It will self replicate on the remote machine and run itself. Technically, it can use itself as it's own proxy!
 
 ## Roadmap
-* Get away from static IPs. Add in a DHCP and DNS server
 * Add menu system for DHCP and DNS managment.
 * Rewrite some of the older functions so that the script can have a proper API
 * Add a web based GUI

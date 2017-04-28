@@ -1326,11 +1326,11 @@ preflight_ceph()
     is_ceph_mon="$(sudo ceph mon dump | grep $HOSTNAME)"
     is_ceph_mds="$(sudo ls /var/lib/ceph/mds | grep $HOSTNAME)"
     ceph_fs_ls=$(sudo ceph fs ls)
-    if [ $ceph_fs_ls == "No filesystems enabled" ]
+    if [ "$ceph_fs_ls" == "No filesystems enabled" ]
     then
       is_ceph_fs=0
     else
-      ceph_fs_ls=$(sudo ceph fs ls | awk '{print $2}' | sed 's/,//')
+      ceph_fs_ls="$(sudo ceph fs ls | awk '{print $2}' | sed 's/,//')"
       is_ceph_fs=1
     fi
   fi
@@ -1974,6 +1974,8 @@ cluster_mon_ip=""
 cluster_cidr=""
 bootstrap_local_network()
 {
+  return_to_base
+  preflight_network_local
   clear
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
   echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
@@ -1982,7 +1984,6 @@ bootstrap_local_network()
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   if [ -z $1 ]
   then
-    preflight_network_local
     net_links=($(ip link | grep mtu | awk '{print $2}' | sed 's/://' | grep -v lo))
     counter=0
     clear
@@ -2120,6 +2121,7 @@ bootstrap_local_network()
 }
 bootstrap_ceph()
 {
+  return_to_base
   clear
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
   echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
@@ -2179,6 +2181,7 @@ bootstrap_ceph()
 }
 bootstrap_cluster_network()
 {
+  return_to_base
   clear
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
   echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
@@ -2213,7 +2216,6 @@ coach_bootstrap()
   bootstrap_local_network
   bootstrap_ceph
   bootstrap_cluster_network
-  
 }
 
 connect_to()

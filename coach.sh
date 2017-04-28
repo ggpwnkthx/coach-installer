@@ -126,59 +126,6 @@ reset_infiniband()
     sudo service openibd restart
     sudo service opensm start
 }
-set_infiniband_ip()
-{
-  ip_added=$(sudo cat /etc/network/interfaces | grep ib0)
-  if [ -z "$ip_added" ]
-  then
-    echo "Making sure OpenFabric services are running..."
-    reset_infiniband
-
-    host_type=$(hostname | grep -o '[^0-9]*')
-    host_number=$(hostname | grep -o '[0-9]*')
-    case $host_type in
-      ceph) ip=$((host_number * 2 - 1)) ;;
-      blade) ip=$((host_number * 2 + 15)) ;;
-	  *) return ;;
-    esac
-
-    x=0
-    interfaces=($(ip -o link show | awk -F': ' '{print $2}' | grep ib))
-    for i in "${interfaces[@]}"
-    do
-      ip=$(($ip + $x))
-      echo "auto $i" | sudo tee --append /etc/network/interfaces
-      echo "iface $i inet static" | sudo tee --append /etc/network/interfaces
-      echo "    address 192.168.0.$ip" | sudo tee --append /etc/network/interfaces
-      echo "    netmask 255.255.255.0" | sudo tee --append /etc/network/interfaces
-      if [ $x = 0 ]
-      then
-        sudo cp /etc/hosts /etc/hosts.old
-        sed -e '/'$HOSTNAME'/s=^[0-9\.]*='"192.168.0.$ip"'=' /etc/hosts.old | sudo tee /etc/hosts
-      fi
-      x=$(($x + 1))
-    done
-
-    echo "Resetting OpenFabric services..."
-    reset_infiniband
-  fi
-}
-ask_infiniband_ip()
-{
-  ip_added=$(sudo cat /etc/network/interfaces | grep ib0)
-  if [ ! -z "$ip_added" ]
-  then
-    echo "IP addresses for Infiniband adpaters detected. New IPs were not added."
-  else
-    read -n1 -p "Set InfiniBand IP addresses? [y,n]" doit
-    case $doit in
-      y|Y) echo '' && set_infiniband_ip ;;
-      n|N) echo '' && echo 'IP addresses for InfiniBand devices were not set.' ;;
-      *) ask_infiniband_ip ;;
-    esac
-  fi
-}
-
 # Install Mellanox drivers installed
 install_mellanox_drivers()
 {
@@ -221,53 +168,6 @@ ask_mellanox_install()
     use_infiniband=1
   fi
   reset_infiniband
-}
-
-# Update local hostname resoltion
-update_hostnames()
-{
-  echo "192.168.0.1    ceph01" | sudo tee --append /etc/hosts
-  echo "192.168.0.3    ceph02" | sudo tee --append /etc/hosts
-  echo "192.168.0.5    ceph03" | sudo tee --append /etc/hosts
-  echo "192.168.0.7    ceph04" | sudo tee --append /etc/hosts
-  echo "192.168.0.9    ceph05" | sudo tee --append /etc/hosts
-  echo "192.168.0.11   ceph06" | sudo tee --append /etc/hosts
-  echo "192.168.0.13   ceph07" | sudo tee --append /etc/hosts
-  echo "192.168.0.15   ceph08" | sudo tee --append /etc/hosts
-  echo "192.168.0.17   blade01" | sudo tee --append /etc/hosts
-  echo "192.168.0.19   blade02" | sudo tee --append /etc/hosts
-  echo "192.168.0.21   blade03" | sudo tee --append /etc/hosts
-  echo "192.168.0.23   blade04" | sudo tee --append /etc/hosts
-  echo "192.168.0.25   blade05" | sudo tee --append /etc/hosts
-  echo "192.168.0.27   blade06" | sudo tee --append /etc/hosts
-  echo "192.168.0.29   blade07" | sudo tee --append /etc/hosts
-  echo "192.168.0.31   blade08" | sudo tee --append /etc/hosts
-  echo "192.168.0.33   blade09" | sudo tee --append /etc/hosts
-  echo "192.168.0.35   blade10" | sudo tee --append /etc/hosts
-  echo "192.168.0.37   blade11" | sudo tee --append /etc/hosts
-  echo "192.168.0.39   blade12" | sudo tee --append /etc/hosts
-  echo "192.168.0.41   blade13" | sudo tee --append /etc/hosts
-  echo "192.168.0.43   blade14" | sudo tee --append /etc/hosts
-  echo "192.168.0.45   blade15" | sudo tee --append /etc/hosts
-  echo "192.168.0.47   blade16" | sudo tee --append /etc/hosts
-  echo "#AutoUpdated" | sudo tee --append /etc/hosts
-
-  reset_infiniband
-}
-ask_hostnames()
-{
-  hosts_added=$(cat /etc/hosts | grep "#AutoUpdated")
-  if [ ! -z "$hosts_added" ]
-  then
-    echo "Preconfigured hostnames detected detected. New hostnames were not added."
-  else
-    read -n1 -p "Update hostname resolution? [y,n]" doit
-    case $doit in
-      y|Y) echo '' && update_hostnames ;;
-      n|N) echo '' && echo 'Hostnames were not updated.' ;;
-      *) ask_hostnames ;;
-    esac
-  fi
 }
 # Install networking
 ask_networking()

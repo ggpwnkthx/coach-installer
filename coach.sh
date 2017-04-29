@@ -1238,12 +1238,12 @@ install_ceph_mon()
 
     if [ -z "$ceph_pub_net" ]
     then
-	  if [ -z "$bootstrap_network" ]
+	  if [ -z "$cluster_cidr" ]
 	  then
 	    default_ceph_public_network="192.168.0.0/24"
         read -p "Ceph Public Network [$default_ceph_public_network]: " ceph_pub_net
 	  else
-	    default_ceph_public_network=$bootstrap_network
+	    default_ceph_public_network=$cluster_cidr
 	  fi
     fi
     if [ -z "$ceph_pub_net" ]
@@ -1355,7 +1355,7 @@ ceph_authenticate()
   then
     sudo ceph auth get-or-create client.$1 osd 'allow rwx' mon 'allow r' -o /etc/ceph/ceph.client.$1.keyring
   else
-    sudo ceph auth get-or-create client.$1.$2 osd 'allow rwx pool=$1' mon 'allow r' -o /etc/ceph/ceph.client.$1.$2.keyring
+    sudo ceph auth get-or-create client.$1.$2 osd 'allow rwx pool=$2' mon 'allow r' -o /etc/ceph/ceph.client.$1.$2.keyring
   fi
 }
 ask_ceph_authenticate()
@@ -2113,8 +2113,10 @@ bootstrap_local_network()
 	echo ""
 	echo "UNICAST is set up on interface: $1"
 	echo "Using the IP address: $address"
+	echo
 	echo "ANYCAST is set up on sub-interface: $1:$net_child"
 	echo "Using the IP sddress: $netmin"
+	echo
 	echo "If you decide to have put gateway on this network, it must have the IP address: $netmax"
 	echo ""
 	
@@ -2184,19 +2186,18 @@ bootstrap_ceph()
 bootstrap_cluster_network()
 {
   return_to_base
+  preflight_network_local
   clear
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
   echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
   echo "Bootstrapping the Cluster's Network"
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
-  bootstrap_net_iface="ib0"
+  
   network_cluster_install
   sudo echo "interface=$bootstrap_net_iface" | sudo tee --append /etc/dnsmasq.conf
   
-  address="$(get_network_local_address $bootstrap_net_iface)"
-  netmask="$(get_network_local_netmask $bootstrap_net_iface)"
-  nodes="$(ipcalc -n $address/$netmask | grep Hosts | awk '{print $2}')"
+  nodes="$(ipcalc -n $cluster_mon_ip/$netmask | grep Hosts | awk '{print $2}')"
   seeds=$[$[$nodes/16]+1]
   echo $seeds
   if [ $seeds -gt 254 ]

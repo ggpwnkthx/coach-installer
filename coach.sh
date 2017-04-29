@@ -2089,6 +2089,8 @@ bootstrap_local_network()
 	  echo "This node will be added as a seed to the existing network."
 	  echo ""
 	  echo "Setting up network adapter temporarily."
+	  sudo sed -i '/dns-search/d' /etc/network/interfaces
+	  sudo sed -i '/dns-nameservers/d' /etc/network/interfaces
 	  set_network_local $1 mode dhcp
 	  clear
       printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
@@ -2124,6 +2126,7 @@ bootstrap_local_network()
 	sudo sed -i "/$HOSTNAME/ s/.*/$address\t$HOSTNAME/g" /etc/hosts
 	
 	add_network_local $1 $address $netmask $netmax
+	awk -f changeInterface.awk /etc/network/interfaces.bak "dev=$1" "dns-nameservers=$netmin" | sudo tee /etc/network/interfaces >/dev/null 2>/dev/null
 	cluster_mon_ip=$address
 	
 	#ANYCAST for DNS

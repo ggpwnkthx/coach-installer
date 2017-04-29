@@ -98,7 +98,10 @@ install_mellanox_drivers()
   cd /tmp
   rm MLNX_OFED_LINUX-*.iso
   wget http://content.mellanox.com/ofed/MLNX_OFED-4.0-1.0.1.0/MLNX_OFED_LINUX-4.0-1.0.1.0-${release,}-x86_64.iso
-  mkdir iso
+  if [ ! -f "iso" ]
+  then
+    sudo mkdir iso
+  fi
   sudo mount -o loop MLNX_OFED_LINUX-*.iso iso
   sudo apt-get -y install perl
   sudo /tmp/iso/mlnxofedinstall
@@ -526,8 +529,14 @@ menu_network_local()
 
 network_cluster_install()
 {
-  sudo mkdir /mnt/ceph/fs/networking
-  sudo mkdir /mnt/ceph/fs/networking/dhcp
+  if [ ! -f "/mnt/ceph/fs/networking" ]
+  then
+    sudo mkdir /mnt/ceph/fs/networking
+  fi
+  if [ ! -f "/mnt/ceph/fs/networking/dhcp" ]
+  then
+    sudo mkdir /mnt/ceph/fs/networking/dhcp
+  fi
   sudo apt-get -y install dnsmasq
   sudo sed -i '/^#dhcp-leasefile/s/^#//' /etc/dnsmasq.conf
   sudo sed -i '/^dhcp-leasefile/s/=.*/=\/mnt\/ceph\/fs\/networking\/dhcp\/leases/' /etc/dnsmasq.conf
@@ -1568,9 +1577,18 @@ ceph_fs_mount()
     fi
   done
 
-  sudo mkdir /mnt
-  sudo mkdir /mnt/ceph
-  sudo mkdir /mnt/ceph/fs
+  if [ ! -f "/mnt" ]
+  then
+    sudo mkdir /mnt
+  fi
+  if [ ! -f "/mnt/ceph" ]
+  then
+    sudo mkdir /mnt/ceph
+  fi
+  if [ ! -f "/mnt/ceph/fs" ]
+  then
+    sudo mkdir /mnt/ceph/fs
+  fi
   ceph_authenticate $HOSTNAME
   secret=$(sudo ceph-authtool -p /etc/ceph/ceph.client.admin.keyring)
   sudo mount -t ceph $ceph_mons:/ /mnt/ceph/fs -o name=admin,secret=$secret	
@@ -1720,13 +1738,32 @@ ceph_rbd_map()
   ceph_authenticate $HOSTNAME
   sudo rbd feature disable $1 exclusive-lock object-map fast-diff deep-flatten
   dev=$(sudo rbd map $1)
-  sudo mkdir /mnt
-  sudo mkdir /mnt/ceph
-  sudo mkdir /mnt/ceph/rbd
+  if [ ! -f "/mnt" ]
+  then
+    sudo mkdir /mnt
+  fi
+  if [ ! -f "/mnt/ceph" ]
+  then
+    sudo mkdir /mnt/ceph
+  fi
+  if [ ! -f "/mnt/ceph/rbd" ]
+  then
+    sudo mkdir /mnt/ceph/rbd
+  fi
   pool=$(echo $1 | awk -F "/" '{print $1}')
   rbd=$(echo $1 | awk -F "/" '{print $2}')
-  sudo mkdir "/mnt/ceph/rbd/$pool"
-  sudo mkdir "/mnt/ceph/rbd/$pool/$rbd"
+  if [ ! -f "/mnt" ]
+  then
+    sudo mkdir /mnt
+  fi
+  if [ ! -f "/mnt/ceph/rbd/$pool" ]
+  then
+    sudo mkdir "/mnt/ceph/rbd/$pool"
+  fi
+  if [ ! -f "/mnt/ceph/rbd/$pool/$rbd" ]
+  then
+    sudo mkdir "/mnt/ceph/rbd/$pool/$rbd"
+  fi
   sudo mount $dev "/mnt/ceph/rbd/$1"
   read -n 1 -s -p "Press any key to return to the previous menu..."
 }
@@ -2163,9 +2200,18 @@ bootstrap_ceph()
     fallocate -l 4G coach_seed
     mkfs.xfs coach_seed
   fi
-  sudo mkdir /mnt
-  sudo mkdir /mnt/ceph
-  sudo mkdir /mnt/ceph/seed
+  if [ ! -f "/mnt" ]
+  then
+    sudo mkdir /mnt
+  fi
+  if [ ! -f "/mnt/ceph" ]
+  then
+    sudo mkdir /mnt/ceph
+  fi
+  if [ ! -f "/mnt/ceph/seed" ]
+  then
+    sudo mkdir /mnt/ceph/seed
+  fi
   echo "/home/$(whoami)/ceph/coach_seed /mnt/ceph/seed xfs loop" | sudo tee --append /etc/fstab
   sudo mount -o loop=$(losetup -f) coach_seed /mnt/ceph/seed
   sudo chmod 777 /mnt/ceph/seed
@@ -2175,9 +2221,18 @@ bootstrap_ceph()
   
   install_ceph_mds
   ceph_fs_create "ceph_fs"
-  sudo mkdir /mnt
-  sudo mkdir /mnt/ceph
-  sudo mkdir /mnt/ceph/fs
+  if [ ! -f "/mnt" ]
+  then
+    sudo mkdir /mnt
+  fi
+  if [ ! -f "/mnt/ceph" ]
+  then
+    sudo mkdir /mnt/ceph
+  fi
+  if [ ! -f "/mnt/ceph/fs" ]
+  then
+    sudo mkdir /mnt/ceph/fs
+  fi
   ceph_authenticate $HOSTNAME
   secret=$(sudo ceph-authtool -p /etc/ceph/ceph.client.admin.keyring)
   sudo mount -t ceph $cluster_mon_ip:/ /mnt/ceph/fs -o name=admin,secret=$secret	

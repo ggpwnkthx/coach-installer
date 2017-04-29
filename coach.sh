@@ -2117,7 +2117,7 @@ bootstrap_local_network()
 	echo "ANYCAST is set up on sub-interface: $1:$net_child"
 	echo "Using the IP sddress: $netmin"
 	echo
-	echo "If you decide to have put gateway on this network, it must have the IP address: $netmax"
+	echo "If you decide to put a gateway on this network, it should have the IP address: $netmax"
 	echo ""
 	
 	read -n 1 -s -p "Press any key to continue..."

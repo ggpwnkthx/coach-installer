@@ -294,14 +294,13 @@ set_network_local()
     fi
 	if [ $(sudo cat /sys/class/net/$1/operstate) == "up" ]
 	then
-      sudo ifconfig $1 down
 	  sudo ifdown $1
       if [ $(ip link | awk "/$1/{getline; print}" | awk '{print $1}' | awk -F "/" '{print $2}') == "infiniband" ]
       then
 	    echo "Clearing OpenFabric Settings"
         reset_infiniband
       fi
-      sudo ifconfig $1 up
+	  sudo ifup $1
 	fi
   fi
 }
@@ -360,7 +359,7 @@ add_network_local()
   preflight_network_local
   sudo cp /etc/network/interfaces /etc/network/interfaces.bak
   awk -f changeInterface.awk /etc/network/interfaces.bak "device=$1" "action=add" "mode=static" "address=$2" "netmask=$3" "gateway=$4" | sudo tee /etc/network/interfaces >/dev/null 2>/dev/null
-  sudo service networking restart
+  sudo ifup $1
 }
 ask_network_local_child()
 {
@@ -2074,6 +2073,7 @@ bootstrap_local_network()
 	network_local_delete $1
 	sudo ifconfig $1 down
 	sudo ifconfig $1 up
+	read -n 1 -s -p "Press any key to continue..."
 	dhcp_search=$(sudo nmap --script broadcast-dhcp-discover -e $1 | grep "Server Identifier" | awk '{print $4}')
 	echo ""
 	if [ -z $dhcp_search ]

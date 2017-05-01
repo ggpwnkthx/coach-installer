@@ -358,7 +358,7 @@ add_network_local()
 {
   preflight_network_local
   sudo cp /etc/network/interfaces /etc/network/interfaces.bak
-  awk -f changeInterface.awk /etc/network/interfaces.bak "device=$1" "action=add" "mode=static" "address=$2" "netmask=$3" "gateway=$4" | sudo tee /etc/network/interfaces >/dev/null 2>/dev/null
+  awk -f changeInterface.awk /etc/network/interfaces.bak "dev=$1" "action=add" "mode=static" "address=$2" "netmask=$3" "gateway=$4" | sudo tee /etc/network/interfaces >/dev/null 2>/dev/null
 }
 ask_network_local_child()
 {
@@ -421,7 +421,7 @@ menu_network_local_child() {
 network_local_delete() 
 {
   sudo cp /etc/network/interfaces /etc/network/interfaces.bak
-  awk -f changeInterface.awk /etc/network/interfaces.bak "device=$1" "action=remove" | sudo tee /etc/network/interfaces >/dev/null 2>/dev/null
+  awk -f changeInterface.awk /etc/network/interfaces.bak "dev=$1" "action=remove" | sudo tee /etc/network/interfaces >/dev/null 2>/dev/null
   sudo service networking restart
 }
 ask_network_local_child_delete() {
@@ -2133,24 +2133,6 @@ bootstrap_local_network()
 	sudo /etc/init.d/networking restart
 	cluster_mon_ip=$address
 	
-	#ANYCAST for DNS
-	net_links=($(cat /etc/network/interfaces | grep "iface $1:" | awk '{print $2}' | awk -F ":" '{print $2}'))
-	net_child=${net_links[0]}
-    if [ -z $net_child ]
-    then
-      net_child=1
-	else
-	  for n in "${net_links[@]}" ; do
-        ((n > net_child)) && net_child=$n
-      done
-    fi
-	sudo ifdown $1:$net_child
-	network_local_delete $1:$net_child
-    add_network_local $1:$net_child $netmin $netmask $netmax
-	sudo ifup $1:$net_child
-	sudo service networking restart
-	sudo /etc/init.d/networking restart
-	
     bootstrap_net_iface=$1
 	
     clear
@@ -2162,9 +2144,6 @@ bootstrap_local_network()
 	echo ""
 	echo "UNICAST is set up on interface: $1"
 	echo "Using the IP address: $address"
-	echo
-	echo "ANYCAST is set up on sub-interface: $1:$net_child"
-	echo "Using the IP sddress: $netmin"
 	echo
 	echo "If you decide to put a gateway on this network, it should have the IP address: $netmax"
 	echo ""
@@ -2254,6 +2233,24 @@ bootstrap_cluster_network()
 {
   return_to_base
   preflight_network_local
+  
+  #ANYCAST for DNS
+  net_links=($(cat /etc/network/interfaces | grep "iface $1:" | awk '{print $2}' | awk -F ":" '{print $2}'))
+  net_child=${net_links[0]}
+  if [ -z $net_child ]
+  then
+    net_child=1
+  else
+    for n in "${net_links[@]}" ; do
+      ((n > net_child)) && net_child=$n
+    done
+  fi
+  sudo ifdown $1:$net_child
+  network_local_delete $1:$net_child
+  add_network_local $1:$net_child $netmin $netmask $netmax
+  sudo ifup $1:$net_child
+  sudo service networking restart
+  sudo /etc/init.d/networking restart
   clear
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
   echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"

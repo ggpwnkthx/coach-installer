@@ -359,7 +359,6 @@ add_network_local()
   preflight_network_local
   sudo cp /etc/network/interfaces /etc/network/interfaces.bak
   awk -f changeInterface.awk /etc/network/interfaces.bak "device=$1" "action=add" "mode=static" "address=$2" "netmask=$3" "gateway=$4" | sudo tee /etc/network/interfaces >/dev/null 2>/dev/null
-  sudo ifup $1
 }
 ask_network_local_child()
 {
@@ -2125,8 +2124,13 @@ bootstrap_local_network()
 	
 	sudo sed -i "/$HOSTNAME/ s/.*/$address\t$HOSTNAME/g" /etc/hosts
 	
+	sudo ifdown $1
+	network_local_delete $1
 	add_network_local $1 $address $netmask $netmax
 	awk -f changeInterface.awk /etc/network/interfaces.bak "dev=$1" "dns-nameservers=$netmin" | sudo tee /etc/network/interfaces >/dev/null 2>/dev/null
+	sudo ifup $1
+	sudo service networking restart
+	sudo /etc/init.d/networking restart
 	cluster_mon_ip=$address
 	
 	#ANYCAST for DNS
@@ -2140,7 +2144,12 @@ bootstrap_local_network()
         ((n > net_child)) && net_child=$n
       done
     fi
+	sudo ifdown $1:$net_child
+	network_local_delete $1:$net_child
     add_network_local $1:$net_child $netmin $netmask $netmax
+	sudo ifup $1:$net_child
+	sudo service networking restart
+	sudo /etc/init.d/networking restart
 	
     bootstrap_net_iface=$1
 	

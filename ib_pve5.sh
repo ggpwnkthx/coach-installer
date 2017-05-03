@@ -1,6 +1,7 @@
+release="$(uname -v | awk '{print $4}')"
 cd /tmp
-wget http://download.proxmox.com/debian/dists/stretch/pvetest/binary-amd64/pve-headers-4.10.1-2-pve_4.10.1-2_amd64.deb
-dpkg -i pve-headers-4.10.1-2-pve_4.10.1-2_amd64.deb
+wget http://download.proxmox.com/debian/dists/stretch/pvetest/binary-amd64/pve-headers-$release-pve_$release_amd64.deb
+dpkg -i pve-headers-$release-pve_$release_amd64.deb
 apt-get update
 apt-get -y install python-libxml2 make dkms
 wget http://content.mellanox.com/ofed/MLNX_OFED-4.0-2.0.2.0/MLNX_OFED_LINUX-4.0-2.0.2.0-ubuntu17.04-x86_64.iso

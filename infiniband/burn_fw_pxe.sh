@@ -1,4 +1,5 @@
 # Install firmware burning tools
+sudo apt-get -y install gcc make dkms
 cd /tmp
 wget http://www.mellanox.com/downloads/MFT/mft-4.5.0-31-x86_64-deb.tgz
 tar -xvzf mft-4.5.0-31-x86_64-deb.tgz

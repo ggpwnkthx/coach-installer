@@ -3,12 +3,12 @@ mods=(mlx4_core mlx4_ib ib_umad ib_uverbs ib_ipoib)
 for i in ${mods[@]}
 do
   mod=$(cat /etc/modules | grep $i)
-  if [ -z $mod ]
+  if [ -z "$mod" ]
   then
     echo $i | sudo tee --append /etc/modules
   fi
   mod=$(lsmod | grep $i)
-  if [ -z $mod ]
+  if [ -z "$mod" ]
   then
     sudo modprobe $i
   fi

@@ -7,7 +7,7 @@
 
 ### BEGIN INIT INFO
 # Provides:          rbdmap
-# Required-Start:    $network $remote_fs openibd
+# Required-Start:    $network $remote_fs
 # Required-Stop:     $network $remote_fs
 # Should-Start:      ceph
 # Should-Stop:       ceph

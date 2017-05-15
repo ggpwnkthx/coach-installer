@@ -1,56 +1,18 @@
-# Add IB modules to /etc/modules
-mod=$(cat /etc/modules | grep "mlx4_core")
-if [ -z $mod ]
-then
-  echo "mlx4_core" >> /etc/modules
-fi
-mod=$(cat /etc/modules | grep "mlx4_ib")
-if [ -z $mod ]
-then
-  echo "mlx4_ib" >> /etc/modules
-fi
-mod=$(cat /etc/modules | grep "ib_umad")
-if [ -z $mod ]
-then
-  echo "ib_umad" >> /etc/modules
-fi
-mod=$(cat /etc/modules | grep "ib_uverbs")
-if [ -z $mod ]
-then
-  echo "ib_uverbs" >> /etc/modules
-fi
-mod=$(cat /etc/modules | grep "ib_ipoib")
-if [ -z $mod ]
-then
-  echo "ib_ipoib" >> /etc/modules
-fi
-
-# Start modules if they are not already
-mod=$(lsmod | grep "mlx4_core")
-if [ -z $mod ]
-then
-  modprobe mlx4_core
-fi
-mod=$(lsmod | grep "mlx4_ib")
-if [ -z $mod ]
-then
-  modprobe mlx4_ib
-fi
-mod=$(lsmod | grep "ib_umad")
-if [ -z $mod ]
-then
-  modprobe ib_umad
-fi
-mod=$(lsmod | grep "mlx4ib_uverbs_core")
-if [ -z $mod ]
-then
-  modprobe ib_uverbs
-fi
-mod=$(lsmod | grep "ib_ipoib")
-if [ -z $mod ]
-then
-  modprobe ib_ipoib
-fi
+# Add IB modules to /etc/modules and start them
+mods=(mlx4_core mlx4_ib ib_umad ib_uverbs ib_ipoib)
+for i in ${mods[@]}
+do
+  mod=$(cat /etc/modules | grep $i)
+  if [ -z $mod ]
+  then
+    echo $i | sudo tee --append /etc/modules
+  fi
+  mod=$(lsmod | grep $i)
+  if [ -z $mod ]
+  then
+    modprobe $i
+  fi
+done
 
 # Install IB Subnet Manager
 apt-get update

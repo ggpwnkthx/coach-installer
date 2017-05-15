@@ -1,0 +1,87 @@
+#!/bin/bash
+#
+# rbdmap Ceph RBD Mapping
+#
+# chkconfig: 2345 20 80
+# description: Ceph RBD Mapping
+
+### BEGIN INIT INFO
+# Provides:          rbdmap
+# Required-Start:    $network $remote_fs openibd
+# Required-Stop:     $network $remote_fs
+# Should-Start:      ceph
+# Should-Stop:       ceph
+# X-Start-Before:    $x-display-manager
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Ceph RBD Mapping
+# Description:       Ceph RBD Mapping
+### END INIT INFO
+
+RBDMAPFILE="/etc/ceph/rbdmap"
+
+if [ -e /lib/lsb/init-functions ]; then
+    . /lib/lsb/init-functions
+fi
+
+
+
+
+case "$1" in
+  start)
+        mons=($(cat /etc/ceph/ceph.conf | grep "mon addr" | awk '{print $4}' | awk '{split($0,a,":"); print a[1];}' ))
+        found=0
+        while [ $found -eq 0 ]
+        do
+                for i in ${mons[@]}
+                do
+                        ping=$(ping $i -c 1 | grep "100% packet loss")
+                        if [ -z "$ping" ]
+                        then
+                                found=1
+                        fi
+                done
+        done
+        $0 reload
+        ;;
+
+  stop)
+        rbdmap unmap
+        ;;
+
+  restart|force-reload)
+        $0 stop
+        $0 start
+        ;;
+
+  reload)
+        rbdmap map
+        mapped=$(rbd showmapped | grep /dev)
+        while read -r i; do
+            pool=$(echo $i | awk '{print $2}')
+            image=$(echo $i | awk '{print $3}')
+            device=$(echo $i | awk '{print $5}')
+            if [ ! -z $pool ]
+            then
+                if [ ! -z $image ]
+                then
+                    if [ ! -z $device ]
+                    then
+                        mkdir -p /mnt/ceph/rbd/$pool/$image
+                        mount $device /mnt/ceph/rbd/$pool/$image
+                    fi
+                fi
+            fi
+        done <<< "$mapped"
+        
+        ;;
+
+  status)
+        rbd showmapped
+        ;;
+
+  *)
+        echo "Usage: rbdmap {start|stop|restart|force-reload|reload|status}"
+        exit 1
+        ;;
+esac

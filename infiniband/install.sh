@@ -10,14 +10,14 @@ do
   mod=$(lsmod | grep $i)
   if [ -z $mod ]
   then
-    modprobe $i
+    sudo modprobe $i
   fi
 done
 
 # Install IB Subnet Manager
-apt-get update
-apt-get -y install opensm
-update-rc.d -f opensm remove
-update-rc.d opensm defaults
-update-rc.d opensm enable
-service opensm restart
+sudo apt-get update
+sudo apt-get -y install opensm
+sudo update-rc.d -f opensm remove
+sudo update-rc.d opensm defaults
+sudo update-rc.d opensm enable
+sudo service opensm restart

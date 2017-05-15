@@ -37,8 +37,14 @@ sudo rm -r /etc/dnsmasq.d
 sudo ln -s /mnt/ceph/rbd/rbd/dhcp/dnsmasq.d /etc
 if [ ! -f /etc/systemd/system/dnsmasq.service ]
 then
-  echo "interface=ib0:1" | sudo tee --append /etc/dnsmasq.conf
-  echo "conf-dir=/etc/dnsmasq.d" | sudo tee --append /etc/dnsmasq.conf
+  conf=("interface=ib0" "interface=ib0:1" "conf-dir=/etc/dnsmasq.d")
+  for i in ${conf[@]}
+  do
+    if [ -z "$(cat /etc/dnsmasq.conf | grep $i)" ]
+    then
+      echo $i | sudo tee --append /etc/dnsmasq.conf
+    fi
+  done
   sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/ceph/dnsmasq.service -O /etc/systemd/system/dnsmasq.service
   sudo systemctl enable dnsmasq.service
 fi

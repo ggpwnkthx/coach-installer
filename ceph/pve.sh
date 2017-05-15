@@ -11,3 +11,7 @@ if [ ! -d /etc/pve/priv ]
 then
   sudo ln -s /etc/ceph /etc/pve/priv
 fi
+if [ -z $(command -c ceph) ]
+then
+  sudo apt-get -y install ceph-common
+fi

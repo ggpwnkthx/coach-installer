@@ -8,7 +8,10 @@ then
 fi
 if [ -f /etc/ceph/rbdmap ]
 then
-  echo "rbd/dhcp id=admin,keyring=/etc/ceph/ceph.client.admin.keyring" | sudo tee --append /etc/ceph/rbdmap
+  if [ -z "$(cat /etc/ceph/rbdmap | grep 'rbd/dhcp')" ]
+  then
+    echo "rbd/dhcp id=admin,keyring=/etc/ceph/ceph.client.admin.keyring" | sudo tee --append /etc/ceph/rbdmap
+  fi
 else
   echo "rbd/dhcp id=admin,keyring=/etc/ceph/ceph.client.admin.keyring" | sudo tee /etc/ceph/rbdmap
 fi
@@ -34,7 +37,7 @@ sudo rm -r /etc/dnsmasq.d
 sudo ln -s /mnt/ceph/rbd/rbd/dhcp/dnsmasq.d /etc
 if [ ! -f /etc/systemd/system/dnsmasq.service ]
 then
-  echo "interface=ib0" | sudo tee --append /etc/dnsmasq.conf
+  echo "interface=ib0:1" | sudo tee --append /etc/dnsmasq.conf
   echo "conf-dir=/etc/dnsmasq.d" | sudo tee --append /etc/dnsmasq.conf
   sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/ceph/dnsmasq.service -O /etc/systemd/system/dnsmasq.service
   sudo systemctl enable dnsmasq.service

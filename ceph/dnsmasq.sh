@@ -18,7 +18,7 @@ fi
 if [ ! -f /etc/systemd/system/rbdmap.service ]
 then
   sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/ceph/rbdmap.init -O /etc/init.d/rbdmap
-  sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/ceph/rbdmap.service - O /etc/systemd/system/rbdmap.service
+  sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/ceph/rbdmap.service -O /etc/systemd/system/rbdmap.service
   sudo systemctl enable rbdmap.service
 fi
 systemctl restart rbdmap.service

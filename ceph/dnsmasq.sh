@@ -28,6 +28,7 @@ then
   sudo cp -r /etc/dnsmasq.d /mnt/ceph/rbd/rbd/dhcp/dnsmasq.d
   echo "dhcp-range=192.168.0.50,192.168.0.150,255.255.255.0,12h" | sudo tee /mnt/ceph/rbd/rbd/dhcp/dnsmasq.d/range.conf
   echo "dhcp-leasefile=/mnt/ceph/rbd/rbd/dhcp/dnsmasq.leases" | sudo tee /mnt/ceph/rbd/rbd/dhcp/dnsmasq.d/leases.conf
+  echo "dhcp-option=dhcp-option=67,http://192.168.0.254/index.php" | sudo tee /mnt/ceph/rbd/rbd/dhcp/dnsmasq.d/options.conf
 fi
 if [ ! -z /mnt/ceph/rbd/rbd/dhcp/dnsmasq.leases ]
 then

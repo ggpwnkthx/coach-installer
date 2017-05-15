@@ -1,0 +1,12 @@
+[Unit]
+Description=DHCP and DNS caching server.
+After=rbdmap.service
+
+[Service]
+ExecStart=/usr/sbin/dnsmasq -k --conf-file=/mnt/ceph/rbd/rbd/dhcp/dnsmasq.conf
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

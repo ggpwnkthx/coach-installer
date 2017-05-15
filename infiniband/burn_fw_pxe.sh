@@ -11,8 +11,8 @@ wget http://www.mellanox.com/downloads/firmware/fw-ConnectX2-rel-2_9_1200.tgz
 tar -xvzf fw-ConnectX2-rel-2_9_1200.tgz
 # Compile then burn firmware
 sudo mst start
-DEVICE=$(mst status | grep -m 1 /dev/mst/ | awk '{print $1}')
-MODEL=$(flint -d $DEVICE dc | grep "Name" | awk '{print $3}')
+DEVICE=$(sudo mst status | grep -m 1 /dev/mst/ | awk '{print $1}')
+MODEL=$(sudo flint -d $DEVICE dc | grep "Name" | awk '{print $3}')
 sudo flint -d $DEVICE dc > /tmp/ConnectX2-rel-2_9_1200/$MODEL.ini
 sudo mlxburn -fw /tmp/ConnectX2-rel-2_9_1200/fw-ConnectX2-rel.mlx -conf /tmp/ConnectX2-rel-2_9_1200/$MODEL.ini -wrimage $MODEL.bin
 sudo flint -d $DEVICE -i $MODEL.bin -y b

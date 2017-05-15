@@ -1,5 +1,5 @@
 read -p "Any PVE hostname or IP: " pve
-sudo scp -r root@$pve:/etc/ceph /etc/ceph
+sudo scp -r root@$pve:/etc/ceph /etc
 if [ ! -d /etc/pve ]
 then
   sudo mkdir /etc/pve

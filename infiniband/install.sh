@@ -1,4 +1,4 @@
-#/bin/sh
+#!/bin/sh
 # Add IB modules to /etc/modules and start them
 mods=(mlx4_core mlx4_ib ib_umad ib_uverbs ib_ipoib)
 for i in ${mods[@]}

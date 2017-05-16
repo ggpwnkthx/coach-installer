@@ -1,0 +1,16 @@
+auto ib0
+iface ib0 inet manual
+  bond-master bond0
+  bond-primary ib0
+  pre-up echo connected > /sys/class/net/ib0/mode
+auto ib1
+iface ib1 inet manual
+  bond-master bond0
+  pre-up echo connected > /sys/class/net/ib1/mode
+auto bond0
+iface bond0 inet static
+  address 192.168.0.1
+  netmask 255.255.0.0
+  bond-mode active-backup
+  bond-miimon 100
+  slaves none

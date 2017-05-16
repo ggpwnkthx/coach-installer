@@ -4,7 +4,7 @@ then
 fi
 if [ -z $(sudo rbd ls | grep dhcp) ]
 then
-  sudo bd create rbd/dhcp --size 1024
+  sudo rbd create rbd/dhcp --size 1024
 fi
 if [ -f /etc/ceph/rbdmap ]
 then

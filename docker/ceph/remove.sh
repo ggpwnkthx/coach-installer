@@ -1,5 +1,5 @@
 #!/bin/bash
-sudo docker kill ceph_mon
-sudo docker rm ceph_mon
+sudo docker ps -a | grep ceph | awk '{print $1}' | xargs sudo docker kill
+sudo docker ps -a | grep ceph | awk '{print $1}' | xargs sudo docker rm
 sudo rm -r /etc/ceph
 sudo rm -r /var/lib/ceph

@@ -25,6 +25,9 @@ then
   done
   sudo chmod +r /etc/ceph
   sudo chmod +r /etc/ceph/*
+  sudo chmod +r /var/lib/ceph/bootstrap-mds/ceph.keyring
+  sudo chmod +r /var/lib/ceph/bootstrap-rgw/ceph.keyring
+  sudo chmod +r /var/lib/ceph/bootstrap-osd/ceph.keyring
 else
   if [ -z "$(sudo docker ps | grep ceph_mon)" ]
   then

@@ -4,7 +4,7 @@ then
 fi
 if [ -z $(sudo rbd ls | grep lamp) ]
 then
-  sudo bd create rbd/lamp --size 1024
+  sudo rbd create rbd/lamp --size 1024
 fi
 
 # Apache

@@ -32,7 +32,11 @@ else
     fi
   fi
 fi
-sudo chmod 777 /var/lib/ceph/bootstrap-osd/ceph.keyring
+sudo chmod 777 /var/lib/ceph
+sudo chmod 777 /var/lib/ceph/*
+sudo chmod 777 /var/lib/ceph/*/*
+sudo chmod 777 /var/lib/ceph/*/*/*
+sudo chmod 777 /var/lib/ceph/*/*/*/*
 if [ -z $journal ]
 then
   if [ -z $bluestore ]

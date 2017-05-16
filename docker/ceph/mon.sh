@@ -25,14 +25,14 @@ then
           echo "Creating SSH keys..."
           echo -e "\n\n\n" | ssh-keygen
         fi
-        if [ -z "$(ssh-keygen -F $1)" ]
+        if [ -z "$(ssh-keygen -F $hostname)" ]
         then
-          echo "Copying new public key from $1..."
-          ssh-copy-id $scp_user@$1
+          echo "Copying new public key from $hostname..."
+          ssh-copy-id $scp_user@$hostname
           if [ $scp_found == 0 ]
           then
-            echo "Host $1" >> ~/.ssh/config
-            echo "	Hostname $1" >> ~/.ssh/config
+            echo "Host $hostname" >> ~/.ssh/config
+            echo "	Hostname $hostname" >> ~/.ssh/config
             echo "	User $scp_user" >> ~/.ssh/config
           fi
         fi

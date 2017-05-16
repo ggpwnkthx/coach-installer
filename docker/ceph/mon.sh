@@ -8,11 +8,38 @@ then
     case $first in
       n|N)
         echo
-        echo "Copy ceph configuration from remote host:"
+        echo "Copy ceph configuration from remote host..."
         read -p "Hostname: " hostname
-        read -p "Username: " username
-        sudo scp -r $username@$hostname:/etc/ceph /etc
-        sudo scp -r $username@$hostname:/var/lib/ceph/bootstrap-* /var/lib/ceph
+        scp_user=$(cat ~/.ssh/config | grep -A 2 $hostname | grep User | awk '{print $2}')
+        scp_found=1
+        if [ -z "$scp_user" ]
+        then
+          read -p "Username: " scp_user
+          scp_found=0
+        fi
+        if [ -f ~/.ssh/id_rsa ]
+        then
+          echo ''
+          echo "SSH keys are already created."
+        else
+          echo "Creating SSH keys..."
+          echo -e "\n\n\n" | ssh-keygen
+        fi
+        if [ -z "$(ssh-keygen -F $1)" ]
+        then
+          echo "Copying new public key from $1..."
+          ssh-copy-id $scp_user@$1
+          if [ $scp_found == 0 ]
+          then
+            echo "Host $1" >> ~/.ssh/config
+            echo "	Hostname $1" >> ~/.ssh/config
+            echo "	User $scp_user" >> ~/.ssh/config
+          fi
+        fi
+        sudo scp -r $scp_user@$hostname:/etc/ceph /etc
+        sudo scp -r $scp_user@$hostname:/var/lib/ceph/bootstrap-mds/ceph.keyring /var/lib/ceph
+        sudo scp -r $scp_user@$hostname:/var/lib/ceph/bootstrap-rgw/ceph.keyring /var/lib/ceph
+        sudo scp -r $scp_user@$hostname:/var/lib/ceph/bootstrap-osd/ceph.keyring /var/lib/ceph
     esac
   fi
   echo

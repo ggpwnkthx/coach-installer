@@ -2,10 +2,6 @@
 lsblk
 read -p "OSD: " device
 read -p "Journal (optional): " journal
-if [ -z $journal ]
-then
-  read -p "Use Bluestore? [y,N] " bluestore
-fi
 read -p "Zap it OSD target ($device)? [y,N] " zap
 case $zap in
   y|Y)
@@ -16,11 +12,17 @@ case $zap in
     done
     sudo docker rm ceph_temp
 esac
-case $bluestore in
-  y|Y)
-    sudo docker run -d --net=host --privileged=true --pid=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /dev/:/dev/ -e OSD_DEVICE=/dev/$device -e OSD_TYPE=disk -e OSD_BLUESTORE=1 ceph/daemon osd
+if [ -z $journal ]
+then
+  read -p "Use Bluestore? [y,N] " bluestore
+  case $bluestore in
+    y|Y)
+      sudo docker run -d --net=host --privileged=true --pid=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /dev/:/dev/ -e OSD_DEVICE=/dev/$device -e OSD_TYPE=disk -e OSD_BLUESTORE=1 ceph/daemon osd
+      ;;
+    *)
+    sudo docker run -d --net=host --privileged=true --pid=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /dev/:/dev/ -e OSD_DEVICE=/dev/$device -e OSD_TYPE=disk ceph/daemon osd
     ;;
-  *)
-    sudo docker run -d --net=host --privileged=true --pid=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /dev/:/dev/ -e OSD_DEVICE=/dev/$device -e OSD_JOURNAL=/dev/$journal -e OSD_TYPE=disk ceph/daemon osd
-    ;;
-esac
+  esac
+else
+  sudo docker run -d --net=host --privileged=true --pid=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /dev/:/dev/ -e OSD_DEVICE=/dev/$device -e OSD_JOURNAL=/dev/$journal -e OSD_TYPE=disk ceph/daemon osd
+fi

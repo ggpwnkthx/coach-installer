@@ -3,8 +3,8 @@ if [ ! -f /etc/ceph/ceph.conf ]
 then
   sudo apt-get -y install ipcalc
   read -n1 -p "Is this the first node? [Y,n]" first
-  case in first
-    n,N)
+  case $first in
+    n|N)
      echo "Copy ceph configuration from remote host:"
      read -p "Hostname: " hostname
      read -p "Username: " username

@@ -41,7 +41,10 @@ if [ -z $journal ]
 then
   if [ -z $bluestore ]
   then
-    read -p "Use Bluestore? [y,N] " bluestore
+    if [ -z $1 ]
+    then
+      read -p "Use Bluestore? [y,N] " bluestore
+    fi
   fi
   case $bluestore in
     y|Y)

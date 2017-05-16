@@ -65,6 +65,11 @@ then
   sudo chmod +r /etc/ceph
   sudo chmod +r /etc/ceph/*
   sudo chmod +r /var/lib/ceph/bootstrap-*/*
+  if [ -z "$(cat /etc/ceph/ceph.conf | grep mon_allow_pool_delete)" ]
+  then
+    echo "mon_allow_pool_delete = true" | sudo tee --append /etc/ceph/ceph.conf
+    sudo docker restart ceph_mon
+  fi
 else
   if [ -z "$(sudo docker ps | grep ceph_mon)" ]
   then

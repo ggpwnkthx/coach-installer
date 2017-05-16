@@ -46,11 +46,11 @@ then
       sudo docker run -d --restart=always --net=host --privileged=true --pid=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /dev/:/dev/ -e OSD_DEVICE=/dev/$device -e OSD_TYPE=disk -e OSD_BLUESTORE=1 ceph/daemon osd
       ;;
     *)
-    sudo docker run -d --restart=always --net=host --privileged=true --pid=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /dev/:/dev/ -e OSD_DEVICE=/dev/$device ceph/daemon osd_ceph_disk
+    sudo docker run -d --restart=always --net=host --privileged=true --pid=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /dev/:/dev/ -e OSD_DEVICE=/dev/$device -e OSD_TYPE=disk ceph/daemon osd
     ;;
   esac
 else
-  sudo docker run -d --restart=always --net=host --privileged=true --pid=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /dev/:/dev/ -e OSD_DEVICE=/dev/$device -e OSD_JOURNAL=/dev/$journal ceph/daemon osd_ceph_disk
+  sudo docker run -d --restart=always --net=host --privileged=true --pid=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /dev/:/dev/ -e OSD_DEVICE=/dev/$device -e OSD_JOURNAL=/dev/$journal -e OSD_TYPE=disk ceph/daemon osd
 fi
 part=1
 while [ -z "$(lsblk | grep $device$part)" ]

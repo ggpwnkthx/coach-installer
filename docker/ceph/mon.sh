@@ -36,15 +36,18 @@ then
             echo "	User $scp_user" >> ~/.ssh/config
           fi
         fi
+        mkdir ~/ceph
         scp -r $scp_user@$hostname:/etc/ceph ~/ceph/etc
         sudo mv ~/ceph/etc/ceph /etc
         sudo chmod +r /etc/ceph
         sudo chmod +r /etc/ceph/*
+        mkdir -p ~/ceph/var/lib/ceph
         scp -r $scp_user@$hostname:/var/lib/ceph/bootstrap-mds ~/ceph/var/lib/ceph
         scp -r $scp_user@$hostname:/var/lib/ceph/bootstrap-rgw ~/ceph/var/lib/ceph
         scp -r $scp_user@$hostname:/var/lib/ceph/bootstrap-osd ~/ceph/var/lib/ceph
         sudo mv /var/lib/ceph/bootstrap-* /var/lib/ceph
         sudo chmod +r /var/lib/ceph/bootstrap-*/*
+        rm -r ~/ceph
     esac
   fi
   echo

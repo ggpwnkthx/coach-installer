@@ -12,6 +12,7 @@ then
         read -p "Hostname: " hostname
         read -p "Username: " username
         sudo scp -r $username@$hostname:/etc/ceph /etc
+        sudo scp -r $username@$hostname:/var/lib/ceph/bootstrap-* /var/lib/ceph
     esac
   fi
   echo

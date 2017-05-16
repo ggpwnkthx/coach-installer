@@ -19,7 +19,10 @@ then
   echo "Which IP address should be used for the ceph monitor?"
   read -p "IP: " ip
   sudo docker run -d --net=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -e MON_IP=$ip -e CEPH_PUBLIC_NETWORK=$(ipcalc $ip -n | grep Network | awk '{print $2}') --name=ceph_mon --restart=always ceph/daemon mon
-  sleep 10
+  while [ ! -f /etc/ceph/ceph.mon.keyring ]
+  do
+    sleep 1
+  done
   sudo chmod 777 /etc/ceph
   sudo chmod 777 /etc/ceph/*
 else

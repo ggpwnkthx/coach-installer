@@ -52,8 +52,8 @@ then
 else
   sudo docker run -d --net=host --privileged=true --pid=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /dev/:/dev/ -e OSD_DEVICE=/dev/$device -e OSD_JOURNAL=/dev/$journal -e OSD_TYPE=disk ceph/daemon osd
 fi
-$a=1
-while [ -z "$(lsblk | grep $device$a)" ]
+$device.=1
+while [ -z "$(lsblk | grep $device)" ]
 do
   sleep 1
 done

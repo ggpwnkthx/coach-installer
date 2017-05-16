@@ -5,7 +5,7 @@ read -p "Journal (optional): " journal
 read -p "Zap it OSD target ($device)? [y,N] " zap
 case $zap in
   y|Y)
-    sudo docker run -d --privileged=true -v /dev/:/dev/ -e OSD_DEVICE=/dev/$device --name ceph_temp ceph/daemon zap_device
+    sudo docker run -d --privileged=true -v /dev/:/dev/ -e OSD_DEVICE=/dev/$device --name=ceph_temp ceph/daemon zap_device
     while [ ! -z "$(sudo docker ps | grep ceph_temp)" ]
     do
       sleep 1

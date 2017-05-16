@@ -1,6 +1,6 @@
 #!/bin/sh
 # Add IB modules to /etc/modules and start them
-mods=(mlx4_core mlx4_ib ib_umad ib_uverbs ib_ipoib)
+mods=(mlx4_core mlx4_ib ib_umad ib_uverbs ib_ipoib bonding)
 for i in ${mods[@]}
 do
   mod=$(cat /etc/modules | grep $i)

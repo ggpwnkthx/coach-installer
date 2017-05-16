@@ -1,5 +1,5 @@
 #!/bin/bash
-if [ -z $(sudo docker ps -a | grep ceph_mon) ]
+if [ -z "$(sudo docker ps -a | grep ceph_mon)" ]
 then
   if [ ! -f /etc/ceph/ceph.conf ]
   then
@@ -22,7 +22,7 @@ then
   sudo chmod 777 /etc/ceph/*
   sudo docker run --restart=always -d ceph_mon
 else
-  if [ -z $(sudo docker ps | grep ceph_mon) ]
+  if [ -z "$(sudo docker ps | grep ceph_mon)" ]
   then
     sudo docker start ceph-mon
     sudo docker run --restart=always -d ceph_mon

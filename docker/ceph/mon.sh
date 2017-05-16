@@ -45,7 +45,10 @@ then
         scp -r $scp_user@$hostname:/var/lib/ceph/bootstrap-mds ~/ceph/var/lib/ceph
         scp -r $scp_user@$hostname:/var/lib/ceph/bootstrap-rgw ~/ceph/var/lib/ceph
         scp -r $scp_user@$hostname:/var/lib/ceph/bootstrap-osd ~/ceph/var/lib/ceph
-        sudo mv /var/lib/ceph/bootstrap-* /var/lib/ceph
+        sudo mkdir /var/liv/ceph
+        sudo mv ~/ceph/var/lib/ceph/bootstrap-mds /var/lib/ceph
+        sudo mv ~/ceph/var/lib/ceph/bootstrap-rgw /var/lib/ceph
+        sudo mv ~/ceph/var/lib/ceph/bootstrap-osd /var/lib/ceph
         sudo chmod +r /var/lib/ceph/bootstrap-*/*
         rm -r ~/ceph
     esac

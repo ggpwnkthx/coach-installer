@@ -36,7 +36,7 @@ then
             echo "	User $scp_user" >> ~/.ssh/config
           fi
         fi
-        mkdir ~/ceph
+        mkdir -p ~/ceph/etc
         scp -r $scp_user@$hostname:/etc/ceph ~/ceph/etc
         sudo mv ~/ceph/etc/ceph /etc
         sudo chmod +r /etc/ceph

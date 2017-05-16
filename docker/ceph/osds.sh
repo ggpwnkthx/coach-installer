@@ -9,13 +9,13 @@ fi
 read -p "Zap it OSD target ($device)? [y,N] " zap
 case $zap in
   y|Y)
-    sudo docker run -d --privileged=true -v /dev/:/dev/ -e OSD_DEVICE=/dev/$device ceph/daemon zap_device
+    sudo docker run -rm -d --privileged=true -v /dev/:/dev/ -e OSD_DEVICE=/dev/$device ceph/daemon zap_device
 esac
 case $bluestore in
   y|Y)
-    docker run -d --net=host --privileged=true --pid=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /dev/:/dev/ -e OSD_DEVICE=/dev/$device -e OSD_TYPE=prepare -e OSD_BLUESTORE=1 ceph/daemon osd
+    sudo docker run -rm -d --net=host --privileged=true --pid=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /dev/:/dev/ -e OSD_DEVICE=/dev/$device -e OSD_TYPE=prepare -e OSD_BLUESTORE=1 ceph/daemon osd
     ;;
   *)
-    docker run -d --net=host --privileged=true --pid=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /dev/:/dev/ -e OSD_DEVICE=/dev/$device -e OSD_JOURNAL=/dev/$journal -e OSD_TYPE=prepare -e ceph/daemon osd
+    sudo docker run -rm -d --net=host --privileged=true --pid=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /dev/:/dev/ -e OSD_DEVICE=/dev/$device -e OSD_JOURNAL=/dev/$journal -e OSD_TYPE=prepare -e ceph/daemon osd
     ;;
 esac

@@ -23,8 +23,8 @@ then
   do
     sleep 1
   done
-  sudo chmod 777 /etc/ceph
-  sudo chmod 777 /etc/ceph/*
+  sudo chmod +r /etc/ceph
+  sudo chmod +r /etc/ceph/*
 else
   if [ -z "$(sudo docker ps | grep ceph_mon)" ]
   then

@@ -37,9 +37,12 @@ then
           fi
         fi
         sudo scp -r $scp_user@$hostname:/etc/ceph /etc
-        sudo scp -r $scp_user@$hostname:/var/lib/ceph/bootstrap-mds/ceph.keyring /var/lib/ceph
-        sudo scp -r $scp_user@$hostname:/var/lib/ceph/bootstrap-rgw/ceph.keyring /var/lib/ceph
-        sudo scp -r $scp_user@$hostname:/var/lib/ceph/bootstrap-osd/ceph.keyring /var/lib/ceph
+        sudo chmod +r /etc/ceph
+        sudo chmod +r /etc/ceph/*
+        sudo scp -r $scp_user@$hostname:/var/lib/ceph/bootstrap-mds /var/lib/ceph
+        sudo scp -r $scp_user@$hostname:/var/lib/ceph/bootstrap-rgw /var/lib/ceph
+        sudo scp -r $scp_user@$hostname:/var/lib/ceph/bootstrap-osd /var/lib/ceph
+        sudo chmod +r /var/lib/ceph/bootstrap-*/*
     esac
   fi
   echo

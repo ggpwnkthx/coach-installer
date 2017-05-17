@@ -5,3 +5,6 @@ Description=Ceph Client Prerequisite
 Type=forking
 ExecStart=/usr/bin/ceph -s
 RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

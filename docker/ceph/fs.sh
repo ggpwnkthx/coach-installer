@@ -16,15 +16,15 @@ do
     ceph_mons="$ceph_mons,$i"
   fi
 done
-if [ ! -f "/mnt" ]
+if [ ! -d "/mnt" ]
 then
   sudo mkdir /mnt
 fi
-if [ ! -f "/mnt/ceph" ]
+if [ ! -d "/mnt/ceph" ]
 then
   sudo mkdir /mnt/ceph
 fi
-if [ ! -f "/mnt/ceph/fs" ]
+if [ ! -d "/mnt/ceph/fs" ]
 then
   sudo mkdir /mnt/ceph/fs
 fi

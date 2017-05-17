@@ -46,11 +46,15 @@ sudo rm /etc/systemd/system/mnt-ceph-fs.mount
 echo "[Unit]" | sudo tee /etc/systemd/system/mnt-ceph-fs.mount
 echo "Description=Mount CephFS" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
 echo "After=ceph_client.service" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
+echo "" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
 echo "[Mount]" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
 echo "What=$ceph_mons:/" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
 echo "Where=/mnt/ceph/fs" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
 echo "Type=ceph" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
 echo "Options=name=admin,secret=$secret" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
-sudo systemctl daemon-reload
-sudo systemctl enable mnt-ceph-fs.mount
-sudo systemctl start mnt-ceph-fs.mount
+echo "" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
+echo "[Install]" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
+echo "WantedBy=multi-user.target" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
+echo "sudo systemctl daemon-reload
+echo "sudo systemctl enable mnt-ceph-fs.mount
+echo "sudo systemctl start mnt-ceph-fs.mount

@@ -1,0 +1,7 @@
+[Unit]
+Description=Ceph Client Prerequisite
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/ceph -s
+RemainAfterExit=yes

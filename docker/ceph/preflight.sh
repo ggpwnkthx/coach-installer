@@ -1,9 +1,16 @@
 #!/bin/bash
+if [ ! -z $1 ]
+then
+  hostname=$1
+fi
 if [ ! -f /etc/ceph/ceph.conf ]
 then
   echo
   echo "Copy ceph configuration from remote host..."
-  read -p "Hostname: " hostname
+  if [ -z $hostname ]
+  then
+    read -p "Hostname: " hostname
+  fi
   scp_user=$(cat ~/.ssh/config | grep -A 2 $hostname | grep User | awk '{print $2}')
   scp_found=1
   if [ -z "$scp_user" ]

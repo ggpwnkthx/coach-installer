@@ -24,7 +24,7 @@ then
     echo "SSH keys are already created."
   else
     echo "Creating SSH keys..."
-    echo -e "\n\n\n" | ssh-keygen
+    ssh-keygen
   fi
   if [ -z "$(ssh-keygen -F $hostname)" ]
   then

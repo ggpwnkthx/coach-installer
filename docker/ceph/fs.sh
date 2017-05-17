@@ -29,7 +29,10 @@ then
   sudo mkdir /mnt/ceph/fs
 fi
 secret=$(sudo ceph-authtool -p /etc/ceph/ceph.client.admin.keyring)
-sudo mount -t ceph $ceph_mons:/ /mnt/ceph/fs -o name=admin,secret=$secret
+if [ -z "$(df -h | grep /mnt/ceph/fs)" ]
+then
+  sudo mount -t ceph $ceph_mons:/ /mnt/ceph/fs -o name=admin,secret=$secret
+fi
 fstab="$ceph_mons:/ /mnt/ceph/fs ceph name=admin,secret=$secret,noatime,_netdev,x-systemd.automount 0 2"
 if [ -z "$(cat /etc/fstab | grep /mnt/ceph/fs)" ]
 then

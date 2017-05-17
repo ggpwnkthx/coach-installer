@@ -34,22 +34,23 @@ then
   sudo systemctl disable ceph_client.service
 fi
 sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/ceph/client.service -O /etc/systemd/system/ceph_client.servic
+sudo systemctl daemon-reload
 sudo systemctl enable ceph_client.service
 secret=$(sudo ceph-authtool -p /etc/ceph/ceph.client.admin.keyring)
-if [ ! -z "$(systemctl | grep mnt-ceph-fs.mount)" ]
+if [ ! -z "$(systemctl | grep mnt-ceph-fs.automount)" ]
 then
-  sudo systemctl stop mnt-ceph-fs.mount
-  sudo systemctl disable mnt-ceph-fs.mount
+  sudo systemctl stop mnt-ceph-fs.automount
+  sudo systemctl disable mnt-ceph-fs.automount
 fi
-sudo rm /etc/systemd/system/mnt-ceph-fs.mount
-echo "[Unit]" | sudo tee /etc/systemd/system/mnt-ceph-fs.mount
-echo "Description=Mount CephFS" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
-echo "After=ceph_client.service" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
+sudo rm /etc/systemd/system/mnt-ceph-fs.automount
+echo "[Unit]" | sudo tee /etc/systemd/system/mnt-ceph-fs.automount
+echo "Description=Mount CephFS" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.automount
+echo "After=ceph_client.service" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.automount
 echo "[Mount]" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
-echo "What=$ceph_mons:/" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
-echo "Where=/mnt/ceph/fs" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
-echo "Type=ceph" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
-echo "Options=name=admin,secret=$secret" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
-
-sudo systemctl enable mnt-ceph-fs.mount
-sudo systemctl start mnt-ceph-fs.mount
+echo "What=$ceph_mons:/" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.automount
+echo "Where=/mnt/ceph/fs" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.automount
+echo "Type=ceph" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.automount
+echo "Options=name=admin,secret=$secret" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.automount
+sudo systemctl daemon-reload
+sudo systemctl enable mnt-ceph-fs.automount
+sudo systemctl start mnt-ceph-fs.automount

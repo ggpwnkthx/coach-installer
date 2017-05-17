@@ -12,3 +12,4 @@ then
   wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/ceph/fs.sh -O ceph_fs.sh
 fi
 chmod +x ceph_fs.sh
+./ceph_fs.sh

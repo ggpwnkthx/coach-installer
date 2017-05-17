@@ -39,7 +39,7 @@ then
   fi
   mkdir -p ~/ceph/etc
   scp -r $scp_user@$hostname:/etc/ceph ~/ceph/etc
-  sudo mv ~/ceph/etc/ceph /etc
+  sudo cp -a ~/ceph/etc/ceph /etc
   sudo chmod +r /etc/ceph
   sudo chmod +r /etc/ceph/*
   mkdir -p ~/ceph/var/lib/ceph
@@ -47,9 +47,11 @@ then
   scp -r $scp_user@$hostname:/var/lib/ceph/bootstrap-rgw ~/ceph/var/lib/ceph
   scp -r $scp_user@$hostname:/var/lib/ceph/bootstrap-osd ~/ceph/var/lib/ceph
   sudo mkdir /var/lib/ceph
-  sudo mv ~/ceph/var/lib/ceph/bootstrap-mds /var/lib/ceph
-  sudo mv ~/ceph/var/lib/ceph/bootstrap-rgw /var/lib/ceph
-  sudo mv ~/ceph/var/lib/ceph/bootstrap-osd /var/lib/ceph
-  sudo chmod +r /var/lib/ceph/bootstrap-*/*
+  sudo cp -r ~/ceph/var/lib/ceph/bootstrap-mds /var/lib/ceph
+  sudo chmod +r /var/lib/ceph/bootstrap-mds/*
+  sudo cp -r ~/ceph/var/lib/ceph/bootstrap-rgw /var/lib/ceph
+  sudo chmod +r /var/lib/ceph/bootstrap-rgw/*
+  sudo cp -r ~/ceph/var/lib/ceph/bootstrap-osd /var/lib/ceph
+  sudo chmod +r /var/lib/ceph/bootstrap-osd/*
   rm -r ~/ceph
 fi

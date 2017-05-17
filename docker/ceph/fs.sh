@@ -5,20 +5,16 @@ then
 fi
 chmod +x ceph_preflight.sh
 sudo apt-get -y install ceph-common
-ceph_mon_ls=($(sudo ceph mon dump | grep mon | awk '{print $3}' | awk '{split($0,a,"."); print a[2]}'))
+ceph_mon_ls=($(sudo ceph mon dump | grep mon | awk '{print $2}' | awk '{split($0,a,"/"); print a[1]}'))
 ceph_mons=""
 for i in ${ceph_mon_ls[@]}
 do
-ping=$(ping $i -c 1 | grep -w PING | awk '{print $3}' | tr -d '()')
-if [ "$ping" != "ping: unknown host $i" ]
-then
   if [ -z $ceph_mons ]
   then
-    ceph_mons="$ping"
+    ceph_mons="$i"
   else
-    ceph_mons="$ceph_mons,$ping"
+    ceph_mons="$ceph_mons,$i"
   fi
-fi
 done
 if [ ! -f "/mnt" ]
 then
@@ -32,7 +28,10 @@ if [ ! -f "/mnt/ceph/fs" ]
 then
   sudo mkdir /mnt/ceph/fs
 fi
-ceph_authenticate $HOSTNAME
 secret=$(sudo ceph-authtool -p /etc/ceph/ceph.client.admin.keyring)
-sudo mount -t ceph $ceph_mons:/ /mnt/ceph/fs -o name=admin,secret=$secret	
-echo "$ceph_mons:/  ceph name=admin,secret=$secret,noatime,_netdev,x-systemd.automount 0 2" | sudo tee --append /etc/fstab
+sudo mount -t ceph $ceph_mons:/ /mnt/ceph/fs -o name=admin,secret=$secret
+fstab="$ceph_mons:/  ceph name=admin,secret=$secret,noatime,_netdev,x-systemd.automount 0 2"
+if [ -z "$(cat /etc/fstab | grep /"$fstab/")" ]
+then
+  echo $fstab | sudo tee --append /etc/fstab
+fi

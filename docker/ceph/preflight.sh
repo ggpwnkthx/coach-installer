@@ -48,10 +48,10 @@ then
   scp -r $scp_user@$hostname:/var/lib/ceph/bootstrap-osd ~/ceph/var/lib/ceph
   sudo mkdir /var/lib/ceph
   sudo cp -r ~/ceph/var/lib/ceph/bootstrap-mds /var/lib/ceph
-  sudo chmod +r /var/lib/ceph/bootstrap-mds/*
   sudo cp -r ~/ceph/var/lib/ceph/bootstrap-rgw /var/lib/ceph
-  sudo chmod +r /var/lib/ceph/bootstrap-rgw/*
   sudo cp -r ~/ceph/var/lib/ceph/bootstrap-osd /var/lib/ceph
-  sudo chmod +r /var/lib/ceph/bootstrap-osd/*
+  sudo chmod +r /var/lib/ceph
+  sudo chmod +r /var/lib/ceph/*
+  sudo chmod +r /var/lib/ceph/*/*
   rm -r ~/ceph
 fi

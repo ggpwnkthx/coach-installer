@@ -7,50 +7,12 @@ then
     read -n1 -p "Is this the first node? [Y,n]" first
     case $first in
       n|N)
-        echo
-        echo "Copy ceph configuration from remote host..."
-        read -p "Hostname: " hostname
-        scp_user=$(cat ~/.ssh/config | grep -A 2 $hostname | grep User | awk '{print $2}')
-        scp_found=1
-        if [ -z "$scp_user" ]
+        if [ ! -f ceph_preflight.sh ]
         then
-          read -p "Username: " scp_user
-          scp_found=0
+          wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/ceph/preflight.sh -O ceph_preflight.sh
         fi
-        if [ -f ~/.ssh/id_rsa ]
-        then
-          echo ''
-          echo "SSH keys are already created."
-        else
-          echo "Creating SSH keys..."
-          echo -e "\n\n\n" | ssh-keygen
-        fi
-        if [ -z "$(ssh-keygen -F $hostname)" ]
-        then
-          echo "Copying new public key from $hostname..."
-          ssh-copy-id $scp_user@$hostname
-          if [ $scp_found == 0 ]
-          then
-            echo "Host $hostname" >> ~/.ssh/config
-            echo "	Hostname $hostname" >> ~/.ssh/config
-            echo "	User $scp_user" >> ~/.ssh/config
-          fi
-        fi
-        mkdir -p ~/ceph/etc
-        scp -r $scp_user@$hostname:/etc/ceph ~/ceph/etc
-        sudo mv ~/ceph/etc/ceph /etc
-        sudo chmod +r /etc/ceph
-        sudo chmod +r /etc/ceph/*
-        mkdir -p ~/ceph/var/lib/ceph
-        scp -r $scp_user@$hostname:/var/lib/ceph/bootstrap-mds ~/ceph/var/lib/ceph
-        scp -r $scp_user@$hostname:/var/lib/ceph/bootstrap-rgw ~/ceph/var/lib/ceph
-        scp -r $scp_user@$hostname:/var/lib/ceph/bootstrap-osd ~/ceph/var/lib/ceph
-        sudo mkdir /var/lib/ceph
-        sudo mv ~/ceph/var/lib/ceph/bootstrap-mds /var/lib/ceph
-        sudo mv ~/ceph/var/lib/ceph/bootstrap-rgw /var/lib/ceph
-        sudo mv ~/ceph/var/lib/ceph/bootstrap-osd /var/lib/ceph
-        sudo chmod +r /var/lib/ceph/bootstrap-*/*
-        rm -r ~/ceph
+        chmod +x ceph_preflight.sh
+        ./ceph_preflight.sh
     esac
   fi
   echo

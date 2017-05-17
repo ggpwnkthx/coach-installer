@@ -4,6 +4,7 @@ then
   wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/ceph/preflight.sh -O ceph_preflight.sh
 fi
 chmod +x ceph_preflight.sh
+./ceph_preflight.sh
 sudo apt-get -y install ceph-common
 ceph_mon_ls=($(sudo ceph mon dump | grep mon | awk '{print $2}' | awk '{split($0,a,"/"); print a[1]}'))
 ceph_mons=""

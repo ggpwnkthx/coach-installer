@@ -61,4 +61,4 @@ fi
 sudo docker run -d --name cephtp \
     -v /mnt/ceph/fs/containers/sftp/config/users.conf:/etc/sftp-users.conf:ro \
     -v /mnt/ceph/fs/containers/sftp/data:/home \
-    -p 22:22 -d atmoz/sftp
+    -p 2222:22 -d atmoz/sftp

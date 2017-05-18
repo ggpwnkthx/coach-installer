@@ -7,4 +7,4 @@ RUN unzip SquidViz.zip -d /var/www
 RUN rm -r /var/www/html
 RUN mv /var/www/squidviz-master /var/www/html
 
-ENTRYPOINT ["/start.sh"]
+CMD ["supervisord", "-n"]

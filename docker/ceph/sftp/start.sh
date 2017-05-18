@@ -1,4 +1,3 @@
-#!/bin/bash
 if [ ! -z $1 ]
 then
   user=$1
@@ -13,21 +12,21 @@ else
   echo "No username or password specified."
   exit
 fi
-if [ ! -d /mnt/ceph/fs/containers/sftp/config ]
+if [ ! -d /mnt/ceph/fs/containers/ftp/config ]
 then
-  sudo mkdir -p /mnt/ceph/fs/containers/sftp/config
+  sudo mkdir -p /mnt/ceph/fs/containers/ftp/config
 fi
-if [ ! -f /mnt/ceph/fs/containers/sftp/config/users.conf ]
+if [ ! -f /mnt/ceph/fs/containers/ftp/config/sftp-users.conf ]
 then
-  echo "$user:$password:1001" | sudo tee /mnt/ceph/fs/containers/sftp/config/users.conf
-  if [ ! -d /mnt/ceph/fs/containers/sftp/data/$user ]
+  echo "$user:$password:1001" | sudo tee /mnt/ceph/fs/containers/ftp/config/sftp-users.conf
+  if [ ! -d /mnt/ceph/fs/containers/ftp/data/$user ]
   then
-    sudo mkdir -p /mnt/ceph/fs/containers/sftp/data/$user
+    sudo mkdir -p /mnt/ceph/fs/containers/ftp/data/$user
   fi
 else
-  if [ -z "$(cat /mnt/ceph/fs/containers/sftp/config/users.conf | grep $user)" ]
+  if [ -z "$(cat /mnt/ceph/fs/containers/ftp/config/sftp-users.conf | grep $user)" ]
   then
-    uids=($(cat /mnt/ceph/fs/containers/sftp/config/users.conf | awk '{split($0,a,":"); print a[3]}'))
+    uids=($(cat /mnt/ceph/fs/containers/ftp/config/sftp-users.conf | awk '{split($0,a,":"); print a[3]}'))
     if [ -z $uids ]
     then
       uids=1000
@@ -35,31 +34,31 @@ else
     IFS=$'\n'
     hi=$(echo "${uids[*]}" | sort -nr | head -n1)
     uid=$[$hi+1]
-    echo "$user:$password:$uid" | sudo tee --append /mnt/ceph/fs/containers/sftp/config/users.conf
-    if [ ! -d /mnt/ceph/fs/containers/sftp/data/$user ]
+    echo "$user:$password:$uid" | sudo tee --append /mnt/ceph/fs/containers/ftp/config/sftp-users.conf
+    if [ ! -d /mnt/ceph/fs/containers/ftp/data/$user ]
     then
-      sudo mkdir -p /mnt/ceph/fs/containers/sftp/data/$user
+      sudo mkdir -p /mnt/ceph/fs/containers/ftp/data/$user
     fi
   else
-    uid=$(cat /mnt/ceph/fs/containers/sftp/config/users.conf | grep $user | awk '{split($0,a,":"); print a[3]}')
+    uid=$(cat /mnt/ceph/fs/containers/ftp/config/sftp-users.conf | grep $user | awk '{split($0,a,":"); print a[3]}')
     sudo sed -i "/^$user/d" /mnt/ceph/fs/containers/sftp/config/users.conf
-    echo "$user:$password:$uid" | sudo tee --append /mnt/ceph/fs/containers/sftp/config/users.conf
-    if [ ! -d /mnt/ceph/fs/containers/sftp/data/$user ]
+    echo "$user:$password:$uid" | sudo tee --append /mnt/ceph/fs/containers/ftp/config/sftp-users.conf
+    if [ ! -d /mnt/ceph/fs/containers/ftp/data/$user ]
     then
-      sudo mkdir -p /mnt/ceph/fs/containers/sftp/data/$user
+      sudo mkdir -p /mnt/ceph/fs/containers/ftp/data/$user
     fi
   fi
 fi
-sudo chmod 777 /mnt/ceph/fs/containers/sftp/data/$user
-if [ ! -z "$(sudo docker ps | grep cephtp)" ]
+sudo chmod 777 /mnt/ceph/fs/containers/ftp/data/$user
+if [ ! -z "$(sudo docker ps | grep sftp_server)" ]
 then
-  sudo docker kill cephtp
+  sudo docker kill sftp_server
 fi
-if [ ! -z "$(sudo docker ps -a | grep cephtp)" ]
+if [ ! -z "$(sudo docker ps -a | grep sftp_server)" ]
 then
-  sudo docker rm cephtp
+  sudo docker rm sftp_server
 fi
-sudo docker run -d --name cephtp \
-    -v /mnt/ceph/fs/containers/sftp/config/users.conf:/etc/sftp-users.conf:ro \
-    -v /mnt/ceph/fs/containers/sftp/data:/home \
-    -p 2222:22 -d atmoz/sftp
+sudo docker run -d --name sftp_server \
+  -v /mnt/ceph/fs/containers/ftp/config/sftp-users.conf:/etc/sftp-users.conf:ro \
+  -v /mnt/ceph/fs/containers/ftp/data:/home \
+  -p 2222:22 -d atmoz/sftp

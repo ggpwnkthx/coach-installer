@@ -9,4 +9,7 @@ if [ ! -z "$(sudo docker ps -a | grep squidviz)" ]
 then
   sudo docker rm squidviz
 fi
-sudo docker run -d --name squidviz -p 80:80 coach/squidviz
+sudo docker run -d --name squidviz \
+  -v /etc/ceph:/etc/ceph \
+  -p 80:80 \
+  coach/squidviz

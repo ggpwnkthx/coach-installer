@@ -50,6 +50,7 @@ else
     fi
   fi
 fi
+sudo chmod 777 /mnt/ceph/fs/containers/sftp/data/$user
 if [ ! -z "$(sudo docker ps | grep cephtp)" ]
 then
   sudo docker kill cephtp

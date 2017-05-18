@@ -28,6 +28,10 @@ else
   if [ -z "$(cat /mnt/ceph/fs/containers/sftp/config/users.conf | grep $user)" ]
   then
     uids=($(cat /mnt/ceph/fs/containers/sftp/config/users.conf | awk '{split($0,a,":"); print a[3]}'))
+    if [ -z $uids ]
+    then
+      uids=1000
+    fi
     IFS=$'\n'
     hi=$(echo "${uids[*]}" | sort -nr | head -n1)
     uid=$[$hi+1]

@@ -50,7 +50,15 @@ else
     fi
   fi
 fi
-docker run \
+if [ ! -z "$(sudo docker ps | grep cephtp)" ]
+then
+  sudo docker kill cephtp
+fi
+if [ ! -z "$(sudo docker ps -a | grep cephtp)" ]
+then
+  sudo docker rm cephtp
+fi
+sudo docker run -d --name cephtp \
     -v /mnt/ceph/fs/containers/sftp/config/users.conf:/etc/sftp-users.conf:ro \
-    -v /mnt/ceph/fs/containers/sftp/data/user:/home/user/ \
+    -v /mnt/ceph/fs/containers/sftp/data:/home \
     -p 22:22 -d atmoz/sftp

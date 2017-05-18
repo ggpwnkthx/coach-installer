@@ -6,5 +6,4 @@ RUN unzip SquidViz.zip
 RUN rm -r /www
 RUN mv -r squidviz-master /www
 
-
 ENTRYPOINT ["/start.sh"]

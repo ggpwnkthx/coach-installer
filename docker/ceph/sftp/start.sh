@@ -42,7 +42,7 @@ else
     fi
   else
     uid=$(cat /mnt/ceph/fs/containers/sftp/config/users.conf | grep $user | awk '{split($0,a,":"); print a[3]}')
-    sudo sed -i '/^$user/d' /mnt/ceph/fs/containers/sftp/config/users.conf
+    sudo sed -i "/^$user/d" /mnt/ceph/fs/containers/sftp/config/users.conf
     echo "$user:$password:$uid" | sudo tee --append /mnt/ceph/fs/containers/sftp/config/users.conf
     if [ ! -d /mnt/ceph/fs/containers/sftp/data/$user ]
     then

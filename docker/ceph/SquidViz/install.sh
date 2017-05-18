@@ -1,5 +1,5 @@
 #!/bin/bash
-wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/ceph/SquidViz/Dockerfile
+wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/ceph/SquidViz/Dockerfile -O Dockerfile
 sudo docker build -t "coach/squidviz" .
 if [ ! -z "$(sudo docker ps | grep squidviz)" ]
 then

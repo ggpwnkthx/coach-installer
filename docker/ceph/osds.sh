@@ -43,17 +43,19 @@ then
   fi
   case $bluestore in
     y|Y)
-      sudo docker run -d --restart=always --net=host --privileged=true --pid=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /dev/:/dev/ -e OSD_DEVICE=/dev/$device -e OSD_TYPE=disk -e OSD_BLUESTORE=1 ceph/daemon osd
+      container=$(sudo docker run -d --restart=always --net=host --privileged=true --pid=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /dev/:/dev/ -e OSD_DEVICE=/dev/$device -e OSD_TYPE=disk -e OSD_BLUESTORE=1 ceph/daemon osd)
       ;;
     *)
-    sudo docker run -d --restart=always --net=host --privileged=true --pid=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /dev/:/dev/ -e OSD_DEVICE=/dev/$device -e OSD_TYPE=disk ceph/daemon osd
+    container=$(sudo docker run -d --restart=always --net=host --privileged=true --pid=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /dev/:/dev/ -e OSD_DEVICE=/dev/$device -e OSD_TYPE=disk ceph/daemon osd)
     ;;
   esac
 else
-  sudo docker run -d --restart=always --net=host --privileged=true --pid=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /dev/:/dev/ -e OSD_DEVICE=/dev/$device -e OSD_JOURNAL=/dev/$journal -e OSD_TYPE=disk ceph/daemon osd
+  container=$(sudo docker run -d --restart=always --net=host --privileged=true --pid=host -v /etc/ceph:/etc/ceph -v /var/lib/ceph/:/var/lib/ceph/ -v /dev/:/dev/ -e OSD_DEVICE=/dev/$device -e OSD_JOURNAL=/dev/$journal -e OSD_TYPE=disk ceph/daemon osd)
 fi
 part=1
 while [ -z "$(lsblk | grep $device$part)" ]
 do
   sleep 1
 done
+osdid=$(sudo docker exec $container lsblk | grep /var/lib/ceph/osd/ | awk '{print $7}' | awk '{split($0,a,"-"); print a[2]}')
+sudo docker rename $container "osd_$osdid"

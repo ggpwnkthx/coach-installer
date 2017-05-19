@@ -31,7 +31,7 @@ if [ ! -z "$(sudo docker ps -a | grep ftpd_server)" ]
 then
   sudo docker rm ftpd_server
 fi
-sudo docker run -d --name ftpd_server \
+sudo docker run -d --name ftpd_server --restart=always \
   -v /mnt/ceph/fs/containers/ftp/config:/etc/pure-ftpd/passwd \
   -v /mnt/ceph/fs/containers/ftp/data:/home \
   -p 21:21 \

@@ -58,4 +58,4 @@ do
   sleep 1
 done
 osdid=$(sudo docker exec $container lsblk | grep /var/lib/ceph/osd/ | awk '{print $7}' | awk '{split($0,a,"-"); print a[2]}')
-sudo docker rename $container "osd_$osdid"
+sudo docker rename $container "ceph_osd.$osdid"

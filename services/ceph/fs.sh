@@ -56,6 +56,6 @@ echo "Options=name=admin,secret=$secret" | sudo tee --append /etc/systemd/system
 echo "" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
 echo "[Install]" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
 echo "WantedBy=multi-user.target" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
-echo "sudo systemctl daemon-reload
-echo "sudo systemctl enable mnt-ceph-fs.mount
-echo "sudo systemctl start mnt-ceph-fs.mount
+sudo systemctl daemon-reload
+sudo systemctl enable mnt-ceph-fs.mount
+sudo systemctl start mnt-ceph-fs.mount

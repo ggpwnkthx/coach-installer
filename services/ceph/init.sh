@@ -15,8 +15,7 @@ echo "public network = $net" >> ceph.conf
 ceph-deploy install $HOSTNAME
 ceph-deploy mon create-initial
 ceph-deploy admin $HOSTNAME
-chmod +r /etc/ceph
-chmod +r /etc/ceph/*
-chmod +r /var/lib/ceph
-chmod +r /var/lib/ceph/*
-chmod +r /var/lib/ceph/*/*
+sudo chmod +r /etc/ceph
+sudo chmod +r /etc/ceph/*
+sudo chmod +r /var/lib/ceph
+sudo chmod +r /var/lib/ceph/*

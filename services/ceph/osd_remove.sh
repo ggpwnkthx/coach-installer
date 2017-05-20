@@ -6,8 +6,14 @@ then
   exit
 fi
 hostname="$(ceph osd find $1 | awk -F\" '$2 ~ /host/ {print $4}')"
-ssh -t $hostname "sudo systemctl stop ceph-osd@$1"
-ssh -t $hostname "sudo umount /var/lib/ceph/osd/ceph-$1"
+if [ $hostname == $HOSTNAME ]
+then
+  sudo systemctl stop ceph-osd@$1
+  sudo umount /var/lib/ceph/osd/ceph-$1
+else
+  ssh -t $hostname "sudo systemctl stop ceph-osd@$1"
+  ssh -t $hostname "sudo umount /var/lib/ceph/osd/ceph-$1"
+fi
 ceph osd out $1
 ceph osd crush remove osd.$1
 ceph auth del osd.$1

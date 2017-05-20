@@ -13,6 +13,8 @@ then
   exit
 fi
 
+sudo apt-get -y install gdisk
+
 parts=($(lsblk -p -l -o kname | grep -e $1"[0-9]"))
 if [ ${#parts[@]} -eq 0 ]
 then

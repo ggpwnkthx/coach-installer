@@ -27,7 +27,7 @@ then
   then
     sudo ceph osd pool create $data 128
   fi
-  if [ -z "$(sudo ceph osd pool ls | gerp $meta)" ]
+  if [ -z "$(sudo ceph osd pool ls | grep $meta)" ]
   then
     sudo ceph osd pool create $meta 128
   fi

@@ -23,7 +23,7 @@ ceph-deploy mds create $HOSTNAME
 
 if [ -z "$(sudo ceph fs ls | grep -w $fs)" ]
 then
-  ceph_pool_create $data 128
-  ceph_pool_create $meta 128
+  sudo ceph osd pool create $data 128
+  sudo ceph osd pool create $meta 128
   sudo ceph fs new $fs $meta $data
 fi

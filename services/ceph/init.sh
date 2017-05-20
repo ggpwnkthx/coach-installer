@@ -12,6 +12,7 @@ mask=$(ifconfig $nic | grep Mask | awk '{print $4}' | awk '{split($0,a,":"); pri
 net=$(ipcalc -n $addr $mask | grep Network | awk '{print $2}')
 echo "osd pool default size = 2" >> ceph.conf
 echo "public network = $net" >> ceph.conf
+sudo sed -i "/$HOSTNAME/ s/.*/$addr\t$HOSTNAME/g" /etc/hosts
 ceph-deploy new $HOSTNAME
 ceph-deploy install $HOSTNAME
 ceph-deploy mon create-initial

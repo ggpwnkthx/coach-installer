@@ -21,3 +21,9 @@ sudo chmod +r /etc/ceph
 sudo chmod +r /etc/ceph/*
 sudo chmod +r /var/lib/ceph
 sudo chmod +r /var/lib/ceph/*
+
+if [ ! -f /etc/sudoers.d/$(whoami) ]
+then
+  echo "$(whoami) ALL = (root) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/$(whoami)
+  sudo chmod 0440 /etc/sudoers.d/$(whoami)
+fi

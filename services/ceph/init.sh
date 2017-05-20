@@ -27,10 +27,9 @@ cd ~/ceph
 ceph-deploy new $HOSTNAME
 echo "osd pool default size = 2" >> ceph.conf
 echo "public network = $net" >> ceph.conf
-ceph-deploy install $HOSTNAME
+
+wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/services/ceph/admin.sh -O services_ceph_admin.sh
+chmod +x services_ceph_admin.sh
+./services_ceph_admin.sh
+
 ceph-deploy mon create-initial
-ceph-deploy admin $HOSTNAME
-sudo chmod +r /etc/ceph
-sudo chmod +r /etc/ceph/*
-sudo chmod +r /var/lib/ceph
-sudo chmod +r /var/lib/ceph/*

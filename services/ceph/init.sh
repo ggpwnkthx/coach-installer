@@ -3,6 +3,10 @@
 echo "$(whoami) ALL = (root) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/$(whoami)
 sudo chmod 0440 /etc/sudoers.d/$(whoami)
 
+wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/services/ceph/purge.sh -O services_ceph_purge.sh
+chmod +x services_ceph_purge.sh
+./services_ceph_purge.sh
+
 sudo apt-get -y install net-tools ipcalc ceph-deploy
 
 ifconfig | awk -v RS="\n\n" '{ for (i=1; i<=NF; i++) if ($i == "inet" && $(i+1) ~ /^addr:/) address = substr($(i+1), 6); if (address != "127.0.0.1") printf "%s\t%s\n", $1, address }'

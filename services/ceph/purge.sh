@@ -1,5 +1,5 @@
 #!/bin/bash
-sudo ceph-deploy purge $HOSTNAME
-sudo ceph-deploy purgedata $HOSTNAME
-sudo ceph-deploy forgetkeys
+ceph-deploy purge $HOSTNAME
+ceph-deploy purgedata $HOSTNAME
+ceph-deploy forgetkeys
 rm -r ~/ceph

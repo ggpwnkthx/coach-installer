@@ -7,13 +7,13 @@ fi
 
 if [ -z $1 ]
 then
-  fs=cephfs
-  data=cephfs_data
-  meta=cephfs_meta
+  fs="cephfs"
+  data="cephfs_data"
+  meta="cephfs_meta"
 else
-  fs=$1
-  data=$1_data
-  meta=$1_meta
+  fs="$1"
+  data="$1_data"
+  meta="$1_meta"
 fi
 
 cd ~/ceph
@@ -23,7 +23,13 @@ ceph-deploy mds create $HOSTNAME
 
 if [ -z "$(sudo ceph fs ls | grep -w $fs)" ]
 then
-  sudo ceph osd pool create $data 128
-  sudo ceph osd pool create $meta 128
+  if [ -z "$(sudo ceph osd pool ls | gerp $data)" ]
+  then
+    sudo ceph osd pool create $data 128
+  fi
+  if [ -z "$(sudo ceph osd pool ls | gerp $meta)" ]
+  then
+    sudo ceph osd pool create $meta 128
+  fi
   sudo ceph fs new $fs $meta $data
 fi

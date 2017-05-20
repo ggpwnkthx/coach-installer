@@ -14,5 +14,5 @@ if [ -z "$(cat /etc/hosts | grep $2)" ]
 then
   echo "$1\t$2" | sudo tee --append /etc/hosts
 else
-  sudo sed -i "/$2/ s/.*/$1\t$2/g" /etc/hosts
+  sudo sed -i "/$2/ s/.*/$1\t$2 #static/g" /etc/hosts
 fi

@@ -33,6 +33,7 @@ if [ ! -z "$(systemctl | grep ceph_client.service)" ]
 then
   sudo systemctl disable ceph_client.service
 fi
+sudo chmod +r /etc/ceph/*
 sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/ceph/client.service -O /etc/systemd/system/ceph_client.service
 sudo systemctl daemon-reload
 sudo systemctl enable ceph_client.service

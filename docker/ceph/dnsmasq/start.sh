@@ -38,8 +38,8 @@ do
 done
 
 sudo docker run -d \
-  --name dnsmasq --restart=always --net=host 
-  -v /mnt/ceph/fs/containers/dnsmasq/dnsmasq.leases:/var/lib/misc/dnsmasq.leases
+  --name dnsmasq --restart=always --net=host \
+  -v /mnt/ceph/fs/containers/dnsmasq/dnsmasq.leases:/var/lib/misc/dnsmasq.leases \
   coach/dnsmasq \
   --dhcp-leasefile=/var/lib/misc/dnsmasq.leases \
   $use_iface \

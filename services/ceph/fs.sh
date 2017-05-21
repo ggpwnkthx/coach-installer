@@ -30,13 +30,13 @@ if [ ! -d "/mnt/ceph/fs" ]
 then
   sudo mkdir /mnt/ceph/fs
 fi
-if [ ! -z "$(systemctl | grep ceph_client.service)" ]
+if [ ! -z "$(systemctl | grep ceph-client.service)" ]
 then
-  sudo systemctl disable ceph_client.service
+  sudo systemctl disable ceph-client.service
 fi
-sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/services/ceph/client.service -O /etc/systemd/system/ceph_client.service
+sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/services/ceph/client.service -O /etc/systemd/system/ceph-client.service
 sudo systemctl daemon-reload
-sudo systemctl enable ceph_client.service
+sudo systemctl enable ceph-client.service
 secret=$(sudo ceph-authtool -p /etc/ceph/ceph.client.admin.keyring)
 if [ ! -z "$(systemctl | grep mnt-ceph-fs.mount)" ]
 then
@@ -46,7 +46,7 @@ fi
 sudo rm /etc/systemd/system/mnt-ceph-fs.mount
 echo "[Unit]" | sudo tee /etc/systemd/system/mnt-ceph-fs.mount
 echo "Description=Mount CephFS" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
-echo "After=ceph_client.service" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
+echo "After=ceph-client.service" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
 echo "" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
 echo "[Mount]" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
 echo "What=$ceph_mons:/" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount

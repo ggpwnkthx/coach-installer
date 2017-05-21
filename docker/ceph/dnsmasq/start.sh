@@ -9,13 +9,13 @@ if [ ! -z "$(sudo docker ps -a | grep dnsmasq)" ]
 then
   sudo docker rm dnsmasq
 fi
-if [ ! -d /mnt/ceph/fs/containers ]
-then
-  sudo mkdir -p /mnt/ceph/fs/containers
-fi
 if [ ! -d /mnt/ceph/fs/containers/dnsmasq ]
 then
   sudo mkdir -p /mnt/ceph/fs/containers/dnsmasq
+fi
+if [ ! -f /mnt/ceph/fs/containers/dnsmasq/dnsmasq.leases ]
+then
+  sudo touch /mnt/ceph/fs/containers/dnsmasq/dnsmasq.leases
 fi
 sudo chmod +rw /mnt/ceph/fs/containers/dnsmasq
 sudo chmod +rw /mnt/ceph/fs/containers/dnsmasq/*
@@ -39,9 +39,9 @@ done
 
 sudo docker run -d \
   --name dhcp --restart=always --net=host 
-  -v /mnt/ceph/fs/containers/dnsmasq:/mnt/ceph/fs/containers/dnsmasq
+  -v /mnt/ceph/fs/containers/dnsmasq/dnsmasq.leases:/var/lib/misc/dnsmasq.leases
   coach/dhcp \
-  --dhcp-leasefile /mnt/ceph/fs/containers/dnsmasq/dnsmasq.lease
+  --dhcp-leasefile=/var/lib/misc/dnsmasq.leases \
   $use_iface \
   $use_range \
   $@

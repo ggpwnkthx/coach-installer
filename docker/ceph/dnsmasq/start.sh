@@ -9,6 +9,10 @@ if [ ! -z "$(sudo docker ps -a | grep dnsmasq)" ]
 then
   sudo docker rm dnsmasq
 fi
+if [ ! -d /mnt/ceph/fs/containers ]
+then
+  sudo mkdir -p /mnt/ceph/fs/containers
+fi
 if [ ! -d /mnt/ceph/fs/containers/dnsmasq ]
 then
   sudo mkdir -p /mnt/ceph/fs/containers/dnsmasq

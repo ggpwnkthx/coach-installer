@@ -34,7 +34,7 @@ if [ ! -z "$(systemctl | grep ceph_client.service)" ]
 then
   sudo systemctl disable ceph_client.service
 fi
-sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/ceph/client.service -O /etc/systemd/system/ceph_client.service
+sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/services/ceph/client.service -O /etc/systemd/system/ceph_client.service
 sudo systemctl daemon-reload
 sudo systemctl enable ceph_client.service
 secret=$(sudo ceph-authtool -p /etc/ceph/ceph.client.admin.keyring)

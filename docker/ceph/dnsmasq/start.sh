@@ -29,7 +29,7 @@ do
     use_iface="$use_iface --interface=$i"
     min=$(ipcalc -n $addr $mask | grep HostMin | awk '{print $2}'
     max=$(ipcalc -n $addr $mask | grep HostMin | awk '{print $2}'
-    use_range="$use_range --dhcp-range=$min,$max,infinite
+    use_range="$use_range --dhcp-range=$min,$max,infinite"
   fi
 done
 

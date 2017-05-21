@@ -1,4 +1,4 @@
-#!/bin/bash
+\#!/bin/bash
 wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/ceph/dnsmasq/Dockerfile -O Dockerfile
 sudo docker build -t "coach/dnsmasq" .
 if [ ! -z "$(sudo docker ps | grep dnsmasq)" ]
@@ -33,12 +33,10 @@ do
   then
     use_iface="$use_iface --interface=$i"
     min=$(ipcalc -n $addr $mask | grep HostMin | awk '{print $2}')
-    max=$(ipcalc -n $addr $mask | grep HostMin | awk '{print $2}')
+    max=$(ipcalc -n $addr $mask | grep HostMax | awk '{print $2}')
     use_range="$use_range --dhcp-range=$min,$max,infinite"
   fi
 done
-echo $use_iface
-exit
 
 sudo docker run -d \
   --name dnsmasq --restart=always --net=host \

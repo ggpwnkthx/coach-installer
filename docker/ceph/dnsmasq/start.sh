@@ -1,13 +1,13 @@
 #!/bin/bash
 wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/ceph/dnsmasq/Dockerfile -O Dockerfile
-sudo docker build -t "coach/dnsmask" .
-if [ ! -z "$(sudo docker ps | grep dnsmask)" ]
+sudo docker build -t "coach/dnsmasq" .
+if [ ! -z "$(sudo docker ps | grep dnsmasq)" ]
 then
-  sudo docker kill dnsmask
+  sudo docker kill dnsmasq
 fi
-if [ ! -z "$(sudo docker ps -a | grep dnsmask)" ]
+if [ ! -z "$(sudo docker ps -a | grep dnsmasq)" ]
 then
-  sudo docker rm dnsmask
+  sudo docker rm dnsmasq
 fi
 if [ ! -d /mnt/ceph/fs/containers/dnsmasq ]
 then
@@ -27,15 +27,16 @@ do
   if [ "$ceph_net" == "$net" ]
   then
     use_iface="$use_iface --interface=$i"
-    min=$(ipcalc -n $addr $mask | grep HostMin | awk '{print $2}'
-    max=$(ipcalc -n $addr $mask | grep HostMin | awk '{print $2}'
+    min=$(ipcalc -n $addr $mask | grep HostMin | awk '{print $2}')
+    max=$(ipcalc -n $addr $mask | grep HostMin | awk '{print $2}')
     use_range="$use_range --dhcp-range=$min,$max,infinite"
   fi
 done
 
 sudo docker run -d \
-  --name dhcp --restart=always --net=host coach/dhcp \
+  --name dhcp --restart=always --net=host 
   -v /mnt/ceph/fs/containers/dnsmasq:/mnt/ceph/fs/containers/dnsmasq
+  coach/dhcp \
   --dhcp-leasefile /mnt/ceph/fs/containers/dnsmasq/dnsmasq.lease
   $use_iface \
   $use_range \

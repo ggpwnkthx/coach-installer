@@ -35,6 +35,8 @@ done
 
 sudo docker run -d \
   --name dhcp --restart=always --net=host coach/dhcp \
+  -v /mnt/ceph/fs/containers/dnsmasq:/mnt/ceph/fs/containers/dnsmasq
+  --dhcp-leasefile /mnt/ceph/fs/containers/dnsmasq/dnsmasq.lease
   $use_iface \
   $use_range \
   $@

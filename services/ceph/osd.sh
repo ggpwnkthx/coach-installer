@@ -54,9 +54,9 @@ then
     fi
   fi
   echo "Creating OSD with separate Journal device..."
-  ceph-deploy osd prepare $HOSTNAME:$1:$2
+  ceph-deploy osd prepare --fs-type btrfs $HOSTNAME:$1:$2
 else
   echo "Creating OSD..."
-  ceph-deploy osd prepare $HOSTNAME:$1
+  ceph-deploy osd prepare --fs-type btrfs $HOSTNAME:$1
 fi
 echo "OSD has been created for device $1"

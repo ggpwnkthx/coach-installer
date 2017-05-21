@@ -1,5 +1,6 @@
 [Unit]
 Description=Ceph Client Prerequisite
+After=ceph-mds.target
 
 [Service]
 Type=forking

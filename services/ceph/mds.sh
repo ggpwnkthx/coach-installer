@@ -16,16 +16,19 @@ else
   meta="$1_meta"
 fi
 
-wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/services/ceph/admin.sh -O services_ceph_admin.sh
-chmod +x services_ceph_admin.sh
-./services_ceph_admin.sh
+if [ ! -f /etc/ceph/ceph.conf ]
+then
+  wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/services/ceph/admin.sh -O services_ceph_admin.sh
+  chmod +x services_ceph_admin.sh
+  ./services_ceph_admin.sh
+fi
 
 cd ~/ceph
 ceph-deploy mds create $HOSTNAME
 
 if [ -z "$(sudo ceph fs ls | grep -w $fs)" ]
 then
-  if [ -z "$(sudo ceph osd pool ls | gerp $data)" ]
+  if [ -z "$(sudo ceph osd pool ls | grep $data)" ]
   then
     sudo ceph osd pool create $data 128
   fi

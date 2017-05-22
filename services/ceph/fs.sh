@@ -1,10 +1,13 @@
 #!/bin/bash
-if [ -f /etc/ceph/ceph.conf ]
+if [ -z "$(command -c ceph)" ]
+then
+  sudo apt-get -y install ceph-common
+fi
+if [ ! -f /etc/ceph/ceph.conf ]
 then
   wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/services/ceph/preflight.sh -O services_ceph_preflight.sh
   chmod +x services_ceph_preflight.sh
   ./services_ceph_preflight.sh
-  sudo apt-get -y install ceph-common
 fi
 
 ceph_mon_ls=($(sudo ceph mon dump | grep mon | awk '{print $2}' | awk '{split($0,a,"/"); print a[1]}'))

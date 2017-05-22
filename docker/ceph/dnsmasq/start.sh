@@ -9,16 +9,29 @@ if [ ! -z "$(sudo docker ps -a | grep dnsmasq)" ]
 then
   sudo docker rm dnsmasq
 fi
+
 if [ ! -d /mnt/ceph/fs/containers/dnsmasq ]
 then
   sudo mkdir -p /mnt/ceph/fs/containers/dnsmasq
 fi
-if [ ! -f /mnt/ceph/fs/containers/dnsmasq/dnsmasq.leases ]
-then
-  sudo touch /mnt/ceph/fs/containers/dnsmasq/dnsmasq.leases
-fi
 sudo chmod +rw /mnt/ceph/fs/containers/dnsmasq
-sudo chmod +rw /mnt/ceph/fs/containers/dnsmasq/*
+
+if [ ! -f /mnt/ceph/fs/containers/dnsmasq/leases ]
+then
+  sudo touch /mnt/ceph/fs/containers/dnsmasq/leases
+fi
+sudo chmod +rw /mnt/ceph/fs/containers/dnsmasq/leases
+
+if [ ! -f /mnt/ceph/fs/containers/dnsmasq/conf ]
+then
+  echo "domain-needed" | sudo tee /mnt/ceph/fs/containers/dnsmasq/conf
+  echo "bogus-priv" | sudo tee --append /mnt/ceph/fs/containers/dnsmasq/conf
+  echo "no-resolv" | sudo tee --append /mnt/ceph/fs/containers/dnsmasq/conf
+  echo "no-poll" | sudo tee --append /mnt/ceph/fs/containers/dnsmasq/conf
+  echo "no-hosts" | sudo tee --append /mnt/ceph/fs/containers/dnsmasq/conf
+  echo "expand-hosts" | sudo tee --append /mnt/ceph/fs/containers/dnsmasq/conf
+fi
+sudo chmod +r /mnt/ceph/fs/containers/dnsmasq/conf
 
 use_iface=""
 ceph_net=$(cat /etc/ceph/ceph.conf | grep public_network | awk '{print $3}')
@@ -52,6 +65,10 @@ done
 
 sudo docker run -d \
   --name dnsmasq --restart=always --net=host \
-  -v /mnt/ceph/fs/containers/dnsmasq/dnsmasq.leases:/var/lib/misc/dnsmasq.leases \
-  coach/dnsmasq  --dhcp-leasefile=/var/lib/misc/dnsmasq.leases $use_iface $use_range $ceph_mons \
+  -v /mnt/ceph/fs/containers/dnsmasq/leases:/var/lib/misc/dnsmasq.leases \
+  -v /mnt/ceph/fs/containers/dnsmasq/conf:/etc/dnsmasq.conf \
+  coach/dnsmasq  --dhcp-leasefile=/var/lib/misc/dnsmasq.leases \
+  $use_iface \
+  $use_range \
+  $ceph_mons \
   $@

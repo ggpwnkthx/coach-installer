@@ -69,8 +69,8 @@ sudo docker run -d \
   -v /mnt/ceph/fs/containers/dnsmasq/leases:/var/lib/misc/dnsmasq.leases \
   -v /mnt/ceph/fs/containers/dnsmasq/conf:/etc/dnsmasq.conf \
   coach/dnsmasq  --dhcp-leasefile=/var/lib/misc/dnsmasq.leases \
-  --domain=$domain_name
-  --local=/$domain_name/
+  --domain=$domain_name \
+  --local=/$domain_name/ \
   $use_iface \
   $use_range \
   $ceph_mons \

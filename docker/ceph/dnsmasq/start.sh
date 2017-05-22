@@ -52,15 +52,10 @@ do
 done
 
 ceph_mon_ls=($(sudo ceph mon dump | grep mon | awk '{print $2}' | awk '{split($0,a,"/"); print a[1]}'))
-ceph_mons="--dhcp-option=242,"
+ceph_mons="--dhcp-option=242"
 for i in ${ceph_mon_ls[@]}
 do
-  if [ -z $ceph_mons ]
-  then
-    ceph_mons="$i"
-  else
-    ceph_mons="$ceph_mons,$i"
-  fi
+  ceph_mons="$ceph_mons,$i"
 done
 
 sudo docker run -d \

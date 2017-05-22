@@ -38,8 +38,20 @@ do
   fi
 done
 
+ceph_mon_ls=($(sudo ceph mon dump | grep mon | awk '{print $2}' | awk '{split($0,a,"/"); print a[1]}'))
+ceph_mons="--dhcp-option="
+for i in ${ceph_mon_ls[@]}
+do
+  if [ -z $ceph_mons ]
+  then
+    ceph_mons="$i"
+  else
+    ceph_mons="$ceph_mons,$i"
+  fi
+done
+
 sudo docker run -d \
   --name dnsmasq --restart=always --net=host \
   -v /mnt/ceph/fs/containers/dnsmasq/dnsmasq.leases:/var/lib/misc/dnsmasq.leases \
-  coach/dnsmasq  --dhcp-leasefile=/var/lib/misc/dnsmasq.leases $use_iface $use_range \
+  coach/dnsmasq  --dhcp-leasefile=/var/lib/misc/dnsmasq.leases $use_iface $use_range $ceph_mons \
   $@

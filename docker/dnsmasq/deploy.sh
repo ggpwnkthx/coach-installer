@@ -53,6 +53,9 @@ do
     max=$(ipcalc -n $addr $mask | grep HostMax | awk '{print $2}')
     use_range="$use_range --dhcp-range=$min,$max,infinite"
   fi
+  addr=""
+  mask=""
+  net=""
 done
 
 ceph_mon_ls=($(sudo ceph mon dump | grep mon | awk '{print $2}' | awk '{split($0,a,"/"); print a[1]}'))

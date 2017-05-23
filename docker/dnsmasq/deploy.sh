@@ -32,7 +32,7 @@ fi
 sudo chmod +r /mnt/ceph/fs/containers/dnsmasq/conf
 
 use_iface=""
-ceph_net=$(cat /etc/ceph/ceph.conf | grep "public_network" | awk '{print $5}')
+ceph_net=$(cat /etc/ceph/ceph.conf | grep "public_network" | awk '{print $3}')
 ifaces=($(ifconfig | awk -v RS="\n\n" '{ for (i=1; i<=NF; i++) if ($i == "inet" && $(i+1) ~ /^addr:/) address = substr($(i+1), 6); if (address != "127.0.0.1") printf "%s\n", $1 }'))
 for i in ${ifaces[@]}
 do

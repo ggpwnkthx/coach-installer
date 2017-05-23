@@ -66,7 +66,7 @@ sudo docker run -d \
   --name dnsmasq --restart=always --net=host \
   -v /mnt/ceph/fs/containers/dnsmasq/leases:/var/lib/misc/dnsmasq.leases \
   -v /mnt/ceph/fs/containers/dnsmasq/conf:/etc/dnsmasq.conf \
-  andyshinn/dnsmasq --dhcp-leasefile=/var/lib/misc/dnsmasq.leases \
+  coach/dnsmasq --dhcp-leasefile=/var/lib/misc/dnsmasq.leases \
   --domain=$domain_name \
   --local=/$domain_name/ \
   $use_iface \

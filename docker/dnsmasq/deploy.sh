@@ -1,4 +1,6 @@
 #!/bin/bash
+wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/dnsmasq/Dockerfile -O Dockerfile
+sudo docker build -t "coach/dnsmasq" .
 if [ ! -z "$(sudo docker ps | grep dnsmasq)" ]
 then
   sudo docker kill dnsmasq

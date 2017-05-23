@@ -1,4 +1,6 @@
 #!/bin/bash
+ce ~/ceph
+
 if [ -z $1 ]
 then
   echo "No device specified."

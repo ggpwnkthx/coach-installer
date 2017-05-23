@@ -40,3 +40,5 @@ chmod +x services_ceph_admin.sh
 ./services_ceph_admin.sh
 
 ceph-deploy mon create-initial
+sudo chmod +rw /etc/ceph
+sudo chmod +rw /etc/ceph/*

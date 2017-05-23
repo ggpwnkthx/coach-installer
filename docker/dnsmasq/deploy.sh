@@ -45,7 +45,6 @@ do
   addr=$(ifconfig $i | grep Mask | awk '{print $2}' | awk '{split($0,a,":"); print a[2]}')
   mask=$(ifconfig $i | grep Mask | awk '{print $4}' | awk '{split($0,a,":"); print a[2]}')
   net=$(ipcalc -n $addr $mask | grep Network | awk '{print $2}')
-  echo "$ceph_net" "$net"
   if [ "$ceph_net" == "$net" ]
   then
     use_iface="$use_iface --interface=$i"

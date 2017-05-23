@@ -1,5 +1,4 @@
 #!/bin/bash
-ce ~/ceph
 
 if [ -z $1 ]
 then
@@ -15,7 +14,7 @@ then
   exit
 fi
 
-sudo apt-get -y install gdisk
+sudo apt-get -y install gdisk btrfs-tools
 
 parts=($(lsblk -p -l -o kname | grep -e $1"[0-9]"))
 if [ ${#parts[@]} -eq 0 ]
@@ -56,9 +55,13 @@ then
     fi
   fi
   echo "Creating OSD with separate Journal device..."
+  
+  cd ~/ceph
   ceph-deploy osd prepare --fs-type btrfs $HOSTNAME:$1:$2
 else
   echo "Creating OSD..."
+  
+  cd ~/ceph
   ceph-deploy osd prepare --fs-type btrfs $HOSTNAME:$1
 fi
 echo "OSD has been created for device $1"

@@ -34,6 +34,7 @@ fi
 sudo chmod +r /mnt/ceph/fs/containers/dnsmasq/conf
 
 use_iface=""
+
 ceph_net=$(cat /etc/ceph/ceph.conf | grep "public_network" | awk '{print $3}')
 if [ -z "$ceph_net" ]
 then
@@ -51,6 +52,7 @@ do
     min=$(ipcalc -n $addr $mask | grep HostMin | awk '{print $2}')
     max=$(ipcalc -n $addr $mask | grep HostMax | awk '{print $2}')
     use_range="$use_range --dhcp-range=$min,$max,infinite"
+    advertize=$addr
   fi
   addr=""
   mask=""
@@ -75,6 +77,7 @@ sudo docker service \
   -v /mnt/ceph/fs/containers/dnsmasq/leases:/var/lib/misc/dnsmasq.leases \
   -v /mnt/ceph/fs/containers/dnsmasq/conf:/etc/dnsmasq.conf \
   coach/dnsmasq --dhcp-leasefile=/var/lib/misc/dnsmasq.leases \
+  --host-record=$HOSTNAME,$advertize
   --domain=$domain_name \
   --local=/$domain_name/ \
   $use_iface \

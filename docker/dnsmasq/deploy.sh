@@ -70,7 +70,7 @@ then
   read -p "Domain Name: " domain_name
 fi
 
-sudo docker run -d \
+sudo docker service \
   --name dnsmasq --restart=always --net=host \
   -v /mnt/ceph/fs/containers/dnsmasq/leases:/var/lib/misc/dnsmasq.leases \
   -v /mnt/ceph/fs/containers/dnsmasq/conf:/etc/dnsmasq.conf \

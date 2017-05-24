@@ -86,7 +86,7 @@ sudo docker run -d \
   --name provisioner --restart=always --net=host \
   -v /mnt/ceph/fs/containers/provisioner/leases:/var/lib/misc/dnsmasq.leases \
   -v /mnt/ceph/fs/containers/provisioner/conf:/etc/dnsmasq.conf \
-  -v /mnt/ceph/fs/containers/provisioner/www:/var/www \
+  -v /mnt/ceph/fs/containers/provisioner/www:/var/www/html \
   coach/dnsmasq --dhcp-leasefile=/var/lib/misc/dnsmasq.leases \
   --host-record=$HOSTNAME,$advertize \
   --dhcp-option=67,http://$HOSTNAME/index.php \

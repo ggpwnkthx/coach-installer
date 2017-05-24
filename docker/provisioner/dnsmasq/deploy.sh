@@ -1,6 +1,6 @@
 #!/bin/bash
-wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/dnsmasq/Dockerfile -O docker_provisioner_dnsmasq
-sudo docker build -t "coach/dnsmasq" -f docker_provisioner_dnsmasq
+wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/dnsmasq/Dockerfile -O Dockerfile
+sudo docker build -t "coach/dnsmasq" .
 if [ ! -z "$(sudo docker ps | grep provisioner_dnsmasq)" ]
 then
   sudo docker kill provisioner_dnsmasq

@@ -88,5 +88,4 @@ sudo docker run -d \
   --local=/$domain_name/ \
   $use_iface \
   $use_range \
-  $ceph_mons \
-  $@
+  $ceph_mons

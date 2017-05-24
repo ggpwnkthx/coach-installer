@@ -19,9 +19,16 @@ fi
 
 sudo rm /mnt/ceph/fs/containers/provisioner/www/boot/boot2docker
 sudo mkdir -p /mnt/ceph/fs/containers/provisioner/www/boot/boot2docker
-sudo wget $(wget https://api.github.com/repos/boot2docker/boot2docker/releases -O - | grep browser_download_url | head -n 1 | awk '{print $2}' | tr -d '"' ) -O /mnt/ceph/fs/containers/provisioner/www/boot/boot2docker/boot2docker.iso
+
+wget https://github.com/boot2docker/boot2docker/archive/master.zip
+sudo apt-get -y install unzip
+unzip master.zip
+sed -i '/infiniband/d' boot2docker-master/Dockerfile
+cd boot2docker-master
+sudo docker build -t boot2docker .
+sudo docker run --rm boot2docker > boot2docker.iso
 sudo mkdir -p /mnt/boot2docker
-sudo mount -o loop /mnt/ceph/fs/containers/provisioner/www/boot/boot2docker/boot2docker.iso /mnt/boot2docker
+sudo mount -o loop $(sudo find / -name boot2docker.iso -printf "%T+\t%p\n" | sort -r | head -1 | awk '{print $2}') /mnt/boot2docker
 sudo cp /mnt/boot2docker/boot/initrd.img /mnt/ceph/fs/containers/provisioner/www/boot/boot2docker/initrd.img
 sudo cp /mnt/boot2docker/boot/vmlinuz64 /mnt/ceph/fs/containers/provisioner/www/boot/boot2docker/vmlinuz64
 

@@ -1,13 +1,13 @@
 #!/bin/bash
 wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/dnsmasq/Dockerfile -O Dockerfile
-sudo docker build -t "coach/dnsmasq" .
-if [ ! -z "$(sudo docker ps | grep dnsmasq)" ]
+sudo docker build -t "coach/provisioner" .
+if [ ! -z "$(sudo docker ps | grep provisioner)" ]
 then
-  sudo docker kill dnsmasq
+  sudo docker kill provisioner
 fi
-if [ ! -z "$(sudo docker ps -a | grep dnsmasq)" ]
+if [ ! -z "$(sudo docker ps -a | grep provisioner)" ]
 then
-  sudo docker rm dnsmasq
+  sudo docker rm provisioner
 fi
 
 if [ ! -d /mnt/ceph/fs/containers/dnsmasq ]
@@ -78,7 +78,7 @@ else
 fi
 
 sudo docker run -d \
-  --name dnsmasq --restart=always --net=host \
+  --name provisioner --restart=always --net=host \
   -v /mnt/ceph/fs/containers/dnsmasq/leases:/var/lib/misc/dnsmasq.leases \
   -v /mnt/ceph/fs/containers/dnsmasq/conf:/etc/dnsmasq.conf \
   coach/dnsmasq --dhcp-leasefile=/var/lib/misc/dnsmasq.leases \

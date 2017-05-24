@@ -1,13 +1,13 @@
 #!/bin/bash
-wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/Dockerfile -O Dockerfile
-sudo docker build -t "coach/provisioner" .
-if [ ! -z "$(sudo docker ps | grep provisioner)" ]
+wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/dnsmasq.docker -O docker_provisioner_dnsmasq
+sudo docker build -t "coach/dnsmasq" -f docker_provisioner_dnsmasq
+if [ ! -z "$(sudo docker ps | grep dnsmasq)" ]
 then
-  sudo docker kill provisioner
+  sudo docker kill dnsmasq
 fi
-if [ ! -z "$(sudo docker ps -a | grep provisioner)" ]
+if [ ! -z "$(sudo docker ps -a | grep dnsmasq)" ]
 then
-  sudo docker rm provisioner
+  sudo docker rm dnsmasq
 fi
 
 if [ ! -d /mnt/ceph/fs/containers/provisioner ]
@@ -33,11 +33,6 @@ then
 fi
 sudo chmod +r /mnt/ceph/fs/containers/provisioner/conf
 
-if [ ! -d /mnt/ceph/fs/containers/provisioner/www ]
-then
-  sudo mkdir /mnt/ceph/fs/containers/provisioner/www
-fi
-sudo chmod +rw /mnt/ceph/fs/containers/provisioner/www
 use_iface=""
 
 ceph_net=$(cat /etc/ceph/ceph.conf | grep "public_network" | awk '{print $3}')
@@ -83,10 +78,9 @@ else
 fi
 
 sudo docker run -d \
-  --name provisioner --restart=always --net=host \
+  --name dnsmasq --restart=always --net=host \
   -v /mnt/ceph/fs/containers/provisioner/leases:/var/lib/misc/dnsmasq.leases \
   -v /mnt/ceph/fs/containers/provisioner/conf:/etc/dnsmasq.conf \
-  -v /mnt/ceph/fs/containers/provisioner/www:/var/www/html \
   coach/dnsmasq --dhcp-leasefile=/var/lib/misc/dnsmasq.leases \
   --host-record=$HOSTNAME,$advertize \
   --dhcp-option=67,http://$HOSTNAME/index.php \

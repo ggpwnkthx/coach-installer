@@ -10,29 +10,34 @@ then
   sudo docker rm provisioner
 fi
 
-if [ ! -d /mnt/ceph/fs/containers/dnsmasq ]
+if [ ! -d /mnt/ceph/fs/containers/provisioner ]
 then
-  sudo mkdir -p /mnt/ceph/fs/containers/dnsmasq
+  sudo mkdir -p /mnt/ceph/fs/containers/provisioner
 fi
-sudo chmod +rw /mnt/ceph/fs/containers/dnsmasq
+sudo chmod +rw /mnt/ceph/fs/containers/provisioner
 
-if [ ! -f /mnt/ceph/fs/containers/dnsmasq/leases ]
+if [ ! -f /mnt/ceph/fs/containers/provisioner/leases ]
 then
-  sudo touch /mnt/ceph/fs/containers/dnsmasq/leases
+  sudo touch /mnt/ceph/fs/containers/provisioner/leases
 fi
-sudo chmod +rw /mnt/ceph/fs/containers/dnsmasq/leases
+sudo chmod +rw /mnt/ceph/fs/containers/provisioner/leases
 
-if [ ! -f /mnt/ceph/fs/containers/dnsmasq/conf ]
+if [ ! -f /mnt/ceph/fs/containers/provisioner/conf ]
 then
-  echo "domain-needed" | sudo tee /mnt/ceph/fs/containers/dnsmasq/conf
-  echo "bogus-priv" | sudo tee --append /mnt/ceph/fs/containers/dnsmasq/conf
-  echo "no-resolv" | sudo tee --append /mnt/ceph/fs/containers/dnsmasq/conf
-  echo "no-poll" | sudo tee --append /mnt/ceph/fs/containers/dnsmasq/conf
-  echo "no-hosts" | sudo tee --append /mnt/ceph/fs/containers/dnsmasq/conf
-  echo "expand-hosts" | sudo tee --append /mnt/ceph/fs/containers/dnsmasq/conf
+  echo "domain-needed" | sudo tee /mnt/ceph/fs/containers/provisioner/conf
+  echo "bogus-priv" | sudo tee --append /mnt/ceph/fs/containers/provisioner/conf
+  echo "no-resolv" | sudo tee --append /mnt/ceph/fs/containers/provisioner/conf
+  echo "no-poll" | sudo tee --append /mnt/ceph/fs/containers/provisioner/conf
+  echo "no-hosts" | sudo tee --append /mnt/ceph/fs/containers/provisioner/conf
+  echo "expand-hosts" | sudo tee --append /mnt/ceph/fs/containers/provisioner/conf
 fi
-sudo chmod +r /mnt/ceph/fs/containers/dnsmasq/conf
+sudo chmod +r /mnt/ceph/fs/containers/provisioner/conf
 
+if [ ! -d /mnt/ceph/fs/containers/provisioner/www ]
+then
+  sudo mkdir /mnt/ceph/fs/containers/provisioner/www
+fi
+sudo chmod +rw /mnt/ceph/fs/containers/provisioner/www
 use_iface=""
 
 ceph_net=$(cat /etc/ceph/ceph.conf | grep "public_network" | awk '{print $3}')
@@ -79,8 +84,9 @@ fi
 
 sudo docker run -d \
   --name provisioner --restart=always --net=host \
-  -v /mnt/ceph/fs/containers/dnsmasq/leases:/var/lib/misc/dnsmasq.leases \
-  -v /mnt/ceph/fs/containers/dnsmasq/conf:/etc/dnsmasq.conf \
+  -v /mnt/ceph/fs/containers/provisioner/leases:/var/lib/misc/dnsmasq.leases \
+  -v /mnt/ceph/fs/containers/provisioner/conf:/etc/dnsmasq.conf \
+  -v /mnt/ceph/fs/containers/provisioner/www:/var/www \
   coach/dnsmasq --dhcp-leasefile=/var/lib/misc/dnsmasq.leases \
   --host-record=$HOSTNAME,$advertize \
   --dhcp-option=67,http://$HOSTNAME/index.php \

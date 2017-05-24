@@ -4,6 +4,6 @@ chmod +x docker_dnsmasq_deploy.sh
 ./docker_dnsmasq_deploy.sh $@
 
 sudo docker run -d \
-  --name provisioner/lamp --restart=always --net=host \
+  --name provisioner_lamp --restart=always --net=host \
   -v /mnt/ceph/fs/containers/provisioner/www:/var/www/html \
   janes/alpine-lamp

@@ -66,10 +66,15 @@ do
   ceph_mons="$ceph_mons,$i"
 done
 
-domain_name=$(domainname)
-if [ "$domain_name" == "(none)" ]
+if [ -z "$1" ]
 then
-  read -p "Domain Name: " domain_name
+  domain_name=$(domainname)
+  if [ "$domain_name" == "(none)" ]
+  then
+    read -p "Domain Name: " domain_name
+  fi
+else
+  domain_name=$1
 fi
 
 sudo docker run -d \
@@ -77,7 +82,7 @@ sudo docker run -d \
   -v /mnt/ceph/fs/containers/dnsmasq/leases:/var/lib/misc/dnsmasq.leases \
   -v /mnt/ceph/fs/containers/dnsmasq/conf:/etc/dnsmasq.conf \
   coach/dnsmasq --dhcp-leasefile=/var/lib/misc/dnsmasq.leases \
-  --host-record=$HOSTNAME,$advertize
+  --host-record=$HOSTNAME,$advertize \
   --domain=$domain_name \
   --local=/$domain_name/ \
   $use_iface \

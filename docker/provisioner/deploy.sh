@@ -1,5 +1,5 @@
 #!/bin/bash
-wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/dnsmasq/Dockerfile -O Dockerfile
+wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/Dockerfile -O Dockerfile
 sudo docker build -t "coach/provisioner" .
 if [ ! -z "$(sudo docker ps | grep provisioner)" ]
 then

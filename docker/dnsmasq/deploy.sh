@@ -1,5 +1,5 @@
 #!/bin/bash
-wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/dnsmasq.docker -O docker_provisioner_dnsmasq
+wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/dnsmasq/Dockerfile -O docker_provisioner_dnsmasq
 sudo docker build -t "coach/dnsmasq" -f docker_provisioner_dnsmasq
 if [ ! -z "$(sudo docker ps | grep dnsmasq)" ]
 then

@@ -1,5 +1,5 @@
 #!/bin/bash
-wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/dnsmasq/deploy.sh -O docker_dnsmasq_deploy.sh
+wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/dnsmasq/deploy.sh -O docker_dnsmasq_deploy.sh
 chmod +x docker_dnsmasq_deploy.sh
 ./docker_dnsmasq_deploy.sh $@
 

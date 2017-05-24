@@ -78,7 +78,7 @@ else
 fi
 
 sudo docker run -d \
-  --name dnsmasq --restart=always --net=host \
+  --name provisioner/dnsmasq --restart=always --net=host \
   -v /mnt/ceph/fs/containers/provisioner/leases:/var/lib/misc/dnsmasq.leases \
   -v /mnt/ceph/fs/containers/provisioner/conf:/etc/dnsmasq.conf \
   coach/dnsmasq --dhcp-leasefile=/var/lib/misc/dnsmasq.leases \

@@ -13,7 +13,7 @@
 set menu-timeout 5000
 
 # Ensure we have menu-default set to something
-isset ${menu-default} || set menu-default rancher
+isset ${menu-default} || set menu-default coreos
 
 ###################### MAIN MENU ####################################
 
@@ -21,7 +21,7 @@ isset ${menu-default} || set menu-default rancher
 menu iPXE boot menu for COACH
 item --gap -- ------------------------- Operating systems ------------------------------
 item 
-item --key b rancher	RancherOS
+item --key b coreos	CoreOS
 item
 item --gap --           ------------------------- Advanced options -------------------------------
 item --key c config     (c)onfigure settings
@@ -33,11 +33,11 @@ choose --timeout ${menu-timeout} --default ${menu-default} selected || goto canc
 set menu-timeout 0
 goto ${selected}
 
-:rancher
+:coreos
 dhcp
-set base-url http://<?=gethostname()?>/boot/rancher
-kernel ${base-url}/vmlinuz printk.devkmsg=on rancher.debug=true rancher.state.dev=LABEL=RANCHER_STATE rancher.state.wait console=tty0 rancher.state.mdadm_scan console=ttyS1,115200n8 rancher.autologin=ttyS1 rancher.network.interfaces.eth*.dhcp=true rancher.cloud_init.datasources=${base-url}/cloud-init
-initrd ${base-url}/initrd
+set base-url http://<?=gethostname()?>/boot/coreos
+kernel ${base-url}/vmlinuz initrd=coreos_production_pxe_image.cpio.gz coreos.config.url=https://example.com/pxe-config.ign
+initrd ${base-url}/image.cpio.gz
 boot
 
 

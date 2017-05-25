@@ -17,20 +17,10 @@ then
   sudo mkdir /mnt/ceph/fs/containers/provisioner/www
 fi
 
-sudo rm /mnt/ceph/fs/containers/provisioner/www/boot/boot2docker
-sudo mkdir -p /mnt/ceph/fs/containers/provisioner/www/boot/boot2docker
-
-wget https://github.com/boot2docker/boot2docker/archive/master.zip
-sudo apt-get -y install unzip
-unzip master.zip
-sed -i '/infiniband/d' boot2docker-master/Dockerfile
-cd boot2docker-master
-sudo docker build -t boot2docker .
-sudo docker run --rm boot2docker > boot2docker.iso
-sudo mkdir -p /mnt/boot2docker
-sudo mount -o loop $(sudo find / -name boot2docker.iso -printf "%T+\t%p\n" | sort -r | head -1 | awk '{print $2}') /mnt/boot2docker
-sudo cp /mnt/boot2docker/boot/initrd.img /mnt/ceph/fs/containers/provisioner/www/boot/boot2docker/initrd.img
-sudo cp /mnt/boot2docker/boot/vmlinuz64 /mnt/ceph/fs/containers/provisioner/www/boot/boot2docker/vmlinuz64
+sudo rm /mnt/ceph/fs/containers/provisioner/www/boot/rancher
+sudo mkdir -p /mnt/ceph/fs/containers/provisioner/www/boot/rancher
+sudo wget https://releases.rancher.com/os/latest/vmlinuz -O /mnt/ceph/fs/containers/provisioner/www/boot/rancher/vmlinuz
+sudo wget https://releases.rancher.com/os/latest/initrd -O /mnt/ceph/fs/containers/provisioner/www/boot/rancher/initrd
 
 sudo chmod -R +rw /mnt/ceph/fs/containers/provisioner
 sudo docker run -d \

@@ -19,6 +19,8 @@ fi
 
 sudo rm /mnt/ceph/fs/containers/provisioner/www/boot/rancher
 sudo mkdir -p /mnt/ceph/fs/containers/provisioner/www/boot/rancher
+wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/ipxe.php -O /mnt/ceph/fs/containers/provisioner/www/index.php
+wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/cloud-init -O /mnt/ceph/fs/containers/provisioner/www/boot/rancher/cloud-init
 sudo wget https://releases.rancher.com/os/latest/vmlinuz -O /mnt/ceph/fs/containers/provisioner/www/boot/rancher/vmlinuz
 sudo wget https://releases.rancher.com/os/latest/initrd -O /mnt/ceph/fs/containers/provisioner/www/boot/rancher/initrd
 

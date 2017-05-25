@@ -24,7 +24,7 @@ wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner
 sudo wget https://releases.rancher.com/os/latest/vmlinuz -O /mnt/ceph/fs/containers/provisioner/www/boot/rancher/vmlinuz
 sudo wget https://releases.rancher.com/os/latest/initrd -O /mnt/ceph/fs/containers/provisioner/www/boot/rancher/initrd
 
-sudo chmod -R +rw /mnt/ceph/fs/containers/provisioner
+sudo chmod -R +r /mnt/ceph/fs/containers/provisioner
 sudo docker run -d \
   --name provisioner_lamp --restart=always --net=host \
   -v /mnt/ceph/fs/containers/provisioner/www:/www \

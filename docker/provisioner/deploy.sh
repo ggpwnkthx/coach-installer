@@ -17,24 +17,11 @@ then
   sudo mkdir /mnt/ceph/fs/containers/provisioner/www
 fi
 
-#sudo apt-get -y install build-essentials git curl
-#git clone https://github.com/rancher/os.git
-#cd os-kernel
-#sudo make
-#cd ..
-
-sudo rm /mnt/ceph/fs/containers/provisioner/www/boot/rancher
-sudo mkdir -p /mnt/ceph/fs/containers/provisioner/www/boot/rancher
+sudo rm /mnt/ceph/fs/containers/provisioner/www/boot/coreos
+sudo mkdir -p /mnt/ceph/fs/containers/provisioner/www/boot/coreos
 sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/ipxe.php -O /mnt/ceph/fs/containers/provisioner/www/index.php
-sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/cloud-init -O /mnt/ceph/fs/containers/provisioner/www/boot/rancher/cloud-init
-sudo wget https://releases.rancher.com/os/latest/vmlinuz -O /mnt/ceph/fs/containers/provisioner/www/boot/rancher/vmlinuz
-wget https://releases.rancher.com/os/latest/initrd -O initrd.lzma
-sudo apt-get -y install lzma
-unlzma initrd.lzma
-mkdir rancheros_initrd
-cd rancheros_initrd
-cpio -id < ../initrd
-
+sudo wget http://stable.release.core-os.net/amd64-usr/current/coreos_production_pxe.vmlinuz -O /mnt/ceph/fs/containers/provisioner/www/boot/coreos/vmlinuz
+sudo wget http://stable.release.core-os.net/amd64-usr/current/coreos_production_pxe_image.cpio.gz -O /mnt/ceph/fs/containers/provisioner/www/boot/coreos/image.cpio.gz
 
 sudo chmod -R +r /mnt/ceph/fs/containers/provisioner
 sudo docker run -d \

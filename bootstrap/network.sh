@@ -70,11 +70,12 @@ iface_menu()
   case $iface in
     b|B) return ;;
     *) 
-      if [ -z "${ifaces[$(($iface-1))]}" ]
+      iface=$((iface-1))
+      if [ -z "${ifaces[$iface]}" ]
       then
         iface_menu
       else
-        bootstrap ${ifaces[$(($iface-1))]}
+        bootstrap ${ifaces[$iface]}
       fi
   esac
 }

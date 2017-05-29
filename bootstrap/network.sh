@@ -61,7 +61,7 @@ iface_menu()
   for iface in ${ifaces[@]}
   do
     echo "[$i] $iface"
-    i=[$i+1]
+    i=$[$i+1]
   done
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo "[B] Back"
@@ -70,7 +70,7 @@ iface_menu()
   case $iface in
     b|B) return ;;
     *) 
-      if [ -z "${ifaces[iface+1]}" ]
+      if [ -z "${ifaces[$iface+1]}" ]
       then
         iface_menu
       else

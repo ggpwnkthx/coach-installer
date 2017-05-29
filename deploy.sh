@@ -106,6 +106,13 @@ menu_auto_installer()
     *) menu_auto_installer ;;
   esac
 }
+
+coach_bootstrap()
+{
+  auto_install
+  download_and_run "bootstrap/network.sh"
+}
+
 connect_to()
 {
   clear

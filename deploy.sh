@@ -81,7 +81,7 @@ menu_auto_installer()
   echo "[V]	System Vendor Specific Software"
   echo "[D]	Storage Drivers"
   echo "[N]	Network Drivers"
-  echo "[P]	Prepare System for Remote Use"
+  echo "[P]	SysPrep (Required)"
   echo ""
   echo "[A]	All of the Above"
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
@@ -164,8 +164,11 @@ menu_main()
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
   echo "Main Menu || $HOSTNAME"
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
-  echo "[B]	Bootstrap (Setup as Seed Node)"
-  echo ""
+  if [ -f /etc/sudoers.d/$(whoami) ]
+  then
+    echo "[B]	Bootstrap (Setup as Seed Node)"
+    echo ""
+  fi
   echo "[A]	Auto-Installers"
   echo "[N]	Network Manager"
   if [ ! -z "$(command -v ceph)" ]

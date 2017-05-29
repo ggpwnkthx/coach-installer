@@ -28,7 +28,7 @@ bootstrap()
         cidr="192.168.0.0/24"
       fi
       network="$(ipcalc -n $cidr | grep Network | awk '{print $2}')"
-      if [ "$network" == $cidr]
+      if [ "$network" == $cidr ]
       then
         netmin="$(ipcalc -n $cidr | grep HostMin | awk '{print $2}')"
         netmax="$(ipcalc -n $cidr | grep HostMax | awk '{print $2}')"
@@ -36,8 +36,8 @@ bootstrap()
         echo "auto $1 " | sudo tee /etc/network/interfaces.d/$1
         echo "iface $1 inet static" | sudo tee --append /etc/network/interfaces.d/$1
         echo "address $netmin" | sudo tee --append /etc/network/interfaces.d/$1
-        echo "netmaks $netmask" | sudo tee --append /etc/network/interfaces.d/$1
-        ifconfig $1 $netmin netmask $netmask
+        echo "netmask $netmask" | sudo tee --append /etc/network/interfaces.d/$1
+        sudo ifconfig $1 $netmin netmask $netmask
       else
         echo "Hmm... you CIDR doesn't look right."
         bootstrap $1
@@ -69,14 +69,12 @@ iface_menu()
   read -p "Choose an interface for your storage fabric: " iface
   case $iface in
     b|B) return ;;
-    *) 
-      iface=$((iface-1))
-      echo ${ifaces[$iface]}
-      if [ -z ${ifaces[$iface]} ]
+    *)
+      if [ -z ${ifaces[$iface-1]} ]
       then
         iface_menu
       else
-        bootstrap ${ifaces[$iface]}
+        bootstrap ${ifaces[$iface-1]}
       fi
   esac
 }

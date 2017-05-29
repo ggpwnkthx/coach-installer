@@ -58,7 +58,7 @@ iface_menu()
   echo "Bootstrapping this node's Network"
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   i=1
-  for iface in $ifaces
+  for iface in ${ifaces[@]}
   do
     echo "[$i] $iface"
   done

@@ -74,7 +74,7 @@ iface_menu()
       then
         iface_menu
       else
-        bootstrap ${ifaces[iface+1]}
+        bootstrap ${ifaces[$iface+1]}
       fi
   esac
 }

@@ -66,7 +66,7 @@ iface_menu()
   echo "[B] Back"
   echo
   read -p "Choose an interface for your storage fabric: " iface
-  case i in $iface
+  case $iface in
     b|B) return ;;
     *) 
       if [ -z "${ifaces[iface+1]}" ]

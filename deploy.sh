@@ -1,29 +1,18 @@
 #!/bin/bash
-
-get_latest=1
+wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/download_and_run -O download_and_run
+chmod +x download_and_run
 
 if [ -z "$(command -v wget)" ]
 then
   sudo apt-get -y install wget
 fi
 
-download_and_run()
-{
-  filename=$(echo $1 | awk '{gsub("/", "_") ; print }')
-  if [ ! -f $filename ] || [ ! -z $get_latest ]
-  then
-    wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/$1 -O $filename
-  fi
-  chmod +x $filename
-  ./$filename "${@:2}"
-}
-
 # Vendor specific system adminstration software
 ask_system_admin()
 {
   system_vendor=$(sudo dmidecode | grep "Vendor: " | sed 's/^.*: //')
   case $system_vendor in
-    "Dell Inc.") download_and_run "sofware/dell/omsa.sh" -y ;;
+    "Dell Inc.") ./download_and_run "sofware/dell/omsa.sh" -y ;;
   esac
 }
 # Storage specific software and drivers
@@ -32,7 +21,7 @@ ask_drives()
   megacli=$(lspci | grep MegaRAID)
   if [ ! -z "$megacli" ]
   then
-    download_and_run "hardware/storage/megacli.sh"
+    ./download_and_run "hardware/storage/megacli.sh"
   fi
 }
 # Install networking
@@ -41,7 +30,7 @@ ask_networking()
   mellanox=$(lspci | grep Mellanox)
   if [ ! -z "$mellanox" ]
   then
-    download_and_run "hardware/networking/infiniband.sh"
+    ./download_and_run "hardware/networking/infiniband.sh"
   fi
 }
 # System Preparation
@@ -113,8 +102,8 @@ menu_auto_installer()
 coach_bootstrap()
 {
   auto_install
-  download_and_run "bootstrap/network.sh"
-  download_and_run "bootstrap/ceph.sh"
+  ./download_and_run "bootstrap/network.sh"
+  ./download_and_run "bootstrap/ceph.sh"
 }
 
 connect_to()

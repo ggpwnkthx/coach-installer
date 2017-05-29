@@ -1,5 +1,86 @@
 #!/bin/bash
 
+download_and_run()
+{
+  filename=$(echo $1 | awk '{gsub("/", "_") ; print }')
+  if [ -z "$(command -v wget)" ]
+  then
+    sudo apt-get -y install wget
+  fi
+  wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/$1 -O $filename
+  chmod +x $filename
+  ./$filename "${@:2}"
+}
+
+# Vendor specific system adminstration software
+ask_system_admin()
+{
+  system_vendor=$(sudo dmidecode | grep "Vendor: " | sed 's/^.*: //')
+  case $system_vendor in
+    "Dell Inc.") download_and_run "sofware/dell/omsa.sh" -y ;;
+  esac
+}
+
+
+auto_install()
+{
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "Installing System Administrative Software"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  ask_system_admin
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "Installing Network Drivers"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  ask_networking
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "Installing Storage Drivers"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  ask_drives
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "Installing Prerequisets"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  sys_prep
+}
+menu_auto_installer()
+{
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "Auto Installers || $HOSTNAME"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  echo "[V]	System Vendor Specific Software"
+  echo "[N]	Network Drivers"
+  echo "[D]	Storage Drivers"
+  echo "[P]	Prepare System for Remote Use"
+  echo ""
+  echo "[A]	All of the Above"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  echo "[0]	BACK"
+  echo ''
+  read -p "What would you like to do? " doit
+  case $doit in
+    0) echo '' && menu_main ;;
+    v|V) echo '' && ask_system_admin && menu_main;;
+    n|N) echo '' && ask_networking && menu_main;;
+    d|D) echo '' && ask_drives && menu_main ;;
+    p|P) echo '' && sys_prep && menu_main ;;
+    a|A) echo '' && auto_install && menu_main ;;
+    *) menu_auto_installer ;;
+  esac
+}
 connect_to()
 {
   clear

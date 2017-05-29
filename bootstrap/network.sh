@@ -63,7 +63,7 @@ bootstrap()
         fi
       fi
     else
-      echo "${ifaces[$iface-1]} has already been configured.
+      echo "${ifaces[$iface-1]} has already been configured."
       address=$(ifconfg ${ifaces[$iface-1]} | grep "inet " | awk '{print $2}' | awk '{split($0,a,":"); print a[2]}')
       netmaks=$(ifconfg ${ifaces[$iface-1]} | grep "inet " | awk '{print $4}' | awk '{split($0,a,":"); print a[2]}')
       cidr=$(ipcalc $address $netmaks)

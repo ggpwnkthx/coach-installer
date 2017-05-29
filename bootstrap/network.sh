@@ -34,17 +34,17 @@ bootstrap()
         netmax="$(ipcalc -n $cidr | grep HostMax | awk '{print $2}')"
         netmask="$(ipcalc -n $cidr | grep Netmask | awk '{print $2}')"
         echo "auto $1 " | sudo tee /etc/network/interfaces.d/$1
-        echo "iface $1 inet static" | sudo tee --append /etc/network/interfaces.d/$1
-        echo "address $netmin" | sudo tee --append /etc/network/interfaces.d/$1
-        echo "netmask $netmask" | sudo tee --append /etc/network/interfaces.d/$1
+        echo "iface $1 inet static" | sudo tee --append /etc/network/interfaces.d/storage
+        echo "address $netmin" | sudo tee --append /etc/network/interfaces.d/storage
+        echo "netmask $netmask" | sudo tee --append /etc/network/interfaces.d/storage
         sudo ifconfig $1 $netmin netmask $netmask
       else
         echo "Hmm... you CIDR doesn't look right."
         bootstrap $1
       fi
     else
-      echo "auto $1 " | sudo tee /etc/network/interfaces.d/$1
-      echo "iface $1 inet dhcp" | sudo tee --append /etc/network/interfaces.d/$1
+      echo "auto $1 " | sudo tee /etc/network/interfaces.d/storage
+      echo "iface $1 inet dhcp" | sudo tee --append /etc/network/interfaces.d/storage
     fi
   fi
 }

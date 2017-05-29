@@ -1,4 +1,10 @@
 #!/bin/bash
+clear
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+echo "Ceph Monitor - $HOSTNAME"
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
 read -p "Is this the first node? [y,N] " first
 case $first in
   y|Y)

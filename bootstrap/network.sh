@@ -61,6 +61,7 @@ iface_menu()
   for iface in ${ifaces[@]}
   do
     echo "[$i] $iface"
+    i=[$i+1]
   done
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo "[B] Back"

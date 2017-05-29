@@ -50,7 +50,7 @@ if [ ! -z $2 ]
 then
   echo "osd_journal_size = $2" >> ceph.conf
 fi
-./download_and_run services/ceph/admin.sh"
+./download_and_run "services/ceph/admin.sh"
 
 ceph-deploy mon create-initial
 sudo chmod +rw /etc/ceph

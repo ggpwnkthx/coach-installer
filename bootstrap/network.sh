@@ -71,7 +71,8 @@ iface_menu()
     b|B) return ;;
     *) 
       iface=$((iface-1))
-      if [ -z "${ifaces[$iface]}" ]
+      echo ${ifaces[$iface]}
+      if [ -z ${ifaces[$iface]} ]
       then
         iface_menu
       else

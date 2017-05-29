@@ -1,10 +1,19 @@
 #!/bin/bash
-echo "$(whoami) ALL = (root) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/$(whoami)
-sudo chmod 0440 /etc/sudoers.d/$(whoami)
+
+if [ -z "$(command -v ifconfig)" ]
+then
+  sudo apt-get -y install net-tools
+fi
+if [ -z "$(command -v ipcalc)" ]
+then
+  sudo apt-get -y install ipcalc
+fi
+if [ -z "$(command -v ceph-deploy)" ]
+then
+  sudo apt-get -y install ceph-deploy
+fi
 
 ./download_and_run "services/ceph/purge.sh"
-
-sudo apt-get -y install net-tools ipcalc ceph-deploy
 if [ -f /etc/network/interfaces.d/storage ]
 then
   addr=$(cat /etc/network/interfaces.d/storage | grep address | awk '{print $2}')

@@ -8,9 +8,7 @@ printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
 read -p "Is this the first node? [y,N] " first
 case $first in
   y|Y)
-    wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/services/ceph/init.sh -O services_ceph_init.sh
-    chmod +x services_ceph_init.sh
-    ./services_ceph_init.sh
+    ./download_and_run services/ceph/init.sh
     ;;
   n|N)
     ifconfig | awk -v RS="\n\n" '{ for (i=1; i<=NF; i++) if ($i == "inet" && $(i+1) ~ /^addr:/) address = substr($(i+1), 6); if (address != "127.0.0.1") printf "%s\t%s\n", $1, address }'

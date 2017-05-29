@@ -101,10 +101,12 @@ iface_menu()
       fi
   esac
 }
-
-if [ -z $1 ]
+if [ ! -f /etc/network/interfaces.d/storage ]
 then
-  iface_menu
-else
-  boostrap $1
+  if [ -z $1 ]
+  then
+    iface_menu
+  else
+    boostrap $1
+  fi
 fi

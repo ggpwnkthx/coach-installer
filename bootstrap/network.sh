@@ -16,16 +16,35 @@ bootstrap()
     echo "Something isn't right here..."
     return
   else
+    echo "Searching for existing network..."
     dhcp_search=$(sudo nmap --script broadcast-dhcp-discover -e $1 | grep "Server Identifier" | awk '{print $4}')
     if [ -z "$dhcp_search" ]
     then
-      read -p "CIDR [192.168.0.0/24] : " cidr
-      netmin="$(ipcalc -n $cidr | grep HostMin | awk '{print $2}')"
-      netmax="$(ipcalc -n $cidr | grep HostMax | awk '{print $2}')"
-      netmask="$(ipcalc -n $cidr | grep Netmask | awk '{print $2}')"
-      
+      echo "No network found."
+      echo "Let's start a new one."
+      read -p "CIDR for new network [192.168.0.0/24] : " cidr
+      if [ -z "$cidr" ]
+      then
+        cidr="192.168.0.0/24"
+      fi
+      network="$(ipcalc -n $cidr | grep Network | awk '{print $2}')"
+      if [ "$network" == $cidr]
+      then
+        netmin="$(ipcalc -n $cidr | grep HostMin | awk '{print $2}')"
+        netmax="$(ipcalc -n $cidr | grep HostMax | awk '{print $2}')"
+        netmask="$(ipcalc -n $cidr | grep Netmask | awk '{print $2}')"
+        echo "auto $1 " | sudo tee /etc/network/interfaces.d/$1
+        echo "iface $1 inet static" | sudo tee --append /etc/network/interfaces.d/$1
+        echo "address $netmin" | sudo tee --append /etc/network/interfaces.d/$1
+        echo "netmaks $netmask" | sudo tee --append /etc/network/interfaces.d/$1
+        ifconfig $1 $netmin netmask $netmask
+      else
+        echo "Hmm... you CIDR doesn't look right."
+        bootstrap $1
+      fi
     else
-      echo "not sure what to do yet"
+      echo "auto $1 " | sudo tee /etc/network/interfaces.d/$1
+      echo "iface $1 inet dhcp" | sudo tee --append /etc/network/interfaces.d/$1
     fi
   fi
 }

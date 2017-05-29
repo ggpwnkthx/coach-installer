@@ -1,5 +1,7 @@
 #!/bin/bash
 
+get_latest=1
+
 if [ -z "$(command -v wget)" ]
 then
   sudo apt-get -y install wget
@@ -8,10 +10,10 @@ fi
 download_and_run()
 {
   filename=$(echo $1 | awk '{gsub("/", "_") ; print }')
-  #if [ ! -f $filename ]
-  #then
+  if [ ! -f $filename ] || [ ! -z $get_latest ]
+  then
     wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/$1 -O $filename
-  #fi
+  fi
   chmod +x $filename
   ./$filename "${@:2}"
 }

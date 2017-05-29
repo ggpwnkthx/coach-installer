@@ -9,6 +9,18 @@ then
   sudo apt-get -y install ipcalc
 fi
 
+set_storage()
+{
+  netmin="$(ipcalc -n $2 | grep HostMin | awk '{print $2}')"
+  netmax="$(ipcalc -n $2 | grep HostMax | awk '{print $2}')"
+  netmask="$(ipcalc -n $2 | grep Netmask | awk '{print $2}')"
+  echo "auto $1 " | sudo tee /etc/network/interfaces.d/storage
+  echo "iface $1 inet static" | sudo tee --append /etc/network/interfaces.d/storage
+  echo "address $netmin" | sudo tee --append /etc/network/interfaces.d/storage
+  echo "netmask $netmask" | sudo tee --append /etc/network/interfaces.d/storage
+  sudo ifconfig $1 $netmin netmask $netmask
+}
+
 bootstrap()
 {
   if [ -z $1 ]
@@ -16,35 +28,46 @@ bootstrap()
     echo "Something isn't right here..."
     return
   else
-    echo "Searching for existing network..."
-    dhcp_search=$(sudo nmap --script broadcast-dhcp-discover -e $1 | grep "Server Identifier" | awk '{print $4}')
-    if [ -z "$dhcp_search" ]
+    if [ -z "$(ifconfig ${ifaces[$iface-1]} | grep "inet ")" ]
     then
-      echo "No network found."
-      echo "Let's start a new one."
-      read -p "CIDR for new network [192.168.0.0/24] : " cidr
-      if [ -z "$cidr" ]
+      echo "Searching for existing network..."
+      if [ -z $2 ]
       then
-        cidr="192.168.0.0/24"
-      fi
-      network="$(ipcalc -n $cidr | grep Network | awk '{print $2}')"
-      if [ "$network" == $cidr ]
-      then
-        netmin="$(ipcalc -n $cidr | grep HostMin | awk '{print $2}')"
-        netmax="$(ipcalc -n $cidr | grep HostMax | awk '{print $2}')"
-        netmask="$(ipcalc -n $cidr | grep Netmask | awk '{print $2}')"
-        echo "auto $1 " | sudo tee /etc/network/interfaces.d/$1
-        echo "iface $1 inet static" | sudo tee --append /etc/network/interfaces.d/storage
-        echo "address $netmin" | sudo tee --append /etc/network/interfaces.d/storage
-        echo "netmask $netmask" | sudo tee --append /etc/network/interfaces.d/storage
-        sudo ifconfig $1 $netmin netmask $netmask
+        dhcp_search=$(sudo nmap --script broadcast-dhcp-discover -e $1 | grep "Server Identifier" | awk '{print $4}')
+        if [ -z "$dhcp_search" ]
+        then
+          echo "No network found."
+          echo "Let's start a new one."
+          read -p "CIDR for new network [192.168.0.0/24] : " cidr
+          if [ -z "$cidr" ]
+          then
+            cidr="192.168.0.0/24"
+          fi
+          network="$(ipcalc -n $cidr | grep Network | awk '{print $2}')"
+          if [ "$network" == $cidr ]
+          then
+            set_storage $1 $cidr
+          else
+            echo "Hmm... you CIDR doesn't look right."
+            bootstrap $1
+          fi
+        else
+          echo "auto $1 " | sudo tee /etc/network/interfaces.d/storage
+          echo "iface $1 inet dhcp" | sudo tee --append /etc/network/interfaces.d/storage
+        fi
       else
-        echo "Hmm... you CIDR doesn't look right."
-        bootstrap $1
+        network="$(ipcalc -n $2 | grep Network | awk '{print $2}')"
+        if [ "$network" == $2 ]
+        then
+          set_storage $1 $2
+        fi
       fi
     else
-      echo "auto $1 " | sudo tee /etc/network/interfaces.d/storage
-      echo "iface $1 inet dhcp" | sudo tee --append /etc/network/interfaces.d/storage
+      echo "${ifaces[$iface-1]} has already been configured.
+      address=$(ifconfg ${ifaces[$iface-1]} | grep "inet " | awk '{print $2}' | awk '{split($0,a,":"); print a[2]}')
+      netmaks=$(ifconfg ${ifaces[$iface-1]} | grep "inet " | awk '{print $4}' | awk '{split($0,a,":"); print a[2]}')
+      cidr=$(ipcalc $address $netmaks)
+      set_storage ${ifaces[$iface-1]} $cidr
     fi
   fi
 }
@@ -78,6 +101,7 @@ iface_menu()
       fi
   esac
 }
+
 if [ -z $1 ]
 then
   iface_menu

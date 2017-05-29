@@ -3,7 +3,7 @@
 download_and_run()
 {
   filename=$(echo $1 | awk '{gsub("/", "_") ; print }')
-  if [ -f $filename ]
+  if [ ! -f $filename ]
   then
     if [ -z "$(command -v wget)" ]
     then

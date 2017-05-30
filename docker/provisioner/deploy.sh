@@ -1,7 +1,5 @@
 #!/bin/bash
-wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/dnsmasq/deploy.sh -O docker_dnsmasq_deploy.sh
-chmod +x docker_dnsmasq_deploy.sh
-./docker_dnsmasq_deploy.sh $@
+./download_and_run "docker/provisioner/dnsmasq/deploy.sh" $@
 
 services=(provisioner_lamp provisioner_tftp)
 for s in $services

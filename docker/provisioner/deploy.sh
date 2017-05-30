@@ -28,5 +28,5 @@ sudo docker run -d \
   
 sudo docker run -d \
   --name provisioner_tftp --restart=always --net=host \ 
-  -v /mnt/ceph/fs/containers/provisioner/tftp: \
+  -v /mnt/ceph/fs/containers/provisioner/tftp:/var/tftpboot \
   pghalliday/tftp

@@ -19,6 +19,17 @@ then
   sudo mkdir /mnt/ceph/fs/containers/provisioner/tftp
 fi
 sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/ipxe.php -O /mnt/ceph/fs/containers/provisioner/www/index.php
+
+cp /etc/initramfs-tools initramfs-tools
+echo "mlx4_core" | tee --append initramfs-tools/modules
+echo "mlx4_ib" | tee --append initramfs-tools/modules
+echo "ib_umad" | tee --append initramfs-tools/modules
+echo "ib_uverbs" | tee --append initramfs-tools/modules
+echo "ib_ipoib" | tee --append initramfs-tools/modules
+mkinitramfs -d initramfs-tools -o initrd
+sudo mv initrd /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/initrd
+sudo cp /boot/vmlinuz-`uname -r` /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/vmlinuz
+
 sudo chmod -R +r /mnt/ceph/fs/containers/provisioner
 
 sudo docker run -d \

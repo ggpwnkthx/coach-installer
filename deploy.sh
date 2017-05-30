@@ -104,7 +104,7 @@ coach_bootstrap()
   auto_install
   ./download_and_run "bootstrap/network.sh"
   ./download_and_run "bootstrap/ceph.sh"
-  ./download_and_run "boostratp/provisioner.sh"
+  ./download_and_run "bootstrap/provisioner.sh"
 }
 
 connect_to()

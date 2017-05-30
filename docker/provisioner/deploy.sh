@@ -18,7 +18,7 @@ if [ ! -d /mnt/ceph/fs/containers/provisioner/tftp ]
 then
   sudo mkdir /mnt/ceph/fs/containers/provisioner/tftp
 fi
-wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/ipxe.php -O /mnt/ceph/fs/containers/provisioner/www/index.php
+sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/ipxe.php -O /mnt/ceph/fs/containers/provisioner/www/index.php
 sudo chmod -R +r /mnt/ceph/fs/containers/provisioner
 
 sudo docker run -d \

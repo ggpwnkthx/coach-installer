@@ -25,8 +25,8 @@ sudo docker run -d \
   --name provisioner_lamp --restart=always --net=host \
   -v /mnt/ceph/fs/containers/provisioner/www:/www \
   janes/alpine-lamp
-  
+
 sudo docker run -d \
-  --name provisioner_tftp --restart=always --net=host \ 
+  --name provisioner_tftp --restart=always --net=host \
   -v /mnt/ceph/fs/containers/provisioner/tftp:/var/tftpboot \
   pghalliday/tftp

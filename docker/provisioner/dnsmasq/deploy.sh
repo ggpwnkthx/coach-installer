@@ -71,7 +71,12 @@ then
   domain_name=$(domainname)
   if [ "$domain_name" == "(none)" ]
   then
-    read -p "Domain Name: " domain_name
+    if [ -z "$(hostname -d)" ]
+    then
+      read -p "Domain Name: " domain_name
+    else
+      domain_name=$(hostname -d)
+    fi
   fi
 else
   domain_name=$1

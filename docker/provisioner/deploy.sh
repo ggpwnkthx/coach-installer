@@ -2,7 +2,7 @@
 ./download_and_run "docker/provisioner/dnsmasq/deploy.sh" $@
 
 services=(provisioner_lamp provisioner_tftp)
-for s in $services
+for s in ${services[@]}
 do
   if [ ! -z "$(sudo docker ps -a | grep $s)" ]
   then

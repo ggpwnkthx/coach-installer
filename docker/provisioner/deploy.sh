@@ -17,6 +17,8 @@ fi
 sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/ipxe.php -O /mnt/ceph/fs/containers/provisioner/www/index.php
 
 cp -r /etc/initramfs-tools initramfs-tools
+echo "chmod -R +x /scripts" | tee initramfs-tools/scripts/local-top/chmod-all
+chmod +x initramfs-tools/scripts/init-top/chmod-all
 sed -i '/^MODULES=/s/=.*/=netboot/' initramfs-tools/initramfs.conf
 echo "mlx4_core" | tee --append initramfs-tools/modules
 echo "mlx4_ib" | tee --append initramfs-tools/modules

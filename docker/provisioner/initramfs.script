@@ -1,0 +1,30 @@
+num=$(expr $(echo $ip | sed 's/,/ /g' | awk -v RS='[[:space:]]' 'END{print NR}') + 2)
+i=1
+while [ $i -lt $num ]
+do
+  config=$(echo $(echo $ip | sed 's/,/ /g' | awk "{print \$$i}") | sed 's/:/ /g')
+  case $(echo $config | awk '{print $2}') in
+    "")
+      echo "empty"
+      ;;
+    dhcp)
+      echo "dhclient -4 $(echo $config | awk '{print $1}')"
+      $(dhclient -r $(echo $config | awk '{print $1}'))
+      $(dhclient -4 $(echo $config | awk '{print $1}'))
+      ;;
+    *)
+      echo "ifconfig $(echo $config | awk '{print $1}') $(echo $config | awk '{print $2}') netmask $(echo $config | awk '{print $3}')"
+      ifconfig $(echo $config | awk '{print $1}') $(echo $config | awk '{print $2}') netmask $(echo $config | awk '{print $3}')
+      case $(echo $config | awk '{print $4}') in
+        "")
+          echo "empty"
+          ;;
+        *)
+          echo "route add default gw $(echo $config | awk '{print $4}') $(echo $config | awk '{print $1}')"
+          route add default gw $(echo $config | awk '{print $4}') $(echo $config | awk '{print $1}')
+          ;;
+      esac
+  esac
+  unset config
+  i=$(expr $i + 1)
+done

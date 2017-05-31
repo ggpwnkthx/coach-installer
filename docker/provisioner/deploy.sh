@@ -21,8 +21,6 @@ then
   sudo rm -r initramfs-tools
 fi
 cp -r /etc/initramfs-tools initramfs-tools
-echo "chmod -R +x /scripts" | tee initramfs-tools/scripts/local-top/chmod-all
-chmod +x initramfs-tools/scripts/init-top/chmod-all
 sed -i '/^MODULES=/s/=.*/=netboot/' initramfs-tools/initramfs.conf
 echo "mlx4_core" | tee --append initramfs-tools/modules
 echo "mlx4_ib" | tee --append initramfs-tools/modules
@@ -32,14 +30,22 @@ echo "ib_ipoib" | tee --append initramfs-tools/modules
 mkinitramfs -d initramfs-tools -o initrd
 sudo mv initrd /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/initrd
 
+if [ -d squashfs-root ]
+then
+  sudo rm -r squashfs-root
+fi
 wget https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64.squashfs -O filesystem.squashfs
 sudo unsquashfs filesystem.squashfs
 echo "useradd ubuntu" | sudo tee squashfs-root/make-changes
-echo "usermod --password ubuntu ubuntu" | sudo tee --append squashfs-root/make-changes
+echo 'passwd ubuntu' | sudo tee --append squashfs-root/make-changes
 echo "adduser ubuntu sudo" | sudo tee --append squashfs-root/make-changes
 echo "exit" | sudo tee --append squashfs-root/make-changes
 sudo chmod +x squashfs-root/make-changes
 sudo chroot squashfs-root/ ./make-changes
+if [ -f /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/squashfs ]
+then
+  sudo rm /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/squashfs
+fi
 sudo mksquashfs squashfs-root /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/squashfs -b 1024k -comp xz -Xbcj x86 -e boot
 
 #sudo wget https://cloud-images.ubuntu.com/xenial/current/unpacked/xenial-server-cloudimg-amd64-initrd-generic -O /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/initrd

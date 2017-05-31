@@ -31,11 +31,19 @@ echo "ib_uverbs" | tee --append initramfs-tools/modules
 echo "ib_ipoib" | tee --append initramfs-tools/modules
 mkinitramfs -d initramfs-tools -o initrd
 sudo mv initrd /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/initrd
-sudo cp /boot/vmlinuz-`uname -r` /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/vmlinuz
 
-sudo wget https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64.squashfs -O /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/squashfs
+wget https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64.squashfs -O filesystem.squashfs
+sudo unsquashfs filesystem.squashfs
+echo "useradd ubuntu" | sudo tee squashfs-root/make-changes
+echo "usermod --password ubuntu ubuntu" | sudo tee --append squashfs-root/make-changes
+echo "adduser ubuntu sudo" | sudo tee --append squashfs-root/make-changes
+echo "exit" | sudo tee --append squashfs-root/make-changes
+sudo chmod +x squashfs-root/make-changes
+sudo chroot squashfs-root/ ./make-changes
+sudo mksquashfs squashfs-root /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/squashfs -b 1024k -comp xz -Xbcj x86 -e boot
+
 #sudo wget https://cloud-images.ubuntu.com/xenial/current/unpacked/xenial-server-cloudimg-amd64-initrd-generic -O /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/initrd
-#sudo wget https://cloud-images.ubuntu.com/xenial/current/unpacked/xenial-server-cloudimg-amd64-vmlinuz-generic -O /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/vmlinuz
+sudo wget https://cloud-images.ubuntu.com/xenial/current/unpacked/xenial-server-cloudimg-amd64-vmlinuz-generic -O /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/vmlinuz
 
 sudo chmod -R +r /mnt/ceph/fs/containers/provisioner
 

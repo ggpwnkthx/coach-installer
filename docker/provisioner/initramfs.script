@@ -24,6 +24,7 @@ do
           route add default gw $(echo $config | awk '{print $4}') $(echo $config | awk '{print $1}')
           ;;
       esac
+      ;;
   esac
   unset config
   i=$(expr $i + 1)

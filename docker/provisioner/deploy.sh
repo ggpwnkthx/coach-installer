@@ -20,7 +20,6 @@ if [ -d initramfs-tools ]
 then
   sudo rm -r initramfs-tools
 fi
-sudo mv initrd /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/initrd
 cp -r /etc/initramfs-tools initramfs-tools
 echo "chmod -R +x /scripts" | tee initramfs-tools/scripts/local-top/chmod-all
 chmod +x initramfs-tools/scripts/init-top/chmod-all

@@ -13,7 +13,7 @@
 set menu-timeout 5000
 
 # Ensure we have menu-default set to something
-isset ${menu-default} || set menu-default coreos
+isset ${menu-default} || set menu-default ubuntu
 
 ###################### MAIN MENU ####################################
 
@@ -21,7 +21,7 @@ isset ${menu-default} || set menu-default coreos
 menu iPXE boot menu for COACH
 item --gap -- ------------------------- Operating systems ------------------------------
 item 
-item --key b coreos	CoreOS
+item --key b ubuntu	Ubuntu 16.04
 item
 item --gap --           ------------------------- Advanced options -------------------------------
 item --key c config     (c)onfigure settings
@@ -35,9 +35,10 @@ goto ${selected}
 
 :coreos
 dhcp
-set base-url http://<?=gethostname()?>/boot/coreos
-kernel ${base-url}/vmlinuz initrd=coreos_production_pxe_image.cpio.gz coreos.config.url=https://example.com/pxe-config.ign
-initrd ${base-url}/image.cpio.gz
+set base-url http://<?=gethostname()?>/boot/ubuntu
+kernel ${base-url}/vmlinuz ro root=filesystem.squashfs
+initrd ${base-url}/initrd
+initrd ${base-url}/squashfs filesystem.squashfs
 boot
 
 

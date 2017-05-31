@@ -33,8 +33,7 @@ choose --timeout ${menu-timeout} --default ${menu-default} selected || goto canc
 set menu-timeout 0
 goto ${selected}
 
-:coreos
-dhcp
+:ubuntu
 set base-url http://<?=gethostname()?>/boot/ubuntu
 kernel ${base-url}/vmlinuz ro root=filesystem.squashfs
 initrd ${base-url}/initrd

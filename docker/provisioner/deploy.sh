@@ -16,6 +16,11 @@ then
 fi
 sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/ipxe.php -O /mnt/ceph/fs/containers/provisioner/www/index.php
 
+if [ -d initramfs-tools ]
+then
+  sudo rm -r initramfs-tools
+fi
+sudo mv initrd /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/initrd
 cp -r /etc/initramfs-tools initramfs-tools
 echo "chmod -R +x /scripts" | tee initramfs-tools/scripts/local-top/chmod-all
 chmod +x initramfs-tools/scripts/init-top/chmod-all
@@ -29,11 +34,9 @@ mkinitramfs -d initramfs-tools -o initrd
 sudo mv initrd /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/initrd
 sudo cp /boot/vmlinuz-`uname -r` /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/vmlinuz
 
-wget https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64.squashfs -O squashfs
-unsquashfs squashfs
-
-sudo wget https://cloud-images.ubuntu.com/xenial/current/unpacked/xenial-server-cloudimg-amd64-initrd-generic -O /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/initrd
-sudo wget https://cloud-images.ubuntu.com/xenial/current/unpacked/xenial-server-cloudimg-amd64-vmlinuz-generic -O /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/vmlinuz
+sudo wget https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64.squashfs -O /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/squashfs
+#sudo wget https://cloud-images.ubuntu.com/xenial/current/unpacked/xenial-server-cloudimg-amd64-initrd-generic -O /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/initrd
+#sudo wget https://cloud-images.ubuntu.com/xenial/current/unpacked/xenial-server-cloudimg-amd64-vmlinuz-generic -O /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/vmlinuz
 
 sudo chmod -R +r /mnt/ceph/fs/containers/provisioner
 

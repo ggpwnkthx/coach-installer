@@ -13,6 +13,8 @@ wget https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64
 sudo unsquashfs filesystem.squashfs
 sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/pxe/chroot.changes -O squashfs-root/make-changes
 sudo chmod +x squashfs-root/make-changes
+wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/services/ceph/fs.sh -O squashfs-root/ceph_fs.sh
+chmod +x squashfs-root/ceph_fs.sh
 sudo chroot squashfs-root/ ./make-changes
 if [ -f /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/squashfs ]
 then

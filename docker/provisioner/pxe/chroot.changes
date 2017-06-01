@@ -1,7 +1,4 @@
 useradd ubuntu
 passwd ubuntu
 adduser ubuntu sudo
-wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/services/ceph/fs.sh -O ceph_fs.sh
-chmod +x ceph_fs.sh
-./ceph_fs.sh localhost
-rm ceph_fs.sh
+./ceph_fs.sh

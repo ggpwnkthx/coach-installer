@@ -1,3 +1,5 @@
+#/bin/bash
+
 get_latest=1
 filename=$(echo $1 | awk '{gsub("/", "_") ; print }')
 if [ ! -f $filename ] || [ ! -z $get_latest ]
@@ -5,4 +7,11 @@ then
   wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/$1 -O $filename
 fi
 chmod +x $filename
+clear
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+echo "Downloading $1"
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+
 ./$filename "${@:2}"

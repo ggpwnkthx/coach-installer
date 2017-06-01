@@ -1,0 +1,15 @@
+useradd ubuntu
+passwd ubuntu
+adduser ubuntu sudo
+echo
+
+clear
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+echo "Setting up the Ubuntu 16.04 Boot Image | Manual"
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+echo "If you would like to make any more changes to the boot image, now would be the time to do it."
+echo "When you are done, run \"exit\" to leave chroot and continue the deployment set up."
+echo
+echo

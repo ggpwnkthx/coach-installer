@@ -1,4 +1,4 @@
 useradd ubuntu
 passwd ubuntu
 adduser ubuntu sudo
-./ceph_fs.sh
+apt-get -y install ceph-common

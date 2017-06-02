@@ -9,8 +9,18 @@ if [ -d squashfs-root ]
 then
   sudo rm -r squashfs-root
 fi
-wget https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64.squashfs -O filesystem.squashfs
-sudo unsquashfs filesystem.squashfs
+#wget https://cloud-images.ubuntu.com/xenial/current/xenial-server-cloudimg-amd64.squashfs -O filesystem.squashfs
+#sudo unsquashfs filesystem.squashfs
+if [ ! -f ubuntu-mini-remix-16.04-amd64.iso ]
+then
+  wget http://ubuntu-mini-remix.mirror.garr.it/mirrors/ubuntu-mini-remix/16.04/ubuntu-mini-remix-16.04-amd64.iso -O ubuntu-mini-remix-16.04-amd64.iso
+fi
+if [ -d remix ]
+then
+  sudo umount remix
+fi
+sudo mount ubuntu-mini-remix-16.04-amd64.iso remix -t iso9660 -o loop
+sudo unsquashfs remix/casper/filesystem.squashfs
 
 ceph_mon_ls=($(sudo ceph mon dump | grep mon | awk '{print $2}' | awk '{split($0,a,"/"); print a[1]}'))
 ceph_mons=""

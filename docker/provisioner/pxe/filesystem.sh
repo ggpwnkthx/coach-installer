@@ -41,7 +41,21 @@ echo "WantedBy=multi-user.target" | sudo tee --append squashfs-root/etc/systemd/
 
 sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/pxe/chroot.changes -O squashfs-root/make-changes
 sudo chmod +x squashfs-root/make-changes
+sudo mv squashfs-root/etc/resolv.conf squashfs-root/etc/resolv.conf.old
+sudo cp /etc/resolv.conf squashfs-root/etc/resolv.conf
+binders=(/dev /tmp /proc)
+for bind in ${binders[@]}
+do
+  sudo mount --bind $bind squashfs-root$bind
+done
 sudo chroot squashfs-root/ ./make-changes
+for bind in ${binders[@]}
+do
+  sudo umount squashfs-root$bind
+done
+sudo rm squashfs-root/etc/resolv.conf
+sudo mv squashfs-root/etc/resolv.conf.old squashfs-root/etc/resolv.conf
+
 if [ -f /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/squashfs ]
 then
   sudo rm /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/squashfs

@@ -58,7 +58,12 @@ for bind in ${binders[@]}
 do
   sudo mount --bind $bind squashfs-root$bind
 done
-cp -r /etc/ceph squashfs-root/etc/
+
+sudo cp /etc/ceph/ceph.conf squashfs-root/etc/ceph
+sudo chmod +r squashfs-root/etc/ceph/ceph.conf
+sudo cp /etc/ceph/ceph.client.admin.keyring squashfs-root/etc/ceph
+sudo chmod +r squashfs-root/etc/ceph/ceph.client.admin.keyring
+
 sudo chroot squashfs-root/ ./make-changes
 for bind in ${binders[@]}
 do

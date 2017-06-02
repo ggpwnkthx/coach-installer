@@ -59,9 +59,10 @@ do
   sudo mount --bind $bind squashfs-root$bind
 done
 
-sudo cp /etc/ceph/ceph.conf squashfs-root/etc/ceph
+sudo mkdir -p squashfs-root/etc/ceph
+sudo cp /etc/ceph/ceph.conf squashfs-root/etc/ceph/
 sudo chmod +r squashfs-root/etc/ceph/ceph.conf
-sudo cp /etc/ceph/ceph.client.admin.keyring squashfs-root/etc/ceph
+sudo cp /etc/ceph/ceph.client.admin.keyring squashfs-root/etc/ceph/
 sudo chmod +r squashfs-root/etc/ceph/ceph.client.admin.keyring
 
 sudo chroot squashfs-root/ ./make-changes

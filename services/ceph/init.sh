@@ -12,6 +12,10 @@ if [ -z "$(command -v ceph-deploy)" ]
 then
   sudo apt-get -y install ceph-deploy
 fi
+if [ -z "$(command -v sgdisk)" ]
+then
+  sudo apt-get -y install gdisk
+fi
 
 ./download_and_run "services/ceph/purge.sh"
 if [ -f /etc/network/interfaces.d/storage ]

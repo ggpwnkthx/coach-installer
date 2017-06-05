@@ -167,8 +167,7 @@ EOT
 
 create_ceph_osd()
 {
-  echo $0
-  #./download_and_run "services/ceph/osd.sh" $@
+  ./download_and_run "services/ceph/osd.sh" $@
 }
 
 printout_ceph_osd()

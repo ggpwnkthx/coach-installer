@@ -165,6 +165,12 @@ EOT
   fi
 }
 
+create_ceph_osd()
+{
+  echo $0
+  #./download_and_run "services/ceph/osd.sh" $@
+}
+
 printout_ceph_osd()
 {
   noselect=0

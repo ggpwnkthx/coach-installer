@@ -269,4 +269,72 @@ menu_ceph_osd()
   echo ''
 }
 
-menu_ceph_osd
+install_ceph_osd()
+{
+  menu_ceph_osd
+  if [ $counter -gt 0 ]
+  then
+    read -p "Which device would you like to use for an OSD? " to_be_osd
+    if [ "$to_be_osd" != "0" ]
+    then
+      if [ $((for e in "${add_selections[@]}"; do [[ "$e" == "$to_be_osd" ]] && exit 0; done) && echo 1 || echo 0) -eq 1 ]
+      then
+        if [ $((for e in "${dev_spin[@]}"; do [[ "$e" == "${dev_available[to_be_osd-1]}" ]] && exit 0; done) && echo 1 || echo 0) -eq 1 ]
+        then
+          if [ ${#dev_ssd[@]} -gt 0 ]
+          then
+            counter=0
+            journal_selections=()
+            echo ''
+            echo "Ceph journaling can be used for the following SSDs (may take a moment to load):"
+            for i in ${dev_ssd[@]}
+            do
+              counter=$[$counter +1]
+              parts=($(lsblk -p -l -o kname | grep -e $i"[0-9]"))
+              if [ "${#parts[@]}" -gt 0 ]
+              then
+                if [ ! -z "$(sudo sgdisk $i -p | grep 'ceph journal')" ]
+                then
+                  journal_free_space=$(sudo parted $i unit MB print free | grep 'Free Space' | tail -n1 | awk '{print $3}' | sed 's/MB//g')
+                  if [ $journal_free_space -gt $osd_journal_size ]
+                  then
+                    echo "[$counter]	$i	(Space Available)"
+                    journal_selections=("${journal_selections[@]}" "$counter")
+                  else
+                    echo "	$i	(Full)"
+                  fi
+                fi
+              else
+                echo "[$counter]	$i	(Empty)"
+                journal_selections=("${journal_selections[@]}" "$counter")
+              fi
+            done
+            read -p "Which device would you like to use for the ceph journal? " to_be_journal
+            if [ $((for e in "${journal_selections[@]}"; do [[ "$e" == "$to_be_journal" ]] && exit 0; done) && echo 1 || echo 0) -eq 1 ]
+            then
+              create_ceph_osd ${dev_available[to_be_osd-1]} ${dev_ssd[to_be_journal-1]}
+            else
+              echo "Your selection was not in the list of available devices."
+              install_ceph_osd
+            fi
+          fi
+          create_ceph_osd ${dev_available[to_be_osd-1]}
+        else
+          echo "You chose an SSD."
+        fi
+        install_ceph_osd
+      else
+        echo "Your selection was not in the list of available devices."
+        install_ceph_osd
+      fi
+    else
+      menu_ceph_osd
+    fi
+  else
+    echo "No devices available."
+    read -n 1 -s -p "Press any key to return to the previous menu..."
+    menu_ceph
+  fi
+}
+
+install_osd

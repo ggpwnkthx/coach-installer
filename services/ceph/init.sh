@@ -57,7 +57,7 @@ then
   echo "osd_journal_size = $2" >> ceph.conf
 fi
 ceph-deploy install $HOSTNAME
-ceph-deploy admin $hostname
+ceph-deploy admin $HOSTNAME
 ceph-deploy mon create-initial
 sudo chmod +rw /etc/ceph
 sudo chmod +rw /etc/ceph/*

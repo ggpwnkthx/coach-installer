@@ -459,7 +459,7 @@ menu_ceph_osd()
   echo ''
   read -p "What would you like to do? " doit
   case $doit in
-    0) echo '' && menu_ceph ;;
+    0) echo '' ;;
     a|A) echo '' && ask_ceph_osd_add ;;
     r|R) echo '' && ask_ceph_osd_remove ;;
     s|S) echo '' && preflight_ceph_osd && menu_ceph_osd ;;

@@ -254,7 +254,7 @@ printout_ceph_osd()
                   printf  "$dev_id	SSD	${BLUE}ORPHANED${NC}\n"
                 else
                   printf  "${BLUE}[$counter]${NC}	$dev_id	SSD	${BLUE}ORPHANED${NC}\n"
-                then
+                fi
                 add_selections=("${add_selections[@]}" "$counter")
               else
                 if [ "$1" = "no-select" ]

@@ -456,7 +456,7 @@ main_menu()
   echo "[R]	Remove OSD"
   echo "[S]	Rescan Devices"
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
-  echo "[0]	BACK"
+  echo "[0]	FINISHED"
   echo ''
   read -p "What would you like to do? " doit
   case $doit in

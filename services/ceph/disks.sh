@@ -172,6 +172,15 @@ diff(){
 
 printout_ceph_osd()
 {
+  RED='\033[1;31m'
+  BLUE='\033[0;34m'
+  YELLOW='\033[1;33m'
+  GREEN='\033[0;32m'
+  NC='\033[0m' # No Color
+  counter=0
+  add_selections=()
+  remove_selections=()
+  fix_selections=()
   for dev_id in ${dev_available[@]}
   do
     counter=$[$counter +1]
@@ -189,10 +198,20 @@ printout_ceph_osd()
               in_use=$(sudo sgdisk $dev_id -p | sed -n -e '/Number/,$p' | grep -v Number | grep -v ceph)
               if [ -z "$in_use" ]
               then
-                printf  "${BLUE}[$counter]${NC}	$dev_id	HDD	${BLUE}ORPHANED${NC}\n"
+                if [ "$1" = "no-select" ]
+                then
+                  printf  "$$dev_id	HDD	${BLUE}ORPHANED${NC}\n"
+                else
+                  printf  "${BLUE}[$counter]${NC}	$dev_id	HDD	${BLUE}ORPHANED${NC}\n"
+                fi
                 add_selections=("${add_selections[@]}" "$counter")
               else
-                printf "${YELLOW}[$counter]${NC}	$dev_id	HDD	${YELLOW}IN USE${NC}\n"
+                if [ "$1" = "no-select" ]
+                then
+                  printf "$dev_id	HDD	${YELLOW}IN USE${NC}\n"
+                else
+                  printf "${YELLOW}[$counter]${NC}	$dev_id	HDD	${YELLOW}IN USE${NC}\n"
+                fi
                 add_selections=("${add_selections[@]}" "$counter")
               fi
             else
@@ -202,7 +221,12 @@ printout_ceph_osd()
           else
             if [ -z $(lsblk -p -l -o kname | grep -e $dev_id"[0-9]") ]
             then
-              printf "${GREEN}[$counter]${NC}	$dev_id	HDD\n"
+              if [ "$1" = "no-select" ]
+              then
+                printf "$dev_id	HDD\n"
+              else
+                printf "${GREEN}[$counter]${NC}	$dev_id	HDD\n"
+              fi
               add_selections=("${add_selections[@]}" "$counter")
             fi
           fi
@@ -251,15 +275,6 @@ printout_ceph_osd()
 
 menu_ceph_osd()
 {
-  RED='\033[1;31m'
-  BLUE='\033[0;34m'
-  YELLOW='\033[1;33m'
-  GREEN='\033[0;32m'
-  NC='\033[0m' # No Color
-  counter=0
-  add_selections=()
-  remove_selections=()
-  fix_selections=()
   clear
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
   echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"

@@ -378,7 +378,7 @@ install_ceph_osd()
   else
     echo "No devices available."
     read -n 1 -s -p "Press any key to return to the previous menu..."
-    menu_ceph
+    menu_ceph_osd
   fi
 }
 ask_ceph_osd_add()
@@ -388,7 +388,7 @@ ask_ceph_osd_add()
     ask_ceph_journal_size
   fi
   install_ceph_osd
-  menu_ceph
+  menu_ceph_osd
 }
 delete_ceph_osd()
 {
@@ -433,7 +433,7 @@ remove_ceph_osd()
 ask_ceph_osd_remove()
 {
   remove_ceph_osd
-  menu_ceph
+  menu_ceph_osd
 }
 scanned=0
 menu_ceph_osd()

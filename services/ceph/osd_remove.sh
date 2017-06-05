@@ -10,10 +10,12 @@ if [ ! -z $hn ]
 then
   if [ $hn == $(hostname -s) ]
   then
+    dev=$(lsblk -lp | grep /var/lib/ceph/osd/ceph-11 | awk '{print $1}' | sed 's/[0-9]//')
     sudo systemctl stop ceph-osd@$1
     sudo umount /var/lib/ceph/osd/ceph-$1
     sudo rm -r /var/lib/ceph/osd/ceph-$1
   else
+    dev=$(ssh -t $hn "lsblk -lp | grep /var/lib/ceph/osd/ceph-11 | awk '{print $1}' | sed 's/[0-9]//'")
     ssh -t $hn "sudo systemctl stop ceph-osd@$1"
     ssh -t $hn "sudo umount /var/lib/ceph/osd/ceph-$1"
     ssh -t $hn "sudo rm -r /var/lib/ceph/osd/ceph-$1"
@@ -22,4 +24,5 @@ then
   ceph osd crush remove osd.$1
   ceph auth del osd.$1
   ceph osd rm $1
+  sudo sgdisk $dev -z
 fi

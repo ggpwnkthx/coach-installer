@@ -164,11 +164,6 @@ $(echo "$dev")
 EOT
   fi
 }
-diff(){
-  awk 'BEGIN{RS=ORS=" "}
-       {NR==FNR?a[$0]++:a[$0]--}
-  END{for(k in a)if(a[k])print k}' <(echo -n "${!1}") <(echo -n "${!2}")
-}
 
 printout_ceph_osd()
 {
@@ -464,8 +459,8 @@ main_menu()
     0) echo '' ;;
     a|A) echo '' && ask_ceph_osd_add ;;
     r|R) echo '' && ask_ceph_osd_remove ;;
-    s|S) echo '' && preflight_ceph_osd && menu_ceph_osd ;;
-    *) menu_ceph_osd ;;
+    s|S) echo '' && preflight_ceph_osd && main_menu ;;
+    *) main_menu ;;
   esac
 }
 

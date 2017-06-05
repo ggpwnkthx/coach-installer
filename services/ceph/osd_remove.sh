@@ -8,7 +8,7 @@ fi
 hostname="$(ceph osd find $1 | awk -F\" '$2 ~ /host/ {print $4}')"
 if [ ! -z $hostname ]
 then
-  if [ $hostname == $HOSTNAME ]
+  if [ $hostname == $(hostname -s) ]
   then
     sudo systemctl stop ceph-osd@$1
     sudo umount /var/lib/ceph/osd/ceph-$1

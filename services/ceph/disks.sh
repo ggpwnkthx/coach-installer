@@ -172,6 +172,15 @@ diff(){
 
 printout_ceph_osd()
 {
+  for args in $@
+  do
+    case $args in
+      --no-select|-ns)
+        noselect=1
+        ;;
+    esac
+  done
+  
   RED='\033[1;31m'
   BLUE='\033[0;34m'
   YELLOW='\033[1;33m'
@@ -198,7 +207,7 @@ printout_ceph_osd()
               in_use=$(sudo sgdisk $dev_id -p | sed -n -e '/Number/,$p' | grep -v Number | grep -v ceph)
               if [ -z "$in_use" ]
               then
-                if [ "$1" == "no-select" ]
+                if [ ! -z $noselect ]
                 then
                   printf  "$dev_id	HDD	${BLUE}ORPHANED${NC}\n"
                 else
@@ -206,7 +215,7 @@ printout_ceph_osd()
                 fi
                 add_selections=("${add_selections[@]}" "$counter")
               else
-                if [ "$1" == "no-select" ]
+                if [ ! -z $noselect ]
                 then
                   printf "$dev_id	HDD	${YELLOW}IN USE${NC}\n"
                 else
@@ -215,7 +224,7 @@ printout_ceph_osd()
                 add_selections=("${add_selections[@]}" "$counter")
               fi
             else
-              if [ "$1" == "no-select" ]
+              if [ ! -z $noselect ]
               then
                 printf  "${RED}[$counter]${NC}	$dev_id	HDD	${RED}(osd.$osd_id)${NC}\n"
               else
@@ -226,7 +235,7 @@ printout_ceph_osd()
           else
             if [ -z $(lsblk -p -l -o kname | grep -e $dev_id"[0-9]") ]
             then
-              if [ "$1" == "no-select" ]
+              if [ ! -z $noselect ]
               then
                 printf "$dev_id	HDD\n"
               else
@@ -249,7 +258,7 @@ printout_ceph_osd()
               in_use=$(sudo sgdisk $dev_id -p | sed -n -e '/Number/,$p' | grep -v Number | grep -v ceph)
               if [ -z "$in_use" ]
               then
-                if [ "$1" == "no-select" ]
+                if [ ! -z $noselect ]
                 then
                   printf  "$dev_id	SSD	${BLUE}ORPHANED${NC}\n"
                 else
@@ -257,7 +266,7 @@ printout_ceph_osd()
                 fi
                 add_selections=("${add_selections[@]}" "$counter")
               else
-                if [ "$1" == "no-select" ]
+                if [ ! -z $noselect ]
                 then
                   printf "$dev_id	SSD	${YELLOW}IN USE${NC}\n"
                 else
@@ -266,7 +275,7 @@ printout_ceph_osd()
                 add_selections=("${add_selections[@]}" "$counter")
               fi
             else
-              if [ "$1" == "no-select" ]
+              if [ ! -z $noselect ]
               then
                 printf  "$dev_id	SSD	${RED}(osd.$osd_id)${NC}\n"
               else
@@ -282,7 +291,7 @@ printout_ceph_osd()
             else
               if [ -z $(lsblk -p -l -o kname | grep -e $dev_id"[0-9]") ]
               then
-                if [ "$1" == "no-select" ]
+                if [ ! -z $noselect ]
                 then
                   printf  "$dev_id	SSD\n"
                 else

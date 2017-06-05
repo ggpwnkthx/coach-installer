@@ -415,7 +415,7 @@ remove_ceph_osd()
     then
       if [ $((for e in "${remove_selections[@]}"; do [[ "$e" == "$to_be_osd" ]] && exit 0; done) && echo 1 || echo 0) -eq 1 ]
       then
-        osd_id=$(menu_ceph_osd | grep '\['$to_be_osd'\]' | awk '{print $4}' | tr -d '()' | awk '{split($0,a,"."); print a[2]}')
+        osd_id=$(menu_ceph_osd | grep '\['$to_be_osd'\]' | awk '{print $4}' | tr -d '()' | awk '{split($0,a,"."); print (0+a[2])}')
         read -p "Are you absolutely sure you want to delete this OSD? [y,n]" doit
         case $doit in
           y|Y) echo '' && delete_ceph_osd $osd_id ;;

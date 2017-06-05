@@ -336,7 +336,34 @@ install_ceph_osd()
     menu_ceph
   fi
 }
+scanned=0
+menu_ceph_osd()
+{
+  if [ $scanned -eq 0 ]
+  then
+    preflight_ceph_osd
+    scanned=1
+  fi
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "Ceph OSD - Manager || $HOSTNAME"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  echo "[A]	Add OSD"
+  echo "[R]	Remove OSD"
+  echo "[S]	Rescan Devices"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  echo "[0]	BACK"
+  echo ''
+  read -p "What would you like to do? " doit
+  case $doit in
+    0) echo '' && menu_ceph ;;
+    a|A) echo '' && ask_ceph_osd_add ;;
+    r|R) echo '' && ask_ceph_osd_remove ;;
+    s|S) echo '' && preflight_ceph_osd && menu_ceph_osd ;;
+    *) menu_ceph_osd ;;
+  esac
+}
 
-ask_megaraid_ceph
-preflight_ceph_osd
-install_osd
+menu_ceph_osd

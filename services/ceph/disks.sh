@@ -170,25 +170,8 @@ diff(){
   END{for(k in a)if(a[k])print k}' <(echo -n "${!1}") <(echo -n "${!2}")
 }
 
-menu_ceph_osd()
+printout_ceph_osd()
 {
-  RED='\033[1;31m'
-  BLUE='\033[0;34m'
-  YELLOW='\033[1;33m'
-  GREEN='\033[0;32m'
-  NC='\033[0m' # No Color
-  counter=0
-  add_selections=()
-  remove_selections=()
-  fix_selections=()
-  clear
-  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
-  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
-  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
-  echo "Available Devices || $HOSTNAME"
-  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
-  echo "	PATH		TYPE	ACTIVITY"
-  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   for dev_id in ${dev_available[@]}
   do
     counter=$[$counter +1]
@@ -264,6 +247,28 @@ menu_ceph_osd()
       fi
     fi
   done
+}
+
+menu_ceph_osd()
+{
+  RED='\033[1;31m'
+  BLUE='\033[0;34m'
+  YELLOW='\033[1;33m'
+  GREEN='\033[0;32m'
+  NC='\033[0m' # No Color
+  counter=0
+  add_selections=()
+  remove_selections=()
+  fix_selections=()
+  clear
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+  echo "Available Devices || $HOSTNAME"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  echo "	PATH		TYPE	ACTIVITY"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  printout_ceph_osd
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo "[0]	BACK"
   echo ''
@@ -336,6 +341,60 @@ install_ceph_osd()
     menu_ceph
   fi
 }
+ask_ceph_osd_add()
+{
+  if [ ${#dev_ssd[@]} -gt 0 ]
+  then
+    ask_ceph_journal_size
+  fi
+  install_ceph_osd
+  menu_ceph
+}
+delete_ceph_osd()
+{
+  if [ ! -z $1 ]
+  then
+    sudo systemctl stop ceph-osd@$1
+    sudo umount /var/lib/ceph/osd/ceph-$1
+    ssh -t $ceph_admin "cd ~/ceph && ceph osd out $1 && ceph osd crush remove osd.$1 && ceph auth del osd.$1 && ceph osd rm $1"
+    sudo sgdisk -z $2
+  else
+    echo "You need to provide a valid OSD #"
+  fi
+  remove_ceph_osd
+}
+remove_ceph_osd()
+{
+  menu_ceph_osd
+  if [ $counter -gt 0 ]
+  then
+    read -p "Which OSD would you like to remove from the cluster? " to_be_osd
+    if [ "$to_be_osd" != "0" ]
+    then
+      if [ $((for e in "${remove_selections[@]}"; do [[ "$e" == "$to_be_osd" ]] && exit 0; done) && echo 1 || echo 0) -eq 1 ]
+      then
+        menu="$(menu_ceph_osd)"
+        osd_id=$(echo "$menu" | grep '\['$to_be_osd'\]' | awk '{print $4}' | grep -Eo '[0-9]{1,4}' )
+        read -p "Are you absolutely sure you want to delete this OSD? [y,n]" doit
+        case $doit in
+          y|Y) echo '' && delete_ceph_osd $osd_id ${dev_available[to_be_osd-1]};;
+          n|N) remove_ceph_osd ;;
+          *) remove_ceph_osd ;;
+        esac
+      else
+        echo "Your selection was not in the list of available devices."
+        remove_ceph_osd
+      fi
+    fi
+  else
+    echo "No devices available."
+  fi
+}
+ask_ceph_osd_remove()
+{
+  remove_ceph_osd
+  menu_ceph
+}
 scanned=0
 menu_ceph_osd()
 {
@@ -349,6 +408,8 @@ menu_ceph_osd()
   echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
   echo "Ceph OSD - Manager || $HOSTNAME"
+  printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+  printout_ceph_osd
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo "[A]	Add OSD"
   echo "[R]	Remove OSD"

@@ -1,4 +1,5 @@
 #!/bin/bash
+rtb=$(pwd)
 
 if [ -z "$(command -v ifconfig)" ]
 then
@@ -47,7 +48,6 @@ if [ ! -d ~/ceph ]
 then
   mkdir ~/ceph
 fi
-returnto=$(pwd)
 cd ~/ceph
 ceph-deploy new $HOSTNAME
 echo "osd pool default size = 2" >> ceph.conf
@@ -61,3 +61,5 @@ ceph-deploy admin $HOSTNAME
 ceph-deploy mon create-initial
 sudo chmod +rw /etc/ceph
 sudo chmod +rw /etc/ceph/*
+
+cd $rtb

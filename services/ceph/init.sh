@@ -47,6 +47,7 @@ if [ ! -d ~/ceph ]
 then
   mkdir ~/ceph
 fi
+returnto=$(pwd)
 cd ~/ceph
 ceph-deploy new $HOSTNAME
 echo "osd pool default size = 2" >> ceph.conf
@@ -55,6 +56,8 @@ if [ ! -z $2 ]
 then
   echo "osd_journal_size = $2" >> ceph.conf
 fi
+
+cd $returnto
 ./download_and_run "services/ceph/admin.sh"
 
 ceph-deploy mon create-initial

@@ -16,7 +16,7 @@ do
 done
 
 # Install IB Subnet Manager
-if -z "$(command -v opensm)"]
+if [ -z "$(command -v opensm)" ]
 then
   sudo apt-get update
   sudo apt-get -y install ifenslave-2.6 opensm

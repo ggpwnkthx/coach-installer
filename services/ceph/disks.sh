@@ -402,15 +402,7 @@ ask_ceph_osd_add()
 }
 delete_ceph_osd()
 {
-  if [ ! -z $1 ]
-  then
-    sudo systemctl stop ceph-osd@$1
-    sudo umount /var/lib/ceph/osd/ceph-$1
-    ssh -t $ceph_admin "cd ~/ceph && ceph osd out $1 && ceph osd crush remove osd.$1 && ceph auth del osd.$1 && ceph osd rm $1"
-    sudo sgdisk -z $2
-  else
-    echo "You need to provide a valid OSD #"
-  fi
+  ./download_and_run "services/ceph/osd_remove.sh" $@
   remove_ceph_osd
 }
 remove_ceph_osd()
@@ -427,7 +419,7 @@ remove_ceph_osd()
         osd_id=$(echo "$menu" | grep '\['$to_be_osd'\]' | awk '{print $4}' | grep -Eo '[0-9]{1,4}' )
         read -p "Are you absolutely sure you want to delete this OSD? [y,n]" doit
         case $doit in
-          y|Y) echo '' && delete_ceph_osd $osd_id ${dev_available[to_be_osd-1]};;
+          y|Y) echo '' && delete_ceph_osd $osd_id ;;
           n|N) remove_ceph_osd ;;
           *) remove_ceph_osd ;;
         esac

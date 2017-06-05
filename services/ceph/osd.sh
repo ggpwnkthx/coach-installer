@@ -1,4 +1,5 @@
 #!/bin/bash
+rtb=$(pwd)
 
 if [ -z $1 ]
 then
@@ -65,3 +66,5 @@ else
   ceph-deploy --overwrite-conf osd prepare --fs-type btrfs $(hostname -s):$1
 fi
 echo "OSD has been created for device $1"
+
+cd $rtb

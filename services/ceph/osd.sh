@@ -57,11 +57,11 @@ then
   echo "Creating OSD with separate Journal device..."
   
   cd ~/ceph
-  ceph-deploy osd prepare --fs-type btrfs $(hostname -s):$1:$2
+  ceph-deploy --overwrite-conf osd prepare --fs-type btrfs $(hostname -s):$1:$2
 else
   echo "Creating OSD..."
   
   cd ~/ceph
-  ceph-deploy osd prepare --fs-type btrfs $(hostname -s):$1
+  ceph-deploy --overwrite-conf osd prepare --fs-type btrfs $(hostname -s):$1
 fi
 echo "OSD has been created for device $1"

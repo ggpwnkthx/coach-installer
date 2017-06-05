@@ -38,8 +38,9 @@ else
   fi
   addr=$(ifconfig $nic | grep Mask | awk '{print $2}' | awk '{split($0,a,":"); print a[2]}')
   mask=$(ifconfig $nic | grep Mask | awk '{print $4}' | awk '{split($0,a,":"); print a[2]}')
-  net=$(ipcalc -n $addr $mask | grep Network | awk '{print $2}')
 fi
+net=$(ipcalc -n $addr $mask | grep Network | awk '{print $2}')
+
 ./download_and_run "hardware/networking/hosts.sh" $addr $HOSTNAME
 
 if [ ! -d ~/ceph ]

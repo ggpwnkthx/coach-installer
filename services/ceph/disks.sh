@@ -382,12 +382,12 @@ install_ceph_osd()
         install_ceph_osd
       fi
     else
-      menu_ceph_osd
+      main_menu
     fi
   else
     echo "No devices available."
     read -n 1 -s -p "Press any key to return to the previous menu..."
-    menu_ceph_osd
+    main_menu
   fi
 }
 ask_ceph_osd_add()
@@ -397,7 +397,7 @@ ask_ceph_osd_add()
     ask_ceph_journal_size
   fi
   install_ceph_osd
-  menu_ceph_osd
+  main_menu
 }
 delete_ceph_osd()
 {
@@ -442,10 +442,10 @@ remove_ceph_osd()
 ask_ceph_osd_remove()
 {
   remove_ceph_osd
-  menu_ceph_osd
+  main_menu
 }
 scanned=0
-menu_ceph_osd()
+main_menu()
 {
   if [ $scanned -eq 0 ]
   then
@@ -476,4 +476,4 @@ menu_ceph_osd()
   esac
 }
 
-menu_ceph_osd
+main_menu

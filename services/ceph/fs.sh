@@ -5,7 +5,7 @@ then
 fi
 if [ ! -f /etc/ceph/ceph.conf ]
 then
-  ../../download_and_run "services/ceph/preflight.sh"
+  ./download_and_run "services/ceph/preflight.sh"
 fi
 
 ceph_mon_ls=($(sudo ceph mon dump | grep mon | awk '{print $2}' | awk '{split($0,a,"/"); print a[1]}'))

@@ -234,7 +234,7 @@ printout_ceph_osd()
               remove_selections=("${remove_selections[@]}" "$counter")
             fi
           else
-            if [ -z '$(lsblk -p -l -o kname | grep -e $dev_id"[0-9]")' ]
+            if [ -z $(lsblk -p -l -o kname | grep -e $dev_id"[0-9]") ]
             then
               if [[ $noselect = 1 ]]
               then

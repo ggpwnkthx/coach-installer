@@ -1,4 +1,6 @@
 #/bin/bash
+rtb=$(pwd)
+
 if [ -z "$(command -v ceph-deploy)" ]
 then
   echo "ceph-deploy is not installed on this node"
@@ -38,3 +40,5 @@ then
   fi
   sudo ceph fs new $fs $meta $data
 fi
+
+cd $rtb

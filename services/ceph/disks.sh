@@ -167,7 +167,7 @@ EOT
 
 create_ceph_osd()
 {
-  ./download_and_run "services/ceph/osd.sh" $@
+  ../../download_and_run "services/ceph/osd.sh" $@
 }
 
 printout_ceph_osd()
@@ -402,7 +402,7 @@ ask_ceph_osd_add()
 }
 delete_ceph_osd()
 {
-  ./download_and_run "services/ceph/osd_remove.sh" $@
+  ../../download_and_run "services/ceph/osd_remove.sh" $@
   remove_ceph_osd
 }
 remove_ceph_osd()

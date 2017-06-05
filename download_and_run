@@ -15,6 +15,7 @@ if [! -f $1 ] || [ ! -z $get_latest ]
 then
   wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/$1 -O $1
 fi
+chmod +x $1
 
 clear
 printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =

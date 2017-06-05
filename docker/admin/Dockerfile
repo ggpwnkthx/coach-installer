@@ -1,0 +1,1 @@
+FROM janes/alpine-lamp

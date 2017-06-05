@@ -337,4 +337,6 @@ install_ceph_osd()
   fi
 }
 
+ask_megaraid_ceph
+preflight_ceph_osd
 install_osd

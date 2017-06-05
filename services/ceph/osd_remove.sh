@@ -6,7 +6,7 @@ then
   exit
 fi
 hn="$(ceph osd find $1 | awk -F\" '$2 ~ /host/ {print $4}')"
-if [ ! -z $hostname ]
+if [ ! -z $hn ]
 then
   if [ $hn == $(hostname -s) ]
   then

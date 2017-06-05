@@ -458,7 +458,7 @@ menu_ceph_osd()
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
   echo "Ceph OSD - Manager || $HOSTNAME"
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
-  printout_ceph_osd no-select
+  printout_ceph_osd -ns
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   echo "[A]	Add OSD"
   echo "[R]	Remove OSD"

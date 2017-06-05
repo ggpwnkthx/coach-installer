@@ -172,6 +172,7 @@ diff(){
 
 printout_ceph_osd()
 {
+  noselect=0
   for args in $@
   do
     case $args in

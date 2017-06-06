@@ -1,4 +1,9 @@
 #!/bin/bash
+if [ -z "$(command -v unsquashfs)" ]
+then
+  sudo apt-get install squashfs-tools
+fi
+
 clear
 printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
 echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
@@ -18,6 +23,10 @@ fi
 if [ -d remix ]
 then
   sudo umount remix
+fi
+if [ ! -d remix ]
+then
+  mkdir remix
 fi
 sudo mount ubuntu-mini-remix-16.04-amd64.iso remix -t iso9660 -o loop
 sudo unsquashfs remix/casper/filesystem.squashfs

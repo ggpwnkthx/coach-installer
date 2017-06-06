@@ -338,7 +338,7 @@ install_ceph_osd()
       then
         for item in ${add_selections[@]}
         do
-          echo $item
+          echo ${dev_available[item-1]}
         done
         read -p "paused" paused
         exit

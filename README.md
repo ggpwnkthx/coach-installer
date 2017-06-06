@@ -2,20 +2,7 @@
 ## How To
 ### First Use
 #### Method 1:
-This method will automatically download the latest version of each script as it is called.
-```bash
-mkdir coach
-cd coach
-wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/deploy.sh
-chmod +x deploy.sh
-./deploy.sh
-```
-##### Prerequisites
-All testing and development was done on Ubuntu 16.04 mini.
-* wget - Needed to download the scripts.
-* sshd - Needed to communicate with other nodes.
-#### Method 2:
-This method will download all scripts at once, and will ignore any updates.
+This method will download all scripts at once, and will ignore any updates. This is best for production environments.
 ```bash
 git clone https://github.com/ggpwnkthx/coach.git
 sed -i 's/^wget/#wget/g' deploy.sh
@@ -24,7 +11,18 @@ chmod +x deploy.sh
 ./deploy.sh
 ```
 ##### Prerequisites
-All testing and development was done on Ubuntu 16.04 mini.
+* wget - Needed to download the scripts.
+* sshd - Needed to communicate with other nodes.
+#### Method 2:
+This method will automatically download the latest version of each script as it is called. This is best for developmental needs.
+```bash
+mkdir coach
+cd coach
+wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/deploy.sh
+chmod +x deploy.sh
+./deploy.sh
+```
+##### Prerequisites
 * git - Needed to clone the repo.
 * sshd - Needed to communicate with other nodes.
 

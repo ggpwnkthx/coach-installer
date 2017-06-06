@@ -30,7 +30,7 @@ then
 fi
 sudo mount ubuntu-mini-remix-16.04-amd64.iso remix -t iso9660 -o loop
 sudo unsquashfs remix/casper/filesystem.squashfs
-
+sudo umount remix
 ceph_mon_ls=($(sudo ceph mon dump | grep mon | awk '{print $2}' | awk '{split($0,a,"/"); print a[1]}'))
 ceph_mons=""
 for i in ${ceph_mon_ls[@]}

@@ -98,13 +98,18 @@ menu_auto_installer()
     *) menu_auto_installer ;;
   esac
 }
-
+menu_network()
+{
+  ./download_and_run "hardware/networking/manager.sh"
+  main_menu
+}
 coach_bootstrap()
 {
   auto_install
   ./download_and_run "bootstrap/network.sh"
   ./download_and_run "bootstrap/ceph.sh"
   ./download_and_run "bootstrap/provisioner.sh"
+  main_menu
 }
 
 connect_to()

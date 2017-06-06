@@ -11,5 +11,5 @@ then
 fi
 if [ -z "$(systemctl | grep mnt-ceph-fs)" ]
 then
-  /download_and_run "services/ceph/fs.sh"
+  ./download_and_run "services/ceph/fs.sh"
 fi

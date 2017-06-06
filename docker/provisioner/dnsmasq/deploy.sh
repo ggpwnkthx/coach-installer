@@ -87,8 +87,8 @@ sudo docker run -d \
   -v /mnt/ceph/fs/containers/provisioner/leases:/var/lib/misc/dnsmasq.leases \
   -v /mnt/ceph/fs/containers/provisioner/conf:/etc/dnsmasq.conf \
   coach/dnsmasq --dhcp-leasefile=/var/lib/misc/dnsmasq.leases \
-  --host-record=$HOSTNAME,$advertize \
-  --dhcp-option=67,http://$HOSTNAME/index.php \
+  --host-record=$(hostname -f),$advertize \
+  --dhcp-option=67,http://$(hostname -f)/index.php \
   --domain=$domain_name \
   --local=/$domain_name/ \
   $use_iface \

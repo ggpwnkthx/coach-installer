@@ -1,5 +1,4 @@
 #!/bin/bash
-rtb=$(pwd)
 
 if [ -z $1 ]
 then
@@ -56,15 +55,9 @@ then
     fi
   fi
   echo "Creating OSD with separate Journal device..."
-  
-  cd ~/ceph
-  ceph-deploy --overwrite-conf osd prepare --fs-type btrfs $(hostname -s):$1:$2
+  ceph-deploy --ceph-conf /etc/ceph/ceph.conf --overwrite-conf osd prepare --fs-type btrfs $(hostname -s):$1:$2
 else
   echo "Creating OSD..."
-  
-  cd ~/ceph
-  ceph-deploy --overwrite-conf osd prepare --fs-type btrfs $(hostname -s):$1
+  ceph-deploy --ceph-conf /etc/ceph/ceph.conf --overwrite-conf osd prepare --fs-type btrfs $(hostname -s):$1
 fi
 echo "OSD has been created for device $1"
-
-cd $rtb

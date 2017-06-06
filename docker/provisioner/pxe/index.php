@@ -1,7 +1,6 @@
 <?php
 $base_url=trim(shell_exec('hostname -f'));
 ?>
-
 #!ipxe
 # menu.ipxe by stefanl
 # hints from:

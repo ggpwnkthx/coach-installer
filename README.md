@@ -5,6 +5,7 @@
 This method will download all scripts at once, and will ignore any updates. This is best for production environments.
 ```bash
 git clone https://github.com/ggpwnkthx/coach.git
+cd coach
 sed -i 's/^wget/#wget/g' deploy.sh
 sed -i 's/^get_latest/#get_latest/g' download_and_run.sh
 chmod +x deploy.sh

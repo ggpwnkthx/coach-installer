@@ -1,8 +1,7 @@
 useradd ubuntu
 passwd ubuntu
 adduser ubuntu sudo
-apt-get -y install ceph-common tasksel
-tasksel install ubuntu-live
+apt-get -y install overlayroot ceph-common tasksel
 tasksel install openssh-server
 tasksel install cloud-image
 systemctl enable ceph-client.service

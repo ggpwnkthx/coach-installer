@@ -13,8 +13,19 @@ then
   echo "ceph-deploy is not installed on this node"
   exit
 fi
+if [ -z "$(command -v gdisk)" ]
+then
+  sudo apt-get -y install gdisk 
+fi
+if [ -z "$(command -v mkfs.btrfs)" ]
+then
+  sudo apt-get -y install btrfs-tools
+fi
 
-sudo apt-get -y install gdisk btrfs-tools
+if [ ! -f ceph.bootstrap-osd.keyring ]
+then
+  ceph-deploy gatherkeys $HOSTNAME
+fi
 
 parts=($(lsblk -p -l -o kname | grep -e $1"[0-9]"))
 if [ ${#parts[@]} -eq 0 ]

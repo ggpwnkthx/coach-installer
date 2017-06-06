@@ -1,3 +1,7 @@
+<?php
+$base_url=trim(shell_exec('hostname -f'));
+?>
+
 #!ipxe
 # menu.ipxe by stefanl
 # hints from:
@@ -34,7 +38,7 @@ set menu-timeout 0
 goto ${selected}
 
 :ubuntu
-set base-url http://<?=shell_exec('hostname -f');?>/boot/ubuntu
+set base-url http://<?=$base_url;?>/boot/ubuntu
 kernel ${base-url}/vmlinuz ro root=filesystem.squashfs
 initrd ${base-url}/initrd
 initrd ${base-url}/squashfs filesystem.squashfs

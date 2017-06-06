@@ -101,7 +101,7 @@ menu_auto_installer()
 menu_network()
 {
   ./download_and_run "hardware/networking/manager.sh"
-  main_menu
+  menu_main
 }
 coach_bootstrap()
 {

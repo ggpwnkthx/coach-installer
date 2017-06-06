@@ -4,5 +4,6 @@ adduser ubuntu sudo
 apt-get -y install ceph-common tasksel
 tasksel install ubuntu-live
 tasksel install openssh-server
+tasksel install cloud-image
 systemctl enable ceph-client.service
 systemctl enable mnt-ceph-fs.mount

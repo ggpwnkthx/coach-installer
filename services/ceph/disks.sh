@@ -338,10 +338,8 @@ install_ceph_osd()
       then
         for item in ${add_selections[@]}
         do
-          echo ${dev_available[item-1]}
+          create_ceph_osd ${dev_available[item-1]}
         done
-        read -p "paused" paused
-        exit
       else
         if [ $((for e in "${add_selections[@]}"; do [[ "$e" == "$to_be_osd" ]] && exit 0; done) && echo 1 || echo 0) -eq 1 ]
         then

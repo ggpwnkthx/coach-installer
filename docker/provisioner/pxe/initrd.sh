@@ -27,19 +27,18 @@ fi
 mkdir initrd-mod
 
 cd initrd-mod
-
+zcat ../initrd | cpio -id
+cd ..
+rm initrd
 
 if [ -d initrd-root ]
 then
   sudo rm -r initrd-root
 fi
-mkdir initrd-root
-zcat ../initrd | cpio -id
-cd ..
-rm initrd
 
 wget https://cloud-images.ubuntu.com/xenial/current/unpacked/xenial-server-cloudimg-amd64-initrd-generic -O initrd.lzma
 unlzma initrd.lzma
+mkdir initrd-root
 cd initrd-root
 cat ../initrd | cpio -id
 
@@ -49,7 +48,13 @@ echo "mlx4_ib" | tee --append conf/modules
 echo "ib_umad" | tee --append conf/modules
 echo "ib_uverbs" | tee --append conf/modules
 echo "ib_ipoib" | tee --append conf/modules
-cp -r ../initrd-mod/lib/modules lib/
+#cp -r ../initrd-mod/lib/modules lib/
+cp -r ../initrd-mod/lib/modules/4.4.0-78-generic/kernel/drivers lib/modules/4.4.0-78-generic/kernel/
+cp ../initrd-mod/lib/modules/4.4.0-78-generic/modules.dep lib/modules/4.4.0-78-generic/
+diff lib/modules/4.4.0-78-generic/modules.dep ../initrd-mod/lib/modules/4.4.0-78-generic/modules.dep | grep "> " | sed 's/> //g' | tee --append lib/modules/4.4.0-78-generic/modules.dep
+cd ..
+depmod -b initrd-root
+cd initrd-root
 
 find . | cpio --create --format='newc' > ../initrd
 cd ..

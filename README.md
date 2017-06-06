@@ -11,8 +11,9 @@ chmod +x deploy.sh
 ./deploy.sh
 ```
 ##### Prerequisites
-* wget - Needed to download the scripts.
+* git - Needed to clone the repo.
 * sshd - Needed to communicate with other nodes.
+
 #### Method 2:
 This method will automatically download the latest version of each script as it is called. This is best for developmental needs.
 ```bash
@@ -23,7 +24,7 @@ chmod +x deploy.sh
 ./deploy.sh
 ```
 ##### Prerequisites
-* git - Needed to clone the repo.
+* wget - Needed to download the scripts.
 * sshd - Needed to communicate with other nodes.
 
 ### Consecutive uses:

@@ -10,9 +10,14 @@ then
   exit
 fi
 
-if [ -z "$(cat /etc/hosts | grep $2)" ]
+if [ "$2" == "$(hostname -s)" ]
 then
-  echo "$1\t$2" | sudo tee --append /etc/hosts
+  sudo sed -i "/$2/ s/.*/$1\t$(hostname -f)\t$(hostname -s) #static/g" /etc/hosts
 else
-  sudo sed -i "/$2/ s/.*/$1\t$2 #static/g" /etc/hosts
+  if [ -z "$(cat /etc/hosts | grep $2)" ]
+  then
+    echo "$1\t$2" | sudo tee --append /etc/hosts
+  else
+    sudo sed -i "/$2/ s/.*/$1\t$2 #static/g" /etc/hosts
+  fi
 fi

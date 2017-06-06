@@ -2,7 +2,18 @@
 
 preflight_network_local()
 {
-  sudo apt-get -y install ipcalc nmap dhcping
+  if [ -z "$(command -v ipcalc)" ]
+  then
+    sudo apt-get -y install ipcalc
+  fi
+  if [ -z "$(command -v namp)" ]
+  then
+    sudo apt-get -y install nmap
+  fi
+  if [ -z "$(command -v dhcping)" ]
+  then
+    sudo apt-get -y install dhcping
+  fi
   if [ ! -f "hardware/networking/changeInterface.awk" ]
   then
     wget https://raw.githubusercontent.com/JoeKuan/Network-Interfaces-Script/master/changeInterface.awk -O hardware/networking/changeInterface.awk

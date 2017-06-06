@@ -109,7 +109,7 @@ coach_bootstrap()
   ./download_and_run "bootstrap/network.sh"
   ./download_and_run "bootstrap/ceph.sh"
   ./download_and_run "bootstrap/provisioner.sh"
-  main_menu
+  menu_main
 }
 
 connect_to()

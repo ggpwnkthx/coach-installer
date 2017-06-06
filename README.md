@@ -1,6 +1,8 @@
 # COACH
 ## How To
-First time use:
+### First Use
+#### Method 1:
+This method will automatically download the latest version of each script as it is called.
 ```bash
 mkdir coach
 cd coach
@@ -8,14 +10,28 @@ wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/deploy.sh
 chmod +x deploy.sh
 ./deploy.sh
 ```
-Consecutive uses:
-```bash
-./coach.sh
-```
-### Prerequisites
+##### Prerequisites
 All testing and development was done on Ubuntu 16.04 mini.
 * wget - Needed to download the scripts.
 * sshd - Needed to communicate with other nodes.
+#### Method 2:
+This method will download all scripts at once, and will ignore any updates.
+```bash
+git clone https://github.com/ggpwnkthx/coach.git
+sed -i 's/^wget/#wget/g' deploy.sh
+sed -i 's/^get_latest/#get_latest/g' download_and_run.sh
+chmod +x deploy.sh
+./deploy.sh
+```
+##### Prerequisites
+All testing and development was done on Ubuntu 16.04 mini.
+* git - Needed to clone the repo.
+* sshd - Needed to communicate with other nodes.
+
+### Consecutive uses:
+```bash
+./coach.sh
+```
 
 ## About
 Maybe I have a unique situation, but I wrote a script to help me deploy my new servers into my cluster.

@@ -34,7 +34,7 @@ set menu-timeout 0
 goto ${selected}
 
 :ubuntu
-set base-url http://<?=gethostname()?>/boot/ubuntu
+set base-url http://<?=shell_exec('hostname -f');?>/boot/ubuntu
 kernel ${base-url}/vmlinuz ro root=filesystem.squashfs
 initrd ${base-url}/initrd
 initrd ${base-url}/squashfs filesystem.squashfs

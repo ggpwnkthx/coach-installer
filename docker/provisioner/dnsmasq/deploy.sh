@@ -24,7 +24,7 @@ sudo chmod +rw /mnt/ceph/fs/containers/provisioner/leases
 
 if [ ! -f /mnt/ceph/fs/containers/provisioner/conf ]
 then
-  echo "domain-needed" | sudo tee /mnt/ceph/fs/containers/provisioner/conf
+#  echo "domain-needed" | sudo tee /mnt/ceph/fs/containers/provisioner/conf
   echo "bogus-priv" | sudo tee --append /mnt/ceph/fs/containers/provisioner/conf
   echo "no-resolv" | sudo tee --append /mnt/ceph/fs/containers/provisioner/conf
   echo "no-poll" | sudo tee --append /mnt/ceph/fs/containers/provisioner/conf

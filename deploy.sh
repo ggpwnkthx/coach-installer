@@ -103,6 +103,10 @@ menu_network()
   ./download_and_run "hardware/networking/manager.sh"
   menu_main
 }
+menu_provisioning()
+{
+  ./download_and_run "docker/provisioner/pxe/deploy.sh"
+}
 coach_bootstrap()
 {
   auto_install
@@ -180,6 +184,7 @@ menu_main()
   if [ ! -z "$(command -v ceph)" ]
   then
     echo "[C]	Ceph Manager"
+    echo "[P] Refresh Provisiong Images"
   fi
   echo ""
   echo "[R]	Connect to Remote System"
@@ -192,6 +197,7 @@ menu_main()
     a|A) echo '' && menu_auto_installer ;;
     n|N) echo '' && menu_network ;;
     c|C) echo '' && menu_ceph ;;
+    p|P) echo '' && menu_provisioning ;;
     b|B) echo '' && coach_bootstrap ;;
     r|R) echo '' && ask_connect_to ;;
     *) menu_main ;;

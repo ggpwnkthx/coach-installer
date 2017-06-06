@@ -2,15 +2,20 @@
 ## How To
 First time use:
 ```bash
-wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/coach.sh && chmod +x coach.sh && ./coach.sh
+mkdir coach
+cd coach
+wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/deploy.sh
+chmod +x deploy.sh
+./deploy.sh
 ```
 Consecutive uses:
 ```bash
 ./coach.sh
 ```
 ### Prerequisites
-* wget
-* sshd
+All testing and development was done on Ubuntu 16.04 mini.
+* wget - Needed to download the scripts.
+* sshd - Needed to communicate with other nodes.
 
 ## About
 Maybe I have a unique situation, but I wrote a script to help me deploy my new servers into my cluster.

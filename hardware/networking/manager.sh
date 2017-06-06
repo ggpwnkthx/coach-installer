@@ -2,20 +2,19 @@
 
 preflight_network_local()
 {
-  return_to_base
   sudo apt-get -y install ipcalc nmap dhcping
-  if [ ! -f "changeInterface.awk" ]
+  if [ ! -f "hardware/networking/changeInterface.awk" ]
   then
-    wget https://raw.githubusercontent.com/JoeKuan/Network-Interfaces-Script/master/changeInterface.awk
+    wget https://raw.githubusercontent.com/JoeKuan/Network-Interfaces-Script/master/changeInterface.awk -O hardware/networking/changeInterface.awk
   fi
-  if [ ! -f "readInterfaces.awk" ]
+  if [ ! -f "hardware/networking/readInterfaces.awk" ]
   then
-    wget https://raw.githubusercontent.com/JoeKuan/Network-Interfaces-Script/master/readInterfaces.awk
+    wget https://raw.githubusercontent.com/JoeKuan/Network-Interfaces-Script/master/readInterfaces.awk -O hardware/networking/readInterfaces.awk
   fi
 }
 get_network_local()
 {
-  awk -f readInterfaces.awk /etc/network/interfaces "device=$1"
+  awk -f hardware/networking/readInterfaces.awk /etc/network/interfaces "device=$1"
 }
 get_network_local_mode()
 {
@@ -52,9 +51,9 @@ set_network_local()
 	fi
     if [ "$2" == "mode" ]
     then
-      awk -f changeInterface.awk /etc/network/interfaces.bak "dev=$1" $net_exists "$2=$3" | sudo tee /etc/network/interfaces >/dev/null 2>/dev/null
+      awk -f hardware/networking/changeInterface.awk /etc/network/interfaces.bak "dev=$1" $net_exists "$2=$3" | sudo tee /etc/network/interfaces >/dev/null 2>/dev/null
     else
-      awk -f changeInterface.awk /etc/network/interfaces.bak "dev=$1" $net_exists "mode=static" "$2=$3" | sudo tee /etc/network/interfaces >/dev/null 2>/dev/null
+      awk -f hardware/networking/changeInterface.awk /etc/network/interfaces.bak "dev=$1" $net_exists "mode=static" "$2=$3" | sudo tee /etc/network/interfaces >/dev/null 2>/dev/null
     fi
 	if [ $(sudo cat /sys/class/net/$1/operstate) == "up" ]
 	then
@@ -122,7 +121,7 @@ add_network_local()
 {
   preflight_network_local
   sudo cp /etc/network/interfaces /etc/network/interfaces.bak
-  awk -f changeInterface.awk /etc/network/interfaces.bak "dev=$1" "action=add" "mode=static" "address=$2" "netmask=$3" "gateway=$4" | sudo tee /etc/network/interfaces >/dev/null 2>/dev/null
+  awk -f hardware/networking/changeInterface.awk /etc/network/interfaces.bak "dev=$1" "action=add" "mode=static" "address=$2" "netmask=$3" "gateway=$4" | sudo tee /etc/network/interfaces >/dev/null 2>/dev/null
 }
 ask_network_local_child()
 {
@@ -185,7 +184,7 @@ menu_network_local_child() {
 network_local_delete() 
 {
   sudo cp /etc/network/interfaces /etc/network/interfaces.bak
-  awk -f changeInterface.awk /etc/network/interfaces.bak "dev=$1" "action=remove" | sudo tee /etc/network/interfaces >/dev/null 2>/dev/null
+  awk -f hardware/networking/changeInterface.awk /etc/network/interfaces.bak "dev=$1" "action=remove" | sudo tee /etc/network/interfaces >/dev/null 2>/dev/null
   sudo service networking restart
 }
 ask_network_local_child_delete() {
@@ -273,7 +272,7 @@ menu_network_local()
   read -p "What would you like to do? " doit
   if [ "$doit" == "0" ]
   then
-    echo '' && menu_main
+    echo '' && exit
   else
     if [ "$doit" == "C" ]
     then
@@ -537,4 +536,5 @@ menu_network()
   fi
 }
 
+preflight_network_local
 menu_network

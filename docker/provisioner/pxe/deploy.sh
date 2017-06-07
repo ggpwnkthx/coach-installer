@@ -9,13 +9,21 @@ if [ ! -d /mnt/ceph/fs/containers/provisioner/www/2009-04-04/meta-data ]
 then
   sudo mkdir -p /mnt/ceph/fs/containers/provisioner/www/2009-04-04/meta-data
 fi
+if [ ! -d /mnt/ceph/fs/containers/provisioner/www/2009-04-04/meta-data/instance-id ]
+then
+  sudo mkdir -p /mnt/ceph/fs/containers/provisioner/www/2009-04-04/meta-data/instance-id
+fi
+if [ ! -d /mnt/ceph/fs/containers/provisioner/www/2009-04-04/meta-data/hostname ]
+then
+  sudo mkdir -p /mnt/ceph/fs/containers/provisioner/www/2009-04-04/meta-data/hostname
+fi
 if [ ! -d /mnt/ceph/fs/containers/provisioner/www/2009-04-04/user-data ]
 then
   sudo mkdir -p /mnt/ceph/fs/containers/provisioner/www/2009-04-04/user-data
 fi
 sudo ln -s /mnt/ceph/fs/containers/provisioner/www/2009-04-04 /mnt/ceph/fs/containers/provisioner/www/latest
-echo "test" | sudo tee  /mnt/ceph/fs/containers/provisioner/www/latest/meta-data/instance-id
-echo "test" | sudo tee  /mnt/ceph/fs/containers/provisioner/www/latest/meta-data/hostname
+echo "test" | sudo tee  /mnt/ceph/fs/containers/provisioner/www/latest/meta-data/instance-id/index.php
+echo "test" | sudo tee  /mnt/ceph/fs/containers/provisioner/www/latest/meta-data/hostname/index.php
 ./download_and_run "docker/provisioner/pxe/vmlinuz.sh"
 ./download_and_run "docker/provisioner/pxe/initrd.sh"
 ./download_and_run "docker/provisioner/pxe/filesystem.sh"

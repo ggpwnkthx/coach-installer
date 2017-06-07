@@ -6,6 +6,7 @@ printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
 echo "Creating a better initrd file"
 printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
 
+## Grab the latest Ubuntu Cloud-Image
 if [ -d initrd-root ]
 then
   sudo rm -r initrd-root
@@ -25,6 +26,23 @@ echo "mlx4_ib" | tee --append conf/modules
 echo "ib_umad" | tee --append conf/modules
 echo "ib_uverbs" | tee --append conf/modules
 echo "ib_ipoib" | tee --append conf/modules
+
+cd ..
+rm initrd
+
+## Prep for a new initramfs file
+if [ -d initramfs-tools ]
+then
+  sudo rm -r initramfs-tools
+fi
+cp -r /etc/initramfs-tools initramfs-tools
+sed -i '/^MODULES=/s/=.*/=netboot/' initramfs-tools/initramfs.conf
+echo "mlx4_core" | tee --append initramfs-tools/modules
+echo "mlx4_ib" | tee --append initramfs-tools/modules
+echo "ib_umad" | tee --append initramfs-tools/modules
+echo "ib_uverbs" | tee --append initramfs-tools/modules
+echo "ib_ipoib" | tee --append initramfs-tools/modules
+## Make sure we have the right files
 ver=$(ls lib/modules/)
 if [ ! -d /lib/modules/$ver/build ]
 then
@@ -35,42 +53,23 @@ then
   sudo apt-get -y install linux-image-$ver
 fi
 sudo apt-get -y install linux-image-extra-$ver
-
-cd ..
-rm initrd
-
-if [ -d initramfs-tools ]
-then
-  sudo rm -r initramfs-tools
-fi
-cp -r /etc/initramfs-tools initramfs-tools
-
-sed -i '/^MODULES=/s/=.*/=netboot/' initramfs-tools/initramfs.conf
-echo "mlx4_core" | tee --append initramfs-tools/modules
-echo "mlx4_ib" | tee --append initramfs-tools/modules
-echo "ib_umad" | tee --append initramfs-tools/modules
-echo "ib_uverbs" | tee --append initramfs-tools/modules
-echo "ib_ipoib" | tee --append initramfs-tools/modules
+## Make the new initramfs with all the modules
 sudo mkinitramfs -d initramfs-tools -o initrd $ver
-
 if [ -d initrd-mod ]
 then
   sudo rm -r initrd-mod
 fi
 mkdir initrd-mod
-
 cd initrd-mod
 zcat ../initrd | cpio -id
 cd ..
 sudo rm initrd
 
+## Copy the module data from new initramfs to the official Ubuntu Cloud-Image
 cp -r initrd-mod/lib/modules/*/kernel/drivers initrd-root/lib/modules/*/kernel/
 diff initrd-root/lib/modules/*/modules.dep initrd-mod/lib/modules/*/modules.dep | grep "> " | sed 's/> //g' | tee --append initrd-root/lib/modules/*/modules.dep
-
-cd ..
 depmod $ver -b initrd-root -E /lib/modules/$ver/build/Module.symvers
 cd initrd-root
-
 find . | cpio --create --format='newc' > ../initrd
 cd ..
 

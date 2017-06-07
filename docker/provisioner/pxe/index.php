@@ -38,7 +38,7 @@ goto ${selected}
 
 :ubuntu
 set base-url http://<?=$base_url;?>/boot/ubuntu
-kernel ${base-url}/vmlinuz ro root=filesystem.squashfs
+kernel ${base-url}/vmlinuz ro root=filesystem.squashfs ip=ib0:dhcp cloud-config-url=http://169.254.169.254/cloud-config
 initrd ${base-url}/initrd
 initrd ${base-url}/squashfs filesystem.squashfs
 boot

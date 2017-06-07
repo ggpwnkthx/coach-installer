@@ -54,11 +54,13 @@ echo "ib_umad" | tee --append conf/modules
 echo "ib_uverbs" | tee --append conf/modules
 echo "ib_ipoib" | tee --append conf/modules
 
-cp -r ../initrd-mod/lib/modules/4.4.0-78-generic/kernel/drivers lib/modules/4.4.0-78-generic/kernel/
-cp ../initrd-mod/lib/modules/4.4.0-78-generic/modules.dep lib/modules/4.4.0-78-generic/
-diff lib/modules/4.4.0-78-generic/modules.dep ../initrd-mod/lib/modules/4.4.0-78-generic/modules.dep | grep "> " | sed 's/> //g' | tee --append lib/modules/4.4.0-78-generic/modules.dep
+cp /sbin/depmod sbin/
+cp -r ../initrd-mod/lib/modules/4.4.*-generic/kernel/drivers lib/modules/4.4.*-generic/kernel/
+cp ../initrd-mod/lib/modules/4.4.*-generic/modules.dep lib/modules/4.4.*-generic/
+diff lib/modules/4.4.*-generic/modules.dep ../initrd-mod/lib/modules/4.4.*-generic/modules.dep | grep "> " | sed 's/> //g' | tee --append lib/modules/4.4.0-78-generic/modules.dep
 cd ..
-depmod -b initrd-root
+ver=$(ls initrd-root/lib/modules/)
+depmod $ver -b initrd-root
 cd initrd-root
 
 find . | cpio --create --format='newc' > ../initrd

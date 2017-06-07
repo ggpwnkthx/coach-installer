@@ -44,7 +44,7 @@ cat ../initrd | cpio -id
 
 wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/pxe/initramfs.script -O scripts/init-bottom/network
 chmod +x scripts/init-bottom/network
-echo '/scripts/init-bottom/plymouth "$@"' | tee --append scripts/init-bottom/ORDER
+echo '/scripts/init-bottom/network "$@"' | tee --append scripts/init-bottom/ORDER
 echo '[ -e /conf/param.conf ] && . /conf/param.conf' | tee -append scripts/init-bottom/ORDER
 
 sed -i '/^MODULES=/s/=.*/=netboot/' conf/initramfs.conf

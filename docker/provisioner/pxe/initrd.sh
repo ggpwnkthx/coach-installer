@@ -66,8 +66,13 @@ cd ..
 sudo rm initrd
 
 ## Copy the module data from new initramfs to the official Ubuntu Cloud-Image
-cp -r initrd-mod/lib/modules/*/kernel/drivers initrd-root/lib/modules/*/kernel/
-diff initrd-root/lib/modules/*/modules.dep initrd-mod/lib/modules/*/modules.dep | grep "> " | sed 's/> //g' | tee --append initrd-root/lib/modules/*/modules.dep
+cp -r initrd-mod/lib/modules/$ver/kernel/drivers/infiniband initrd-root/lib/modules/$ver/kernel/drivers
+diff initrd-root/lib/modules/$ver/modules.dep initrd-mod/lib/modules/$ver/modules.dep | grep "> " | sed 's/> //g' | grep kernel/drivers/infiniband | tee --append initrd-root/lib/modules/*/modules.dep
+cp -r initrd-mod/lib/modules/$ver/kernel/drivers/net initrd-root/lib/modules/$ver/kernel/drivers
+diff initrd-root/lib/modules/$ver/modules.dep initrd-mod/lib/modules/$ver/modules.dep | grep "> " | sed 's/> //g' | grep kernel/drivers/net | tee --append initrd-root/lib/modules/*/modules.dep
+cp -r initrd-mod/lib/modules/$ver/kernel/drivers/ntb initrd-root/lib/modules/$ver/kernel/drivers
+diff initrd-root/lib/modules/$ver/modules.dep initrd-mod/lib/modules/$ver/modules.dep | grep "> " | sed 's/> //g' | grep kernel/drivers/ntb | tee --append initrd-root/lib/modules/*/modules.dep
+
 depmod $ver -b initrd-root -E /lib/modules/$ver/build/Module.symvers
 cd initrd-root
 find . | cpio --create --format='newc' > ../initrd

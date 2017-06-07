@@ -57,8 +57,7 @@ echo "ib_ipoib" | tee --append conf/modules
 cp -r ../initrd-mod/lib/modules/*/kernel/drivers lib/modules/*/kernel/
 diff lib/modules/*/modules.dep ../initrd-mod/lib/modules/*/modules.dep | grep "> " | sed 's/> //g' | tee --append lib/modules/*/modules.dep
 cd ..
-oldver=$(ls initrd-root/lib/modules/)
-newver=
+ver=$(ls initrd-root/lib/modules/)
 if [ ! -d /lib/modules/$ver ]
 then
   sudo apt-get -y install linux-headers-$ver

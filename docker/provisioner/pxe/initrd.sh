@@ -42,15 +42,18 @@ mkdir initrd-root
 cd initrd-root
 cat ../initrd | cpio -id
 
+wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/pxe/initramfs.script -O scripts/init-bottom/network
+chmod +x scripts/init-bottom/network
+echo '/scripts/init-bottom/plymouth "$@"' | tee --append scripts/init-bottom/ORDER
+echo '[ -e /conf/param.conf ] && . /conf/param.conf' | tee -append scripts/init-bottom/ORDER
+
 sed -i '/^MODULES=/s/=.*/=netboot/' conf/initramfs.conf
 echo "mlx4_core" | tee --append conf/modules
 echo "mlx4_ib" | tee --append conf/modules
 echo "ib_umad" | tee --append conf/modules
 echo "ib_uverbs" | tee --append conf/modules
 echo "ib_ipoib" | tee --append conf/modules
-wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/pxe/initramfs.script -O scripts/init-bottom/network
-chmod +x scripts/init-bottom/network
-#cp -r ../initrd-mod/lib/modules lib/
+
 cp -r ../initrd-mod/lib/modules/4.4.0-78-generic/kernel/drivers lib/modules/4.4.0-78-generic/kernel/
 cp ../initrd-mod/lib/modules/4.4.0-78-generic/modules.dep lib/modules/4.4.0-78-generic/
 diff lib/modules/4.4.0-78-generic/modules.dep ../initrd-mod/lib/modules/4.4.0-78-generic/modules.dep | grep "> " | sed 's/> //g' | tee --append lib/modules/4.4.0-78-generic/modules.dep

@@ -59,7 +59,7 @@ cp -r ../initrd-mod/lib/modules/*/kernel/drivers lib/modules/*/kernel/
 diff lib/modules/*/modules.dep ../initrd-mod/lib/modules/*/modules.dep | grep "> " | sed 's/> //g' | tee --append lib/modules/*/modules.dep
 cd ..
 ver=$(ls initrd-root/lib/modules/)
-sudo apt-get -y install linux-headers=$ver
+sudo apt-get -y install linux-headers-$ver
 depmod $ver -b initrd-root -E /lib/modules/$ver/build/Module.symvers
 cd initrd-root
 

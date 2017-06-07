@@ -55,11 +55,12 @@ echo "ib_uverbs" | tee --append conf/modules
 echo "ib_ipoib" | tee --append conf/modules
 
 cp /sbin/depmod sbin/
-cp -r ../initrd-mod/lib/modules/4.4.*-generic/kernel/drivers lib/modules/4.4.*-generic/kernel/
-diff lib/modules/4.4.*-generic/modules.dep ../initrd-mod/lib/modules/4.4.*-generic/modules.dep | grep "> " | sed 's/> //g' | tee --append lib/modules/4.4.*-generic/modules.dep
+cp -r ../initrd-mod/lib/modules/*/kernel/drivers lib/modules/*/kernel/
+diff lib/modules/*/modules.dep ../initrd-mod/lib/modules/*/modules.dep | grep "> " | sed 's/> //g' | tee --append lib/modules/*/modules.dep
 cd ..
 ver=$(ls initrd-root/lib/modules/)
-depmod $ver -b initrd-root -A
+sudo apt-get -y install linux-headers=$ver
+depmod $ver -b initrd-root -E /lib/modules/$ver/build/Module.symvers
 cd initrd-root
 
 find . | cpio --create --format='newc' > ../initrd

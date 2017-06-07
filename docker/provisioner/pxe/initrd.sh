@@ -60,7 +60,7 @@ diff lib/modules/*/modules.dep ../initrd-mod/lib/modules/*/modules.dep | grep ">
 cd ..
 ver=$(ls initrd-root/lib/modules/)
 sudo apt-get -y install linux-headers-$ver
-depmod $ver -b initrd-root -E /lib/modules/$ver/build/Module.symvers
+depmod $ver -b initrd-root -E /lib/modules/$ver/build/Module.symvers -e
 cd initrd-root
 
 find . | cpio --create --format='newc' > ../initrd

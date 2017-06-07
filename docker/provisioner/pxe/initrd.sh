@@ -56,7 +56,6 @@ echo "ib_ipoib" | tee --append conf/modules
 
 cp /sbin/depmod sbin/
 cp -r ../initrd-mod/lib/modules/4.4.*-generic/kernel/drivers lib/modules/4.4.*-generic/kernel/
-cp ../initrd-mod/lib/modules/4.4.*-generic/modules.dep lib/modules/4.4.*-generic/
 diff lib/modules/4.4.*-generic/modules.dep ../initrd-mod/lib/modules/4.4.*-generic/modules.dep | grep "> " | sed 's/> //g' | tee --append lib/modules/4.4.*-generic/modules.dep
 cd ..
 ver=$(ls initrd-root/lib/modules/)

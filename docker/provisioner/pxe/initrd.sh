@@ -59,7 +59,7 @@ cp -r ../initrd-mod/lib/modules/4.4.*-generic/kernel/drivers lib/modules/4.4.*-g
 diff lib/modules/4.4.*-generic/modules.dep ../initrd-mod/lib/modules/4.4.*-generic/modules.dep | grep "> " | sed 's/> //g' | tee --append lib/modules/4.4.*-generic/modules.dep
 cd ..
 ver=$(ls initrd-root/lib/modules/)
-depmod $ver -b initrd-root
+depmod $ver -b initrd-root -A
 cd initrd-root
 
 find . | cpio --create --format='newc' > ../initrd

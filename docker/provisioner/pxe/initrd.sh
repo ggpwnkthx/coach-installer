@@ -26,10 +26,15 @@ echo "ib_umad" | tee --append conf/modules
 echo "ib_uverbs" | tee --append conf/modules
 echo "ib_ipoib" | tee --append conf/modules
 ver=$(ls lib/modules/)
-if [ ! -d /lib/modules/$ver ]
+if [ ! -d /lib/modules/$ver/build ]
 then
   sudo apt-get -y install linux-headers-$ver
 fi
+if [ ! -d /lib/modules/$ver/kernel ]
+then
+  sudo apt-get -y install linux-image-$ver
+fi
+sudo apt-get -y install linux-image-extra-$ver
 
 cd ..
 rm initrd
@@ -57,7 +62,7 @@ mkdir initrd-mod
 cd initrd-mod
 zcat ../initrd | cpio -id
 cd ..
-rm initrd
+sudo rm initrd
 
 cp -r initrd-mod/lib/modules/*/kernel/drivers initrd-root/lib/modules/*/kernel/
 diff initrd-root/lib/modules/*/modules.dep initrd-mod/lib/modules/*/modules.dep | grep "> " | sed 's/> //g' | tee --append initrd-root/lib/modules/*/modules.dep

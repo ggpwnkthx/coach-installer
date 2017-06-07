@@ -8,7 +8,14 @@ if [ -z "$(command -v ipcalc)" ]
 then
   sudo apt-get -y install ipcalc
 fi
-
+set_cloud()
+{
+  echo "auto $1 " | sudo tee /etc/network/interfaces.d/cloud
+  echo "iface $1 inet static" | sudo tee --append /etc/network/interfaces.d/cloud
+  echo "address 169.254.169.254" | sudo tee --append /etc/network/interfaces.d/cloud
+  echo "netmask 255.0.0.0" | sudo tee --append /etc/network/interfaces.d/cloud
+  sudo ifconfig $1 169.254.169.254 netmask 255.0.0.0
+}
 set_storage()
 {
   netmin="$(ipcalc -n $2 | grep HostMin | awk '{print $2}')"
@@ -68,6 +75,7 @@ bootstrap()
       netmaks=$(ifconfig ${ifaces[$iface-1]} | grep "inet " | awk '{print $4}' | awk '{split($0,a,":"); print a[2]}')
       cidr=$(ipcalc $address $netmaks)
       set_storage ${ifaces[$iface-1]} $cidr
+      set_cloud ${ifaces[$iface-1]}
     fi
   fi
 }

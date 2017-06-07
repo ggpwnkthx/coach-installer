@@ -26,6 +26,7 @@ echo "mlx4_ib" | tee --append conf/modules
 echo "ib_umad" | tee --append conf/modules
 echo "ib_uverbs" | tee --append conf/modules
 echo "ib_ipoib" | tee --append conf/modules
+ver=$(ls lib/modules/)
 
 cd ..
 rm initrd
@@ -43,7 +44,6 @@ echo "ib_umad" | tee --append initramfs-tools/modules
 echo "ib_uverbs" | tee --append initramfs-tools/modules
 echo "ib_ipoib" | tee --append initramfs-tools/modules
 ## Make sure we have the right files
-ver=$(ls lib/modules/)
 if [ ! -d /lib/modules/$ver/build ]
 then
   sudo apt-get -y install linux-headers-$ver

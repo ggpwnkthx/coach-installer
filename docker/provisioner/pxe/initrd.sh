@@ -46,7 +46,7 @@ echo "mlx4_ib" | tee --append initramfs-tools/modules
 echo "ib_umad" | tee --append initramfs-tools/modules
 echo "ib_uverbs" | tee --append initramfs-tools/modules
 echo "ib_ipoib" | tee --append initramfs-tools/modules
-mkinitramfs -d initramfs-tools -o initrd $ver
+sudo mkinitramfs -d initramfs-tools -o initrd $ver
 
 if [ -d initrd-mod ]
 then

@@ -1,5 +1,5 @@
 #!/bin/bash
-wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/download_and_run -O download_and_run
+#wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/download_and_run -O download_and_run
 chmod +x download_and_run
 
 if [ -z "$(command -v wget)" ]

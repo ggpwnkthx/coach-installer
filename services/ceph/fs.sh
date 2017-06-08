@@ -18,5 +18,6 @@ sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/services/ceph
 sudo systemctl daemon-reload
 sudo systemctl enable ceph-client.service
 sudo systemctl start ceph-client.service
+sudo chmod + x /etc/ceph/mnt-ceph-fs.sh
 sudo systemctl enable mnt-ceph-fs.service
 sudo systemctl start mnt-ceph-fs.service

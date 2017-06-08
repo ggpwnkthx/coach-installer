@@ -8,6 +8,7 @@ ExecStart=/bin/bash /etc/ceph/mnt-ceph-fs.sh start
 ExecStop=/bin/bash /etc/ceph/mnt-ceph-fs.sh stop
 Restart=always
 RestartSec=5
+RemainAfterExit=yes
 
 [Install]
 WantedBy=multi-user.target

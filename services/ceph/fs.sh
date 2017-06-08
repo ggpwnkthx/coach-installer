@@ -54,9 +54,6 @@ echo "What=$ceph_mons:/" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mou
 echo "Where=/mnt/ceph/fs" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
 echo "Type=ceph" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
 echo "Options=name=admin,secret=$secret" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
-echo "" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
-echo "[Install]" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
-echo "WantedBy=multi-user.target" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
 
 sudo rm /etc/systemd/system/mnt-ceph-fs.service
 echo "[Unit]" | sudo tee /etc/systemd/system/mnt-ceph-fs.service
@@ -68,7 +65,9 @@ echo "ExecStartPre=/bin/systemctl start mnt-ceph-fs.mount" | sudo tee --append /
 echo "ExecStop=/bin/systemctl stop mnt-ceph-fs.mount" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.service
 echo "ExecStart=/bin/sleep 10000000d" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.service
 echo "Restart=always" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.service
-echo "RestartSec=" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.service
+echo "RestartSec=5" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.service
+echo "[Install]" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
+echo "WantedBy=multi-user.target" | sudo tee --append /etc/systemd/system/mnt-ceph-fs.mount
 
 sudo systemctl daemon-reload
 sudo systemctl enable mnt-ceph-fs.mount

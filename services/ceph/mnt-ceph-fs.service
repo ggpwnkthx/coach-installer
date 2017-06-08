@@ -4,7 +4,7 @@ After=ceph-client.service
 
 [Service]
 Type=simple
-ExecStartPre=/bin/bash /etc/ceph/mnt-ceph-fs.sh
+ExecStart=/bin/bash /etc/ceph/mnt-ceph-fs.sh
 Restart=always
 RestartSec=5
 

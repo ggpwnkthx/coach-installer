@@ -82,30 +82,28 @@ else
   domain_name=$1
 fi
 
-echo "[Unit]" | sudo tee /etc/systemd/system/provisioner-dnsmasq.service
-echo "Description=COACH DNSMasq Docker Container for Provisioning Service" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
-echo "After=mnt-ceph-fs.service docker.service" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
-echo "Requires=mnt-ceph-fs.service docker.service" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
-echo "" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
-echo "[Service]" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
-echo "Restart=always" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
-echo "ExecStart=/usr/bin/docker run -rm \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
-echo "  --name provisioner_dnsmasq --net=host \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
-echo "  -v /mnt/ceph/fs/containers/provisioner/leases:/var/lib/misc/dnsmasq.leases \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
-echo "  -v /mnt/ceph/fs/containers/provisioner/conf:/etc/dnsmasq.conf \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
-echo "  coach/dnsmasq --dhcp-leasefile=/var/lib/misc/dnsmasq.leases \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
-echo "  --host-record=$(hostname -f),$advertize \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
-echo "  --dhcp-option=67,http://$(hostname -f)/index.php \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
-echo "  --domain=$domain_name \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
-echo "  --local=/$domain_name/ \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
-echo "  $use_iface \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
-echo "  $use_range \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
-echo "  $ceph_mons" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
-echo "ExecStop=/usr/bin/docker rm -f provisioner_dnsmasq" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
-echo "" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
-echo "[Install]" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
-echo "WantedBy=multi-user.target" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
+echo "#!/bin/bash" | sudo tee /etc/ceph/procisioner-dnsmasq.sh
+echo "case $1 in" | sudo tee --append /etc/ceph/procisioner-dnsmasq.sh
+echo "  start)" | sudo tee --append /etc/ceph/procisioner-dnsmasq.sh
+echo "    docker run -d -rm \\" | sudo tee --append /etc/ceph/procisioner-dnsmasq.sh
+echo "      --name provisioner_dnsmasq --net=host \\" | sudo tee --append /etc/ceph/procisioner-dnsmasq.sh
+echo "      -v /mnt/ceph/fs/containers/provisioner/leases:/var/lib/misc/dnsmasq.leases \\" | sudo tee --append /etc/ceph/procisioner-dnsmasq.sh
+echo "      -v /mnt/ceph/fs/containers/provisioner/conf:/etc/dnsmasq.conf \\" | sudo tee --append /etc/ceph/procisioner-dnsmasq.sh
+echo "      coach/dnsmasq --dhcp-leasefile=/var/lib/misc/dnsmasq.leases \\" | sudo tee --append /etc/ceph/procisioner-dnsmasq.sh
+echo "      --host-record=$(hostname -f),$advertize \\" | sudo tee --append /etc/ceph/procisioner-dnsmasq.sh
+echo "      --dhcp-option=67,http://$(hostname -f)/index.php \\" | sudo tee --append /etc/ceph/procisioner-dnsmasq.sh
+echo "      --domain=$domain_name \\" | sudo tee --append /etc/ceph/procisioner-dnsmasq.sh
+echo "      --local=/$domain_name/ \\" | sudo tee --append /etc/ceph/procisioner-dnsmasq.sh
+echo "      $use_iface \\" | sudo tee --append /etc/ceph/procisioner-dnsmasq.sh
+echo "      $use_range \\" | sudo tee --append /etc/ceph/procisioner-dnsmasq.sh
+echo "      $ceph_mons" | sudo tee --append /etc/ceph/procisioner-dnsmasq.sh
+echo "    ;;" | sudo tee --append /etc/ceph/procisioner-dnsmasq.sh
+echo "  stop)" | sudo tee --append /etc/ceph/procisioner-dnsmasq.sh
+echo "    docker stop provisioner_dnsmasq" | sudo tee --append /etc/ceph/procisioner-dnsmasq.sh
+echo "    ;;" | sudo tee --append /etc/ceph/procisioner-dnsmasq.sh
+echo "  status)" | sudo tee --append /etc/ceph/procisioner-dnsmasq.sh
+echo "    docker ps -a | grep provisioner_dnsmasq" | sudo tee --append /etc/ceph/procisioner-dnsmasq.sh
+echo "    ;;" | sudo tee --append /etc/ceph/procisioner-dnsmasq.sh
+echo "esac" | sudo tee --append /etc/ceph/procisioner-dnsmasq.sh
 
-sudo systemctl daemon-reload
-sudo systemctl enable provisioner-dnsmasq.service
-sudo systemctl start provisioner-dnsmasq.service
+sudo chmod +x /etc/ceph/procisioner-dnsmasq.sh

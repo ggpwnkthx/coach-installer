@@ -15,3 +15,6 @@ sudo docker run -d \
   --name provisioner_lamp --net=host \
   -v /mnt/ceph/fs/containers/provisioner/www:/www \
   janes/alpine-lamp
+
+sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/lamp/provisioner-lamp.service -O /etc/systemd/system/provisioner-lamp.service
+sudo systectl enable provisioner-lamp.service

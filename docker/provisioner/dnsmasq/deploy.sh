@@ -82,20 +82,30 @@ else
   domain_name=$1
 fi
 
-sudo docker run -d \
-  --name provisioner_dnsmasq --net=host \
-  -v /mnt/ceph/fs/containers/provisioner/leases:/var/lib/misc/dnsmasq.leases \
-  -v /mnt/ceph/fs/containers/provisioner/conf:/etc/dnsmasq.conf \
-  coach/dnsmasq --dhcp-leasefile=/var/lib/misc/dnsmasq.leases \
-  --host-record=$(hostname -f),$advertize \
-  --dhcp-option=67,http://$(hostname -f)/index.php \
-  --domain=$domain_name \
-  --local=/$domain_name/ \
-  $use_iface \
-  $use_range \
-  $ceph_mons
+echo "[Unit]" | sudo tee /etc/systemd/system/provisioner-dnsmasq.service
+echo "Description=COACH DNSMasq Docker Container for Provisioning Service" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
+echo "After=mnt-ceph-fs.service docker.service" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
+echo "Requires=mnt-ceph-fs.service docker.service" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
+echo "" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
+echo "[Service]" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
+echo "Restart=always" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
+echo "ExecStart=/usr/bin/docker run \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
+echo "  --name provisioner_dnsmasq --net=host \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
+echo "  -v /mnt/ceph/fs/containers/provisioner/leases:/var/lib/misc/dnsmasq.leases \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
+echo "  -v /mnt/ceph/fs/containers/provisioner/conf:/etc/dnsmasq.conf \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
+echo "  coach/dnsmasq --dhcp-leasefile=/var/lib/misc/dnsmasq.leases \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
+echo "  --host-record=$(hostname -f),$advertize \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
+echo "  --dhcp-option=67,http://$(hostname -f)/index.php \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
+echo "  --domain=$domain_name \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
+echo "  --local=/$domain_name/ \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
+echo "  $use_iface \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
+echo "  $use_range \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
+echo "  $ceph_mons" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
+echo "ExecStop=/usr/bin/docker rm- f provisioner_dnsmasq" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
+echo "" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
+echo "[Install]" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
+echo "WantedBy=multi-user.target" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
 
-sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/dnsmasq/provisioner-dnsmasq.service -O /etc/systemd/system/provisioner-dnsmasq.service
 sudo systectl enable provisioner-dnsmasq.service
 
 

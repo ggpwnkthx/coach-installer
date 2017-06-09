@@ -6,6 +6,11 @@ printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
 echo "Creating a better initrd file"
 printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
 
+if [ -f initrd ]
+then
+  sudo rm initrd
+fi
+
 ## Grab the latest Ubuntu Cloud-Image
 if [ -d initrd-root ]
 then

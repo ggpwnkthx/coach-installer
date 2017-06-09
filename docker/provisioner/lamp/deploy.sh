@@ -19,7 +19,7 @@ echo "Requires=mnt-ceph-fs.service docker.service" | sudo tee --append /etc/syst
 echo "" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
 echo "[Service]" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
 echo "Restart=always" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
-echo "ExecStart=/usr/bin/docker run \\" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
+echo "ExecStart=/usr/bin/docker run -rm \\" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
 echo "  --name provisioner_lamp --net=host \\" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
 echo "  -v /mnt/ceph/fs/containers/provisioner/www:/www \\" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
 echo "  janes/alpine-lamp" | sudo tee --append /etc/systemd/system/provisioner-lamp.service

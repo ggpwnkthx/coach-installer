@@ -4,8 +4,9 @@ After=mnt-ceph-fs.service docker.service
 Requires=mnt-ceph-fs.service docker.service
  
 [Service]
-ExecStart=/usr/bin/docker start provisioner_dnsmasq
 Restart=always
+ExecStart=/usr/bin/docker start provisioner_dnsmasq
+ExecStop=/usr/bin/docker stop provisioner_dnsmasq
  
 [Install]
 WantedBy=multi-user.target

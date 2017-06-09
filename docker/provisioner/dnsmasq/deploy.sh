@@ -100,6 +100,7 @@ echo "      $ceph_mons" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
 echo "    ;;" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
 echo "  stop)" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
 echo "    docker stop provisioner_dnsmasq" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "    docker rm -f provisioner_dnsmasq" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
 echo "    ;;" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
 echo "  status)" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
 echo "    docker ps -a | grep provisioner_dnsmasq" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh

@@ -12,6 +12,6 @@ then
   sudo mkdir /mnt/ceph/fs/containers/provisioner/www
 fi
 sudo docker run -d \
-  --name provisioner_lamp --restart=always --net=host \
+  --name provisioner_lamp --net=host \
   -v /mnt/ceph/fs/containers/provisioner/www:/www \
   janes/alpine-lamp

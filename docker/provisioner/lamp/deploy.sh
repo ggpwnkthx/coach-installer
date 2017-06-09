@@ -11,10 +11,23 @@ if [ ! -d /mnt/ceph/fs/containers/provisioner/www ]
 then
   sudo mkdir /mnt/ceph/fs/containers/provisioner/www
 fi
-sudo docker run -d \
-  --name provisioner_lamp --net=host \
-  -v /mnt/ceph/fs/containers/provisioner/www:/www \
-  janes/alpine-lamp
 
-sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/lamp/provisioner-lamp.service -O /etc/systemd/system/provisioner-lamp.service
-sudo systectl enable provisioner-lamp.service
+echo "[Unit]" | sudo tee /etc/systemd/system/provisioner-lamp.service
+echo "Description=COACH LAMP Docker Container for Provisioning Service" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
+echo "After=mnt-ceph-fs.service docker.service" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
+echo "Requires=mnt-ceph-fs.service docker.service" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
+echo "" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
+echo "[Service]" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
+echo "Restart=always" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
+echo "ExecStart=/usr/bin/docker run \\" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
+echo "  --name provisioner_lamp --net=host \\" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
+echo "  -v /mnt/ceph/fs/containers/provisioner/www:/www \\" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
+echo "  janes/alpine-lamp" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
+echo "ExecStop=/usr/bin/docker rm -f provisioner_lamp" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
+echo "" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
+echo "[Install]" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
+echo "WantedBy=multi-user.target" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
+
+sudo systemctl daemon-reload
+sudo systemctl enable provisioner-lamp.service
+sudo systemctl start provisioner-lamp.service

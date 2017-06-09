@@ -94,3 +94,8 @@ sudo docker run -d \
   $use_iface \
   $use_range \
   $ceph_mons
+
+sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/dnsmasq/provisioner-dnsmasq.service -O /etc/systemd/system/provisioner-dnsmasq.service
+sudo systectl enable provisioner-dnsmasq.service
+
+

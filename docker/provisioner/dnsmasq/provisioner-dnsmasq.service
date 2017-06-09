@@ -4,12 +4,8 @@ After=mnt-ceph-fs.service docker.service
 Requires=mnt-ceph-fs.service docker.service
  
 [Service]
-TimeoutStartSec=0
-ExecStart=/usr/local/bin/systemd-docker --cgroups name=systemd start provisioning_dnsmasq
+ExecStart=/usr/bin/docker start provisioner_dnsmasq
 Restart=always
-RestartSec=10s
-Type=notify
-NotifyAccess=all
  
 [Install]
 WantedBy=multi-user.target

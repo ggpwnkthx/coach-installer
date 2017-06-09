@@ -101,7 +101,7 @@ echo "  --local=/$domain_name/ \\" | sudo tee --append /etc/systemd/system/provi
 echo "  $use_iface \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
 echo "  $use_range \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
 echo "  $ceph_mons" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
-echo "ExecStop=/usr/bin/docker rm- f provisioner_dnsmasq" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
+echo "ExecStop=/usr/bin/docker rm -f provisioner_dnsmasq" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
 echo "" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
 echo "[Install]" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
 echo "WantedBy=multi-user.target" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service

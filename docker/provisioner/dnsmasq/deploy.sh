@@ -106,6 +106,4 @@ echo "" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
 echo "[Install]" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
 echo "WantedBy=multi-user.target" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
 
-sudo systectl enable provisioner-dnsmasq.service
-
-
+sudo systemctl enable provisioner-dnsmasq.service

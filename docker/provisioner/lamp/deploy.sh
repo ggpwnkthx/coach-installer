@@ -12,22 +12,19 @@ then
   sudo mkdir /mnt/ceph/fs/containers/provisioner/www
 fi
 
-echo "[Unit]" | sudo tee /etc/systemd/system/provisioner-lamp.service
-echo "Description=COACH LAMP Docker Container for Provisioning Service" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
-echo "After=mnt-ceph-fs.service docker.service" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
-echo "Requires=mnt-ceph-fs.service docker.service" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
-echo "" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
-echo "[Service]" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
-echo "Restart=always" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
-echo "ExecStart=/usr/bin/docker run -rm \\" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
-echo "  --name provisioner_lamp --net=host \\" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
-echo "  -v /mnt/ceph/fs/containers/provisioner/www:/www \\" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
-echo "  janes/alpine-lamp" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
-echo "ExecStop=/usr/bin/docker rm -f provisioner_lamp" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
-echo "" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
-echo "[Install]" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
-echo "WantedBy=multi-user.target" | sudo tee --append /etc/systemd/system/provisioner-lamp.service
-
-sudo systemctl daemon-reload
-sudo systemctl enable provisioner-lamp.service
-sudo systemctl start provisioner-lamp.service
+echo "#!/bin/bash" | sudo tee /etc/ceph/provisioner-lamp.sh
+echo "case \$1 in" | sudo tee --append /etc/ceph/provisioner-lamp.sh
+echo "  start)" | sudo tee --append /etc/ceph/provisioner-lamp.sh
+echo "    docker run -d \\" | sudo tee --append /etc/ceph/provisioner-lamp.sh
+echo "      --name provisioner_lamp --net=host \\" | sudo tee --append /etc/ceph/provisioner-lamp.sh
+echo "      -v /mnt/ceph/fs/containers/provisioner/www:/www \\" | sudo tee --append /etc/ceph/provisioner-lamp.sh
+echo "      janes/alpine-lamp" | sudo tee --append /etc/ceph/provisioner-lamp.sh
+echo "    ;;" | sudo tee --append /etc/ceph/provisioner-lamp.sh
+echo "  stop)" | sudo tee --append /etc/ceph/provisioner-lamp.sh
+echo "    docker stop provisioner_lamp" | sudo tee --append /etc/ceph/provisioner-lamp.sh
+echo "    docker rm -f provisioner_lamp" | sudo tee --append /etc/ceph/provisioner-lamp.sh
+echo "    ;;" | sudo tee --append /etc/ceph/provisioner-lamp.sh
+echo "  status)" | sudo tee --append /etc/ceph/provisioner-lamp.sh
+echo "    docker ps -a | grep provisioner_lamp" | sudo tee --append /etc/ceph/provisioner-lamp.sh
+echo "    ;;" | sudo tee --append /etc/ceph/provisioner-lamp.sh
+echo "esac" | sudo tee --append /etc/ceph/provisioner-lamp.sh

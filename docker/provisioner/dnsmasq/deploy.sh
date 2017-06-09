@@ -89,7 +89,7 @@ echo "Requires=mnt-ceph-fs.service docker.service" | sudo tee --append /etc/syst
 echo "" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
 echo "[Service]" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
 echo "Restart=always" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
-echo "ExecStart=/usr/bin/docker run \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
+echo "ExecStart=/usr/bin/docker run -rm \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
 echo "  --name provisioner_dnsmasq --net=host \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
 echo "  -v /mnt/ceph/fs/containers/provisioner/leases:/var/lib/misc/dnsmasq.leases \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service
 echo "  -v /mnt/ceph/fs/containers/provisioner/conf:/etc/dnsmasq.conf \\" | sudo tee --append /etc/systemd/system/provisioner-dnsmasq.service

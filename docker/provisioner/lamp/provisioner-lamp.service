@@ -4,9 +4,9 @@ After=mnt-ceph-fs.service docker.service
 Requires=mnt-ceph-fs.service docker.service
  
 [Service]
-TimeoutStartSec=0
-ExecStart=/usr/bin/docker start provisioning_lamp
-ExecStop=/usr/bin/docker stop provisioning_lamp
+Restart=always
+ExecStart=/usr/bin/docker start provisioner_lamp
+ExecStop=/usr/bin/docker stop provisioner_lamp
  
 [Install]
 WantedBy=multi-user.target

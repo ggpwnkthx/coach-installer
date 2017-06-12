@@ -85,6 +85,10 @@ fi
 echo "#!/bin/bash" | sudo tee /etc/ceph/provisioner-dnsmasq.sh
 echo "case \$1 in" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
 echo "  start)" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "    if [ ! -z \"\$(docker ps -a | grep provisioner_dnsmasq)\" ]" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "    then" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "      docker rm -f provisioner_dnsmasq" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "    fi" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
 echo "    docker run -d \\" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
 echo "      --name provisioner_dnsmasq --net=host \\" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
 echo "      -v /mnt/ceph/fs/containers/provisioner/leases:/var/lib/misc/dnsmasq.leases \\" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh

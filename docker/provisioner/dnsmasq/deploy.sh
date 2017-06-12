@@ -108,3 +108,8 @@ echo "    ;;" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
 echo "esac" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
 
 sudo chmod +x /etc/ceph/provisioner-dnsmasq.sh
+
+sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/dnsmasq/provisioner-dnsmasq.service -O /etc/systemd/system/provisioner-dnsmasq.service
+sudo systemctl daemon-reload
+sudo systemctl enable provisioner-dnsmasq.service
+sudo systemctl start provisioner-dnsmasq.service

@@ -1,12 +1,14 @@
 [Unit]
-Description=COACH LAMP Docker Container for Provisioning Service
-After=mnt-ceph-fs.service docker.service
-Requires=mnt-ceph-fs.service docker.service
- 
+Description=COACH Provisioning LAMP Container
+Requires=mnt-ceph-fs.service
+After=mnt-ceph-fs.service
+
 [Service]
-Restart=always
-ExecStart=/usr/bin/docker start provisioner_lamp
-ExecStop=/usr/bin/docker stop provisioner_lamp
- 
+Type=oneshot
+ExecStartPre=/bin/sleep 5
+ExecStart=/bin/bash /etc/ceph/provisioner-lamp.sh start
+ExecStop=/bin/bash /etc/ceph/provisioner-lamp.sh stop
+RemainAfterExit=yes
+
 [Install]
 WantedBy=multi-user.target

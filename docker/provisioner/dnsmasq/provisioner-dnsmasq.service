@@ -1,0 +1,14 @@
+[Unit]
+Description=COACH Provisioning DNSMasq Container
+Requires=mnt-ceph-fs.service
+After=mnt-ceph-fs.service
+
+[Service]
+Type=oneshot
+ExecStartPre=/bin/sleep 5
+ExecStart=/bin/bash /etc/ceph/provisioner-dnsmasq.sh start
+ExecStop=/bin/bash /etc/ceph/provisioner-dnsmasq.sh stop
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -23,6 +23,9 @@ chmod +x deploy.sh
 * git - Need for the initial download.
 * wget - Needed to download 3rd party libraries.
 * sshd - Needed to communicate with other nodes.
+```bash
+sudo apt-get install git wget sshd
+```
 
 ### Consecutive uses:
 ```bash

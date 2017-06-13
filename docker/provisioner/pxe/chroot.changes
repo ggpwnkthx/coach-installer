@@ -1,4 +1,2 @@
 apt-get -y install ceph-common overlayroot
 sed -i 's/^overlayroot=""/overlayroot="tmpfs"/g' /etc/overlayroot.conf
-systemctl enable ceph-client.service
-systemctl enable mnt-ceph-fs.mount

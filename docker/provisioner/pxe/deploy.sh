@@ -3,7 +3,7 @@ if [ ! -d /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu ]
 then
   sudo mkdir -p /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu
 fi
-sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/pxe/index.php -O /mnt/ceph/fs/containers/provisioner/www/index.php
+sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/pxe/ipxe.php -O /mnt/ceph/fs/containers/provisioner/www/ipxe.php
 
 if [ ! -d /mnt/ceph/fs/containers/provisioner/www/2009-04-04/meta-data ]
 then

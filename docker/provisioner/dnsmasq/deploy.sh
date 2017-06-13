@@ -95,7 +95,7 @@ echo "      -v /mnt/ceph/fs/containers/provisioner/leases:/var/lib/misc/dnsmasq.
 echo "      -v /mnt/ceph/fs/containers/provisioner/conf:/etc/dnsmasq.conf \\" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
 echo "      coach/dnsmasq --dhcp-leasefile=/var/lib/misc/dnsmasq.leases \\" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
 echo "      --host-record=$(hostname -f),$advertize \\" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "      --dhcp-option=67,http://$(hostname -f)/index.php \\" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "      --dhcp-option=67,http://$(hostname -f)/ipxe.php \\" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
 echo "      --domain=$domain_name \\" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
 echo "      --local=/$domain_name/ \\" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
 echo "      $use_iface \\" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh

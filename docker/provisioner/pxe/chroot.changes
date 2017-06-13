@@ -1,2 +1,2 @@
-apt-get -y install ceph-common overlayroot
+apt-get -y install overlayroot
 sed -i 's/^overlayroot=""/overlayroot="tmpfs"/g' /etc/overlayroot.conf

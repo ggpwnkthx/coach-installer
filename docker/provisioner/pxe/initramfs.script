@@ -13,13 +13,20 @@ configure()
       ;;
   esac
 }
-
-interfaces=$(echo $ip | sed 's/,/ /g')
-num=$(echo $ip | awk -F\, '{print NF}')
+export INIT_IP
+for x in $(cat /proc/cmdline); do
+  case $x in
+    init_ip=*)
+      INIT_IP="${x#init_ip=}"
+    ;;
+  esac
+done
+interfaces=$(echo $init_ip | sed 's/,/ /g')
+num=$(echo $init_ip | awk -F\, '{print NF}')
 i=1
 while [ $i -le $num ]
 do
-  iface=$(echo $(echo $ip | sed 's/,/ /g' | awk "{print \$$i}") | sed 's/:/ /g')
+  iface=$(echo $(echo $init_ip | sed 's/,/ /g' | awk "{print \$$i}") | sed 's/:/ /g')
   configure $(echo $iface | awk '{print $1}') $(echo $iface | awk '{print $2}') $(echo $iface | awk '{print $3}') $(echo $iface | awk '{print $4}')
   i=$(expr $i + 1)
 done

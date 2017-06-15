@@ -38,12 +38,11 @@ goto ${selected}
 
 :ubuntu
 set base-url http://<?=$base_url;?>/boot/ubuntu
-kernel ${base-url}/vmlinuz vga=775 ro root=filesystem.squashfs init_ip=ib0:dhcp  ds=nocloud-net
+kernel ${base-url}/vmlinuz vga=775 ro root=filesystem.squashfs init_net=${mac},dhcp  ds=nocloud-net
 initrd ${base-url}/initrd
 initrd ${base-url}/squashfs filesystem.squashfs
 initrd http://<?=$base_url;?>/user-data/ /nocloud/user-data
 initrd http://<?=$base_url;?>/meta-data/ /nocloud/meta-data
-
 boot
 
 :cancel

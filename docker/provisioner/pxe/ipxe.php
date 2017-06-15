@@ -23,7 +23,7 @@ isset ${menu-default} || set menu-default ubuntu
 :start
 menu iPXE boot menu for COACH
 item --gap -- ------------------------- Operating systems ------------------------------
-item 
+item
 item --key b ubuntu	Ubuntu 16.04
 item
 item --gap --           ------------------------- Advanced options -------------------------------
@@ -38,11 +38,13 @@ goto ${selected}
 
 :ubuntu
 set base-url http://<?=$base_url;?>/boot/ubuntu
-kernel ${base-url}/vmlinuz ro root=filesystem.squashfs ip=ib0:dhcp cloud-config-url=http://169.254.169.254/cloud-config
+kernel ${base-url}/vmlinuz vga=775 ro root=filesystem.squashfs init_ip=ib0:dhcp  ds=nocloud-net
 initrd ${base-url}/initrd
 initrd ${base-url}/squashfs filesystem.squashfs
-boot
+initrd http://<?=$base_url;?>/user-data/ /nocloud/user-data
+initrd http://<?=$base_url;?>/meta-data /nocloud/meta-data
 
+boot
 
 :cancel
 echo You cancelled the menu, dropping you to a shell

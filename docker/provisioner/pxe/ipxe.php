@@ -42,7 +42,7 @@ kernel ${base-url}/vmlinuz vga=775 ro root=filesystem.squashfs init_ip=ib0:dhcp 
 initrd ${base-url}/initrd
 initrd ${base-url}/squashfs filesystem.squashfs
 initrd http://<?=$base_url;?>/user-data/ /nocloud/user-data
-initrd http://<?=$base_url;?>/meta-data /nocloud/meta-data
+initrd http://<?=$base_url;?>/meta-data/ /nocloud/meta-data
 
 boot
 

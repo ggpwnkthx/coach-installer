@@ -21,9 +21,14 @@ unlzma initrd.lzma
 mkdir initrd-root
 cd initrd-root
 cat ../initrd | cpio -id
-wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/pxe/initramfs.script -O scripts/init-bottom/network
+mkdir nocloud
+wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/pxe/initramfs.network -O scripts/init-bottom/network
 chmod +x scripts/init-bottom/network
 echo '/scripts/init-bottom/network "$@"' | tee --append scripts/init-bottom/ORDER
+echo '[ -e /conf/param.conf ] && . /conf/param.conf' | tee --append scripts/init-bottom/ORDER
+wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/pxe/initramfs.nocloud -O scripts/init-bottom/nocloud
+chmod +x scripts/init-bottom/nocloud
+echo '/scripts/init-bottom/nocloud "$@"' | tee --append scripts/init-bottom/ORDER
 echo '[ -e /conf/param.conf ] && . /conf/param.conf' | tee --append scripts/init-bottom/ORDER
 sed -i '/^MODULES=/s/=.*/=netboot/' conf/initramfs.conf
 echo "mlx4_core" | tee --append conf/modules

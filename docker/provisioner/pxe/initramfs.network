@@ -2,7 +2,7 @@
 configure()
 {
   case $2 in
-    dhcp) 
+    dhcp)
       while [ -z "$(ifconfig $1 | grep 'inet addr:')" ]
       do
         dhclient $1
@@ -13,20 +13,21 @@ configure()
       ;;
   esac
 }
-export INIT_IP
+export INIT_NET
 for x in $(cat /proc/cmdline); do
   case $x in
-    init_ip=*)
-      INIT_IP="${x#init_ip=}"
+    init_net=*)
+      INIT_NET="${x#init_net=}"
     ;;
   esac
 done
-interfaces=$(echo $init_ip | sed 's/,/ /g')
-num=$(echo $init_ip | awk -F\, '{print NF}')
+interfaces=$(echo $init_net | sed 's/;/ /g')
+num=$(echo $init_net | awk -F\; '{print NF}')
 i=1
 while [ $i -le $num ]
 do
-  iface=$(echo $(echo $init_ip | sed 's/,/ /g' | awk "{print \$$i}") | sed 's/:/ /g')
+  mac=$(echo $init_net | sed 's/;/ /g' | awk '{print \$$i}' | sed 's/,/ /g' | awk '{print $1}' | grep -o '.................$')
+  iface=$(ip link | awk '/'$mac'/ {print a} {a = $0}' | awk '{print $2}' | tr -d ':')
   configure $(echo $iface | awk '{print $1}') $(echo $iface | awk '{print $2}') $(echo $iface | awk '{print $3}') $(echo $iface | awk '{print $4}')
   i=$(expr $i + 1)
 done

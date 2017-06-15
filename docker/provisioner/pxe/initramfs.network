@@ -26,8 +26,9 @@ num=$(echo $init_net | awk -F\; '{print NF}')
 i=1
 while [ $i -le $num ]
 do
-  mac=$(echo $init_net | sed 's/;/ /g' | awk '{print \$$i}' | sed 's/,/ /g' | awk '{print $1}' | grep -o '.................$')
+  full=$(echo $init_net | sed 's/;/ /g' | awk '{print $'$i'}' | sed 's/,/ /g')
+  mac=$(echo $full | awk '{print $1}' | grep -o '.................$')
   iface=$(ip link | awk '/'$mac'/ {print a} {a = $0}' | awk '{print $2}' | tr -d ':')
-  configure $(echo $iface | awk '{print $1}') $(echo $iface | awk '{print $2}') $(echo $iface | awk '{print $3}') $(echo $iface | awk '{print $4}')
+  configure $iface $(echo $full | awk '{print $2}') $(echo $full | awk '{print $3}') $(echo $full | awk '{print $4}')
   i=$(expr $i + 1)
 done

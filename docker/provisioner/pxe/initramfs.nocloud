@@ -1,0 +1,7 @@
+#!/bin/sh
+
+if [ ! -d ${rootmnt}/media/root-rw/overlay/var/lib/cloud/seed ]
+then
+  mkdir -p ${rootmnt}/media/root-rw/overlay/var/lib/cloud/seed/
+fi
+mv /nocloud ${rootmnt}/media/root-rw/overlay/var/lib/cloud/seed/

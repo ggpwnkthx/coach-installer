@@ -11,6 +11,10 @@ if [ ! -d /mnt/ceph/fs/containers/provisioner/www ]
 then
   sudo mkdir /mnt/ceph/fs/containers/provisioner/www
 fi
+if [ ! -d /mnt/ceph/fs/containers/provisioner/database ]
+then
+  sudo mkdir /mnt/ceph/fs/containers/provisioner/database
+fi
 
 wget https://s3-us-west-2.amazonaws.com/core-releases/8314/8532/5573/concrete5-8.1.0.zip
 if [ -z "$(command -v unzip)" ]

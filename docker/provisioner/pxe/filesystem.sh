@@ -36,6 +36,9 @@ done
 
 sudo rm squashfs-root/etc/resolv.conf
 sudo mv squashfs-root/etc/resolv.conf.old squashfs-root/etc/resolv.conf
+sudo rm squashfs-root/make-changes
+sudo rm squashfs-root/initrd.img
+sudo rm squashfs-root/vmlinuz
 
 if [ -f /mnt/ceph/fs/containers/provisioner/www/boot/ubuntu/squashfs ]
 then

@@ -25,9 +25,10 @@ sudo chmod 777 /mnt/ceph/fs/containers/provisioner/www/application/files
 sudo sed -i 's/Install concrete5/Install COACH/g' /mnt/ceph/fs/containers/provisioner/www/concrete/views/frontend/install.php
 sudo sed -i "s/<?php echo t('Site') ?>/<?php echo t('Cluster') ?>/g" /mnt/ceph/fs/containers/provisioner/www/concrete/views/frontend/install.php
 sudo sed -i  "s/pkgHandle == 'elemental_full'/pkgHandle == 'elemental_blank'/g" /mnt/ceph/fs/containers/provisioner/www/concrete/views/frontend/install.php
-sudo sed -i  "s/'DB_SERVER', \['required' => 'required'\]/'DB_SERVER', 'localhost',  \['required' => 'required'\]/g" /mnt/ceph/fs/containers/provisioner/www/concrete/views/frontend/install.php
+sudo sed -i  "s/'DB_SERVER', \['required' => 'required'\]/'DB_SERVER', '127.0.0.1',  \['required' => 'required'\]/g" /mnt/ceph/fs/containers/provisioner/www/concrete/views/frontend/install.php
 sudo sed -i  "s/'DB_USERNAME'/'DB_USERNAME', 'root'/g" /mnt/ceph/fs/containers/provisioner/www/concrete/views/frontend/install.php
-sudo sed -i  "s/'DB_DATABASE'/'DB_DATABASE', 'coach'/g" /mnt/ceph/fs/containers/provisioner/www/concrete/views/frontend/install.php
+sudo sed -i  "s/'DB_DATABASE'/'DB_DATABASE', 'db'/g" /mnt/ceph/fs/containers/provisioner/www/concrete/views/frontend/install.php
+sudo sed -i  "s/'Edit Your Site'/'Start'/g" /mnt/ceph/fs/containers/provisioner/www/concrete/views/frontend/install.php
 
 sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/lamp/provisioner-lamp.sh -O /etc/ceph/provisioner-lamp.sh
 sudo chmod +x /etc/ceph/provisioner-lamp.sh

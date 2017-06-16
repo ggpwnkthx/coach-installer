@@ -1,3 +1,3 @@
 apt-get -y install overlayroot linux-headers linux-image linux-extras
-
+depmod
 sed -i 's/^overlayroot=""/overlayroot="tmpfs"/g' /etc/overlayroot.conf

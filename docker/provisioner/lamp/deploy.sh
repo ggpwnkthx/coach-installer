@@ -18,6 +18,7 @@ then
   echo "default-character-set=utf8" | sudo tee /mnt/ceph/fs/containers/provisioner/database/db.obt
   echo "default-collation=utf8_general_ci" | sudo tee --append /mnt/ceph/fs/containers/provisioner/database/db.obt
   sudo chmod +r /mnt/ceph/fs/containers/provisioner/database/db.obt
+  sudo chmod 777 /mnt/ceph/fs/containers/provisioner/database
 fi
 
 ./download_and_run docker/provisioner/lamp/gui.sh

@@ -1,5 +1,8 @@
 #!/bin/bash
-
+if [ -f concrete5-* ]
+then
+  rm concrete5-*
+fi
 wget https://s3-us-west-2.amazonaws.com/core-releases/8314/8532/5573/concrete5-8.1.0.zip
 if [ -z "$(command -v unzip)" ]
 then

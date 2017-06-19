@@ -15,6 +15,9 @@ sudo mkdir /mnt/ceph/fs/containers/provisioner/www
 if [ ! -d /mnt/ceph/fs/containers/provisioner/database ]
 then
   sudo mkdir /mnt/ceph/fs/containers/provisioner/database
+  echo "default-character-set=utf8" | sudo tee /mnt/ceph/fs/containers/provisioner/database/db.obt
+  echo "default-collation=utf8_general_ci" | sudo tee --append /mnt/ceph/fs/containers/provisioner/database/db.obt
+  sudo chmod +r /mnt/ceph/fs/containers/provisioner/database/db.obt
 fi
 
 ./download_and_run docker/provisioner/lamp/gui.sh

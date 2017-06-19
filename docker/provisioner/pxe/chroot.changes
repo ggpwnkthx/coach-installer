@@ -1,4 +1,4 @@
 apt-get update
-apt-get -y install overlayroot linux-headers-`uname -r` linux-image-`uname -r` linux-image-extra-`uname -r`
+DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install linux-headers-`uname -r` linux-image-`uname -r` linux-image-extra-`uname -r`
 depmod
 sed -i 's/^overlayroot=""/overlayroot="tmpfs"/g' /etc/overlayroot.conf

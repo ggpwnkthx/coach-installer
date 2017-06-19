@@ -9,8 +9,9 @@ do
 done
 if [ ! -d /mnt/ceph/fs/containers/provisioner/www ]
 then
-  sudo mkdir /mnt/ceph/fs/containers/provisioner/www
+  sudo rm -r /mnt/ceph/fs/containers/provisioner/www
 fi
+sudo mkdir /mnt/ceph/fs/containers/provisioner/www
 if [ ! -d /mnt/ceph/fs/containers/provisioner/database ]
 then
   sudo mkdir /mnt/ceph/fs/containers/provisioner/database

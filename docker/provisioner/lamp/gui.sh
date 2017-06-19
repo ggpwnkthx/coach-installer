@@ -20,8 +20,8 @@ sudo sed -i "s/'DB_SERVER', \['required' => 'required'\]/'DB_SERVER', '127.0.0.1
 sudo sed -i "s/'DB_USERNAME'/'DB_USERNAME', 'root'/g" /mnt/ceph/fs/containers/provisioner/www/concrete/views/frontend/install.php
 sudo sed -i "s/'DB_DATABASE'/'DB_DATABASE', 'db'/g" /mnt/ceph/fs/containers/provisioner/www/concrete/views/frontend/install.php
 sudo sed -i "s/'Edit Your Site'/'Start'/g" /mnt/ceph/fs/containers/provisioner/www/concrete/views/frontend/install.php
-sudo sed -i "s/<?php echo t('Starting Point') ?>//g" /mnt/ceph/fs/containers/provisioner/www/concrete/views/frontend/install.php
-sudo sed -i 's/id="starting-point"/id="starting-point" style="display:none"/g' /mnt/ceph/fs/containers/provisioner/www/concrete/views/frontend/install.php
-sudo sed -i "s/<?php echo t('Database') ?>//g" /mnt/ceph/fs/containers/provisioner/www/concrete/views/frontend/install.php
-sudo sed -i 's/id="database"/id="database" style="display:none"/g' /mnt/ceph/fs/containers/provisioner/www/concrete/views/frontend/install.php
+#sudo sed -i "s/<?php echo t('Starting Point') ?>//g" /mnt/ceph/fs/containers/provisioner/www/concrete/views/frontend/install.php
+#sudo sed -i 's/id="starting-point"/id="starting-point" style="display:none"/g' /mnt/ceph/fs/containers/provisioner/www/concrete/views/frontend/install.php
+#sudo sed -i "s/<?php echo t('Database') ?>//g" /mnt/ceph/fs/containers/provisioner/www/concrete/views/frontend/install.php
+#sudo sed -i 's/id="database"/id="database" style="display:none"/g' /mnt/ceph/fs/containers/provisioner/www/concrete/views/frontend/install.php
 sudo sed -i "s/'concrete.misc.login_redirect', 'DESKTOP'/'concrete.misc.login_redirect', 'HOMEPAGE'/g" /mnt/ceph/fs/containers/provisioner/www/concrete/src/Package/StartingPointPackage.php

@@ -7,7 +7,7 @@ do
     sudo docker rm -f $s
   fi
 done
-if [ ! -d /mnt/ceph/fs/containers/provisioner/www ]
+if [ -d /mnt/ceph/fs/containers/provisioner/www ]
 then
   sudo rm -r /mnt/ceph/fs/containers/provisioner/www
 fi

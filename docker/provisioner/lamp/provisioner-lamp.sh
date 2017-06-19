@@ -8,6 +8,7 @@ case $1 in
     docker run -d \
       --name provisioner_lamp --net=host \
       -v /mnt/ceph/fs/containers/provisioner/www:/www \
+      -v /mnt/ceph/fs/containers/provisioner/database:/var/lib/mysql/db \
       janes/alpine-lamp
     ;;
   stop)

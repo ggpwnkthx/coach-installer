@@ -1,22 +1,22 @@
 #!/bin/bash
 if [ -z "$(command -c ceph)" ]
 then
-  sudo apt-get -y install ceph-common
+  apt-get -y install ceph-common
 fi
 if [ ! -f /etc/ceph/ceph.conf ]
 then
   ./download_and_run "services/ceph/preflight.sh"
 fi
 
-sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/services/ceph/ceph-client.service -O /etc/systemd/system/ceph-client.service
-sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/services/ceph/mnt-ceph-fs.service -O /etc/systemd/system/mnt-ceph-fs.service
-sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/services/ceph/mnt-ceph-fs.sh -O /etc/ceph/mnt-ceph-fs.sh
-sudo chmod +x /etc/ceph/mnt-ceph-fs.sh
+wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/services/ceph/ceph-client.service -O /etc/systemd/system/ceph-client.service
+wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/services/ceph/mnt-ceph-fs.service -O /etc/systemd/system/mnt-ceph-fs.service
+wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/services/ceph/mnt-ceph-fs.sh -O /etc/ceph/mnt-ceph-fs.sh
+chmod +x /etc/ceph/mnt-ceph-fs.sh
 
-sudo systemctl daemon-reload
-sudo systemctl enable ceph-client.service
-sudo systemctl start ceph-client.service
-sudo systemctl enable mnt-ceph-fs.service
-sudo systemctl start mnt-ceph-fs.service
-sudo systemctl enable mnt-ceph-fs.mount
-sudo systemctl start mnt-ceph-fs.mount
+systemctl daemon-reload
+systemctl enable ceph-client.service
+systemctl start ceph-client.service
+systemctl enable mnt-ceph-fs.service
+systemctl start mnt-ceph-fs.service
+systemctl enable mnt-ceph-fs.mount
+systemctl start mnt-ceph-fs.mount

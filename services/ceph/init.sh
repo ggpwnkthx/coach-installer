@@ -58,12 +58,14 @@ then
 fi
 ceph-deploy install $HOSTNAME
 sudo chmod +rw /etc/ceph
-sudo chmod 777 /etc/ceph/*
+sudo chmod +rw /etc/ceph/*
 ceph-deploy admin $HOSTNAME
 sudo chmod +rw /etc/ceph
-sudo chmod 777 /etc/ceph/*
+sudo chmod +rw /etc/ceph/*
 ceph-deploy mon create-initial
 sudo chmod +rw /etc/ceph
-sudo chmod 777 /etc/ceph/*
+sudo chmod +rw /etc/ceph/*
+sudo chmod +rw /var/lib/ceph/
+sudo chmod +rw /var/lib/ceph/*
 
 cd $rtb

@@ -3,19 +3,19 @@ rtb=$(pwd)
 
 if [ -z "$(command -v ifconfig)" ]
 then
-  sudo apt-get -y install net-tools
+  apt-get -y install net-tools
 fi
 if [ -z "$(command -v ipcalc)" ]
 then
-  sudo apt-get -y install ipcalc
+  apt-get -y install ipcalc
 fi
 if [ -z "$(command -v ceph-deploy)" ]
 then
-  sudo apt-get -y install ceph-deploy
+  apt-get -y install ceph-deploy
 fi
 if [ -z "$(command -v sgdisk)" ]
 then
-  sudo apt-get -y install gdisk
+  apt-get -y install gdisk
 fi
 
 ./download_and_run "services/ceph/purge.sh"

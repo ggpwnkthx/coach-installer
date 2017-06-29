@@ -4,13 +4,13 @@ chmod +x download_and_run
 
 if [ -z "$(command -v wget)" ]
 then
-  sudo apt-get -y install wget
+  apt-get -y install wget
 fi
 
 # Vendor specific system adminstration software
 ask_system_admin()
 {
-  system_vendor=$(sudo dmidecode | grep "Vendor: " | sed 's/^.*: //')
+  system_vendor=$(dmidecode | grep "Vendor: " | sed 's/^.*: //')
   case $system_vendor in
     "Dell Inc.") ./download_and_run "sofware/dell/omsa.sh" -y ;;
   esac
@@ -36,8 +36,8 @@ ask_networking()
 # System Preparation
 sys_prep()
 {
-  echo "$(whoami) ALL = (root) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/$(whoami)
-  sudo chmod 0440 /etc/sudoers.d/$(whoami)
+  echo "$(whoami) ALL = (root) NOPASSWD:ALL" | tee /etc/sudoers.d/$(whoami)
+  chmod 0440 /etc/sudoers.d/$(whoami)
 }
 auto_install()
 {

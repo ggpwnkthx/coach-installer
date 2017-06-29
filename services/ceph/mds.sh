@@ -26,22 +26,22 @@ then
 fi
 
 cd ~/ceph
-sudo chmod 777 /var/lib/ceph
-sudo chmod 777 /var/lib/ceph/*
+chmod 777 /var/lib/ceph
+chmod 777 /var/lib/ceph/*
 
 ceph-deploy mds create $HOSTNAME
 
-if [ -z "$(sudo ceph fs ls | grep -w $fs)" ]
+if [ -z "$(ceph fs ls | grep -w $fs)" ]
 then
-  if [ -z "$(sudo ceph osd pool ls | grep $data)" ]
+  if [ -z "$(ceph osd pool ls | grep $data)" ]
   then
-    sudo ceph osd pool create $data 128
+    ceph osd pool create $data 128
   fi
-  if [ -z "$(sudo ceph osd pool ls | grep $meta)" ]
+  if [ -z "$(ceph osd pool ls | grep $meta)" ]
   then
-    sudo ceph osd pool create $meta 128
+    ceph osd pool create $meta 128
   fi
-  sudo ceph fs new $fs $meta $data
+  ceph fs new $fs $meta $data
 fi
 
 cd $rtb

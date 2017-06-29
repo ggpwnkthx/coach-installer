@@ -1,6 +1,7 @@
 #/bin/bash
 rtb=$(pwd)
 
+cd ~/ceph
 if [ -z "$(command -v ceph-deploy)" ]
 then
   echo "ceph-deploy is not installed on this node"
@@ -24,10 +25,10 @@ then
   chmod +x services_ceph_admin.sh
   ./services_ceph_admin.sh
 fi
-
-cd ~/ceph
-chmod 777 /var/lib/ceph
-chmod 777 /var/lib/ceph/*
+if [ ! -f ceph.bootstrap-mds.keyring ]
+then
+  ceph-deploy gatherkeys $HOSTNAME
+fi
 
 ceph-deploy mds create $HOSTNAME
 

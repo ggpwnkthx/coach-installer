@@ -7,7 +7,7 @@ This method will download all scripts at once, and will ignore any updates. This
 git clone https://github.com/ggpwnkthx/coach.git
 cd coach
 chmod +x deploy.sh
-./deploy.sh
+sudo ./deploy.sh
 ```
 #### Method 2:
 This method will automatically download the latest version of each script as it is called. This is best for developmental needs.
@@ -17,7 +17,7 @@ cd coach
 sed -i 's/^#wget/wget/g' deploy.sh
 sed -i 's/^#get_latest/get_latest/g' download_and_run
 chmod +x deploy.sh
-./deploy.sh
+sudo ./deploy.sh
 ```
 ##### Prerequisites
 * git - Need for the initial download.
@@ -29,7 +29,7 @@ sudo apt-get install git wget sshd
 
 ### Consecutive uses:
 ```bash
-./deploy.sh
+sudo ./deploy.sh
 ```
 
 ## About

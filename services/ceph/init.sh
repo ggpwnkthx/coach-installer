@@ -57,15 +57,15 @@ then
   echo "osd_journal_size = $2" >> ceph.conf
 fi
 ceph-deploy install $HOSTNAME
-sudo chmod +rw /etc/ceph
-sudo chmod +rw /etc/ceph/*
+chmod +rw /etc/ceph
+chmod +rw /etc/ceph/*
 ceph-deploy admin $HOSTNAME
-sudo chmod +rw /etc/ceph
-sudo chmod +rw /etc/ceph/*
+chmod +rw /etc/ceph
+chmod +rw /etc/ceph/*
 ceph-deploy mon create-initial
-sudo chmod +rw /etc/ceph
-sudo chmod +rw /etc/ceph/*
-sudo chmod +rw /var/lib/ceph/
-sudo chmod +rw /var/lib/ceph/*
+chmod +rw /etc/ceph
+chmod +rw /etc/ceph/*
+chmod +rw /var/lib/ceph/
+chmod +rw /var/lib/ceph/*
 
 cd $rtb

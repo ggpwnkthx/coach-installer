@@ -14,9 +14,15 @@ wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/services/ceph/mnt-
 chmod +x /etc/ceph/mnt-ceph-fs.sh
 
 systemctl daemon-reload
+
+systemctl stop ceph-client.service
 systemctl enable ceph-client.service
 systemctl start ceph-client.service
+
+systemctl stop mnt-ceph-fs.service
 systemctl enable mnt-ceph-fs.service
 systemctl start mnt-ceph-fs.service
+
+systemctl stop mnt-ceph-fs.mount
 systemctl enable mnt-ceph-fs.mount
 systemctl start mnt-ceph-fs.mount

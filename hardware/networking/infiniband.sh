@@ -6,22 +6,22 @@ do
   mod=$(cat /etc/modules | grep $i)
   if [ -z "$mod" ]
   then
-    echo $i | sudo tee --append /etc/modules
+    echo $i | tee --append /etc/modules
   fi
   mod=$(lsmod | grep $i)
   if [ -z "$mod" ]
   then
-    sudo modprobe $i
+    modprobe $i
   fi
 done
 
 # Install IB Subnet Manager
 if [ -z "$(command -v opensm)" ]
 then
-  sudo apt-get update
-  sudo apt-get -y install ifenslave-2.6 opensm
-  sudo update-rc.d -f opensm remove
-  sudo update-rc.d opensm defaults
-  sudo update-rc.d opensm enable
-  sudo service opensm restart
+  apt-get update
+  apt-get -y install ifenslave-2.6 opensm
+  update-rc.d -f opensm remove
+  update-rc.d opensm defaults
+  update-rc.d opensm enable
+  service opensm restart
 fi

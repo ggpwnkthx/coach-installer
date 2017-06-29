@@ -4,22 +4,22 @@
 preflight_megaraid()
 {
   # Clear foreign states
-  sudo MegaCli -CfgForeign -Clear -aALL
+  MegaCli -CfgForeign -Clear -aALL
 }
 build_megaraid()
 {
   preflight_megaraid
-  sudo megaclisas-status | grep Unconfigured | grep "HDD\|SSD" | while read -r line ;
+  megaclisas-status | grep Unconfigured | grep "HDD\|SSD" | while read -r line ;
   do
     adapter=$(echo $line | awk '{print $1}' | grep -o '[0-9]\+')
     device=$(echo $line | awk 'NR>1{print $1}' RS=[ FS=] | sed -e 's/N\/A//g')
-    sudo MegaCli -CfgLdAdd -r0[$device] -a$adapter
+    MegaCli -CfgLdAdd -r0[$device] -a$adapter
   done
 }
 use_megaraid=0
 ask_megaraid_ceph()
 {
-  no_it_mode=$(sudo megaclisas-status | grep "PERC H700\|NonJBODCard")
+  no_it_mode=$(megaclisas-status | grep "PERC H700\|NonJBODCard")
   if [ ! -z "$no_it_mode" ]
   then
     use_megaraid=1
@@ -72,8 +72,8 @@ preflight_ceph_osd()
     build_megaraid
 
     echo "Scanning for any RAID spans with more than 1 device. These will be ignored."
-    raid_ignore=($(sudo megaclisas-status | grep Online | grep HDD | awk '{print $1}' | grep p1))
-    raid_ignore=(${raid_ignore[@]} $(sudo megaclisas-status | grep Online | grep SSD | awk '{print $1}' | grep p1))
+    raid_ignore=($(megaclisas-status | grep Online | grep HDD | awk '{print $1}' | grep p1))
+    raid_ignore=(${raid_ignore[@]} $(megaclisas-status | grep Online | grep SSD | awk '{print $1}' | grep p1))
     raid_ignore=("${raid_ignore[@]}" "$(megaclisas-status | grep Online | grep SSD | awk '{print $1}' | grep p1)")
     ignore_count=0
     echo ""
@@ -81,21 +81,21 @@ preflight_ceph_osd()
     for line in "${raid_ignore}"
     do
       raid_id=$(echo $line | sed -r 's/(c[0-9]+u[0-9]+)(p1)/\1/')
-      dev_id=$(sudo megaclisas-status | grep $raid_id | grep "/dev" | awk '{print $16}')
+      dev_id=$(megaclisas-status | grep $raid_id | grep "/dev" | awk '{print $16}')
       ignore_dev=("${ignore_dev[@]}" "$dev_id")
       dev=$(echo "$dev" | grep -v "$dev_id")
       echo "  $raid_id		$dev_id"
     done
     echo ""
     echo "Scanning for MegaRAID hard disks..."
-    found_spin=$(sudo megaclisas-status | grep Online | grep HDD)
+    found_spin=$(megaclisas-status | grep Online | grep HDD)
     if [ ! -z "$found_spin" ]
     then
       raid_spin=($(echo "${found_spin[@]}" | awk '{print $1}' | grep p0))
       for line in "${raid_spin[@]}"
       do
         raid_id=$(echo $line | sed -r 's/(c[0-9]+u[0-9]+)(p0)/\1/')
-        dev_id=$(sudo megaclisas-status | grep -w $raid_id | grep "/dev" | awk '{print $16}')
+        dev_id=$(megaclisas-status | grep -w $raid_id | grep "/dev" | awk '{print $16}')
         should_ignore=$((for e in "${ignore_dev[@]}"; do [[ "$e" == "$dev_id" ]] && exit 0; done) && echo 1 || echo 0)
         if [ "$should_ignore" -lt 1 ]
         then
@@ -109,14 +109,14 @@ preflight_ceph_osd()
     fi
     echo ""
     echo "Scanning for MegaRAID solid state disks..."
-    found_ssd=$(sudo megaclisas-status | grep Online | grep SSD)
+    found_ssd=$(megaclisas-status | grep Online | grep SSD)
     if [ ! -z "$found_ssd" ]
     then
       raid_ssd=($(echo "${found_ssd[@]}" | awk '{print $1}' | grep p0))
       for line in "${raid_ssd[@]}"
       do
         raid_id=$(echo $line | sed -r 's/(c[0-9]+u[0-9]+)(p0)/\1/')
-        dev_id=$(sudo megaclisas-status | grep -w $raid_id | grep "/dev" | awk '{print $16}')
+        dev_id=$(megaclisas-status | grep -w $raid_id | grep "/dev" | awk '{print $16}')
         should_ignore=$((for e in "${ignore_dev[@]}"; do [[ "$e" == "$dev_id" ]] && exit 0; done) && echo 1 || echo 0)
         if [ "$should_ignore" -lt 1 ]
         then
@@ -135,7 +135,7 @@ preflight_ceph_osd()
     while read line
     do
       id=$(echo "$line" | awk '{split($0,a,"/"); print a[3]}')
-      if [ -z "$(sudo cat /proc/mdstat | grep $id)" ]
+      if [ -z "$(cat /proc/mdstat | grep $id)" ]
       then
         if [ -z  $(lsblk -p -l -o kname | grep -e $line"[0-9]") ]
         then
@@ -200,12 +200,12 @@ printout_ceph_osd()
       then
         if [ $((for e in "${dev_spin[@]}"; do [[ "$e" == "$dev_id" ]] && exit 0; done) && echo 1 || echo 0) -eq 1 ]
         then
-          if [ ! -z "$(sudo sgdisk $dev_id -p | grep 'ceph data')" ]
+          if [ ! -z "$(sgdisk $dev_id -p | grep 'ceph data')" ]
           then
             osd_id=$(mount | grep $dev_id | grep ceph | awk '{print $3}' | grep -Eo '[0-9]{1,4}')
             if [ -z "$osd_id" ]
             then
-              in_use=$(sudo sgdisk $dev_id -p | sed -n -e '/Number/,$p' | grep -v Number | grep -v ceph)
+              in_use=$(sgdisk $dev_id -p | sed -n -e '/Number/,$p' | grep -v Number | grep -v ceph)
               if [ -z "$in_use" ]
               then
                 if [[ $noselect = 1 ]]
@@ -251,12 +251,12 @@ printout_ceph_osd()
       then
         if [ $((for e in "${dev_ssd[@]}"; do [[ "$e" == "$dev_id" ]] && exit 0; done) && echo 1 || echo 0) -eq 1 ]
         then
-          if [ ! -z "$(sudo sgdisk $dev_id -p | grep 'ceph data')" ]
+          if [ ! -z "$(sgdisk $dev_id -p | grep 'ceph data')" ]
           then
             osd_id=$(mount | grep $dev_id | grep ceph | awk '{print $3}' | grep -Eo '[0-9]{1,4}')
             if [ -z "$osd_id" ]
             then
-              in_use=$(sudo sgdisk $dev_id -p | sed -n -e '/Number/,$p' | grep -v Number | grep -v ceph)
+              in_use=$(sgdisk $dev_id -p | sed -n -e '/Number/,$p' | grep -v Number | grep -v ceph)
               if [ -z "$in_use" ]
               then
                 if [[ $noselect = 1 ]]
@@ -285,7 +285,7 @@ printout_ceph_osd()
               remove_selections=("${remove_selections[@]}" "$counter")
             fi
           else
-            if [ ! -z "$(sudo sgdisk $dev_id -p | grep 'ceph journal')" ]
+            if [ ! -z "$(sgdisk $dev_id -p | grep 'ceph journal')" ]
             then
               parts=($(lsblk -p -l -o kname | grep -e $dev_id"[0-9]"))
               echo "	$dev_id	SSD	(${#parts[@]} Journals)"
@@ -357,9 +357,9 @@ install_ceph_osd()
                 parts=($(lsblk -p -l -o kname | grep -e $i"[0-9]"))
                 if [ "${#parts[@]}" -gt 0 ]
                 then
-                  if [ ! -z "$(sudo sgdisk $i -p | grep 'ceph journal')" ]
+                  if [ ! -z "$(sgdisk $i -p | grep 'ceph journal')" ]
                   then
-                    journal_free_space=$(sudo parted $i unit MB print free | grep 'Free Space' | tail -n1 | awk '{print $3}' | sed 's/MB//g')
+                    journal_free_space=$(parted $i unit MB print free | grep 'Free Space' | tail -n1 | awk '{print $3}' | sed 's/MB//g')
                     if [ $journal_free_space -gt $osd_journal_size ]
                     then
                       echo "[$counter]	$i	(Space Available)"

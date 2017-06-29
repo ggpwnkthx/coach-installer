@@ -26,6 +26,9 @@ then
 fi
 
 cd ~/ceph
+sudo chmod 777 /var/lib/ceph
+sudo chmod 777 /var/lib/ceph/*
+
 ceph-deploy mds create $HOSTNAME
 
 if [ -z "$(sudo ceph fs ls | grep -w $fs)" ]

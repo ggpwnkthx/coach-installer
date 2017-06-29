@@ -1,16 +1,16 @@
 # Install Dell OpenManage Server Administrator
 install_dell_omsa()
 {
-  echo 'deb http://linux.dell.com/repo/community/ubuntu trusty openmanage' | sudo tee -a /etc/apt/sources.list.d/linux.dell.com.sources.list
-  gpg --keyserver pool.sks-keyservers.net --recv-key 1285491434D8786F ; gpg -a --export 1285491434D8786F | sudo apt-key add -
+  echo 'deb http://linux.dell.com/repo/community/ubuntu trusty openmanage' | tee -a /etc/apt/sources.list.d/linux.dell.com.sources.list
+  gpg --keyserver pool.sks-keyservers.net --recv-key 1285491434D8786F ; gpg -a --export 1285491434D8786F | apt-key add -
   # add openjdk-7-jdk repository to meet dependencies
-  sudo add-apt-repository ppa:openjdk-r/ppa
-  sudo apt-get update
-  sudo apt-get -y install srvadmin-all
-  sudo apt-get -y install srvadmin-omcommon srvadmin-storage srvadmin-base srvadmin-storageservices srvadmin-deng srvadmin-omacs srvadmin-omilcore srvadmin-storelib srvadmin-ominst srvadmin-smcommon srvadmin-storelib-sysfs srvadmin-isvc srvadmin-rnasoap srvadmin-xmlsup srvadmin-realssd srvadmin-nvme srvadmin-storageservices-snmp srvadmin-storageservices-cli srvadmin-storage-snmp srvadmin-deng-snmp srvadmin-isvc-snmp srvadmin-idrac-snmp srvadmin-storage-cli srvadmin-omacore
-  sudo service dsm_om_connsvc start
-  sudo update-rc.d dsm_om_connsvc defaults
-  sudo service dataeng start
+  add-apt-repository ppa:openjdk-r/ppa
+  apt-get update
+  apt-get -y install srvadmin-all
+  apt-get -y install srvadmin-omcommon srvadmin-storage srvadmin-base srvadmin-storageservices srvadmin-deng srvadmin-omacs srvadmin-omilcore srvadmin-storelib srvadmin-ominst srvadmin-smcommon srvadmin-storelib-sysfs srvadmin-isvc srvadmin-rnasoap srvadmin-xmlsup srvadmin-realssd srvadmin-nvme srvadmin-storageservices-snmp srvadmin-storageservices-cli srvadmin-storage-snmp srvadmin-deng-snmp srvadmin-isvc-snmp srvadmin-idrac-snmp srvadmin-storage-cli srvadmin-omacore
+  service dsm_om_connsvc start
+  update-rc.d dsm_om_connsvc defaults
+  service dataeng start
 }
 
 if [ "$1" == "-y"]

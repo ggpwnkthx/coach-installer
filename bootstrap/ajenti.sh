@@ -8,3 +8,4 @@ if [ -z "$(cat /etc/ajenti/config.yml | grep 'restricted_user: $(whoami)')" ]
 then
   echo "restricted_user: $(whoami)" | sudo tee --append /etc/ajenti/config.yml
 fi
+

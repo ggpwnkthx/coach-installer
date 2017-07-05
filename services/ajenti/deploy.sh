@@ -11,7 +11,7 @@ systemctl stop ajenti.service
 
 if [ -z "$(cat /etc/ajenti/config.yml | grep 'restricted_user: $(whoami)')" ]
 then
-  echo "restricted_user: $(whoami)" | sudo tee --append /etc/ajenti/config.yml
+  echo "restricted_user: $(who am i | awk '{print $1}')" | sudo tee --append /etc/ajenti/config.yml
 fi
 
 pip uninstall ajenti.plugin.notepad

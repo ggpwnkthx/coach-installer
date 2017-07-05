@@ -1,0 +1,9 @@
+[Unit]
+Description=Ajenti
+
+[Service]
+Type=forking
+ExecStart=/usr/local/bin/ajenti-panel
+
+[Install]
+WantedBy=multi-user.target

@@ -110,8 +110,9 @@ menu_provisioning()
 coach_bootstrap()
 {
   auto_install
-  ./download_and_run "bootstrap/network.sh"
-  ./download_and_run "bootstrap/ceph.sh"
+  ./download_and_run "bootstrap/ajenti.sh"
+  #./download_and_run "bootstrap/network.sh"
+  #./download_and_run "bootstrap/ceph.sh"
   #./download_and_run "bootstrap/provisioner.sh"
   menu_main
 }
@@ -176,10 +177,10 @@ menu_main()
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   if [ -f /etc/sudoers.d/$(whoami) ]
   then
-    echo "[B]	Bootstrap (Setup as Seed Node)"
+    echo "[B]	Bootstraper"
     echo ""
   fi
-  echo "[A]	Auto-Installers"
+  echo "[S]	System Prep (Must Run First)"
   echo "[N]	Network Manager"
   if [ ! -z "$(command -v ceph)" ]
   then
@@ -194,7 +195,7 @@ menu_main()
   read -p "What would you like to do? " doit
   case $doit in
     0) echo '' && exit ;;
-    a|A) echo '' && menu_auto_installer ;;
+    s|S) echo '' && menu_auto_installer ;;
     n|N) echo '' && menu_network ;;
     c|C) echo '' && menu_ceph ;;
     p|P) echo '' && menu_provisioning ;;

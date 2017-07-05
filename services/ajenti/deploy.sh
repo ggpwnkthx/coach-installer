@@ -8,3 +8,7 @@ if [ -z "$(cat /etc/ajenti/config.yml | grep 'restricted_user: $(whoami)')" ]
 then
   echo "restricted_user: $(whoami)" | sudo tee --append /etc/ajenti/config.yml
 fi
+
+wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/coach/services/ajenti/ajenti.service -O /etc/systemd/system/ajenti.service
+systemctl ajenti.service enable
+systemctl ajenti.service start

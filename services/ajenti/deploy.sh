@@ -14,7 +14,6 @@ then
   echo "restricted_user: $(who am i | awk '{print $1}')" | sudo tee --append /etc/ajenti/config.yml
 fi
 
-pip uninstall ajenti.plugin.notepad
-pip install ajenti.plugin.network ajenti.plugin.datetime ajenti.plugin.power ajenti.plugin.traffic
+sed -i "s/{{customization.plugins.core.title || 'Ajenti'}}/{{customization.plugins.core.title || 'COACH'}}"/g /usr/local/lib/python2.7/dist-packages/ajenti_plugin_core/content/pages/index.html
 
 systemctl start ajenti.service

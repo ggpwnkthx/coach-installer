@@ -74,3 +74,26 @@ auto_install()
 
 auto_install
 ./download_and_run "bootstrap/ajenti.sh"
+
+ips=${$(ifconfig | awk -F "[: ]+" '/inet addr:/ { if ($4 != "127.0.0.1") print $4 }')}
+
+clear
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+echo "COACH - Cluster Of Arbitrary, Cheap, Hardware"
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =
+echo "System Prepared"
+printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
+echo ""
+echo "Please go to any of the following addresses to start the bootstrap process."
+echo ""
+for i in "${ips[@]}"
+do
+  echo "  http://$i:8000"
+done
+echo ""
+echo "Login using the same credentials you used to login to this terminal."
+echo "Click on the circle in the upper right hand corner."
+echo "Click 'Elevate' (similar to sudo for the GUI)."
+echo "Type in your password for sudo."
+echo "Then click on 'BOOTSTRAP', under 'CLUSTER', in the navigation menu."
+echo ""

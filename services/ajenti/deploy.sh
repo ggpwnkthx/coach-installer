@@ -16,4 +16,6 @@ fi
 
 sed -i "s/{{customization.plugins.core.title || 'Ajenti'}}/{{customization.plugins.core.title || 'COACH'}}"/g /usr/local/lib/python2.7/dist-packages/ajenti_plugin_core/content/pages/index.html
 
+cp -r coach /usr/local/lib/python2.7/dist-packages/ajenti_plugin_coach
+
 systemctl start ajenti.service

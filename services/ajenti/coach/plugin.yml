@@ -1,0 +1,26 @@
+name: coach
+author: Isaac Jessup
+email: ibjessup@gmail.com
+url: http://example.com
+version: '0.1'
+title: 'coach'
+icon: futbol-o
+dependencies:
+    - !!python/object:aj.plugins.PluginDependency {
+        plugin_name: core
+    }
+resources:
+    - 'resources/js/module.es'
+    - 'resources/js/router.es'
+    - 'resources/partial/bootstrap.html'
+    - 'resources/js/controllers/bootstrap.controller.es'
+    - 'resources/js/services/bootstrap.service.es'
+    - 'resources/partial/fabric.html'
+    - 'resources/js/controllers/fabric.controller.es'
+    - 'resources/js/services/fabric.service.es'
+    - 'resources/partial/nodes.html'
+    - 'resources/js/controllers/nodes.controller.es'
+    - 'resources/partial/storage.html'
+    - 'resources/js/controllers/storage.controller.es'
+    - 'resources/js/services/storage.service.es'
+    - 'ng:coach'

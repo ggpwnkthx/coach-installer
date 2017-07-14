@@ -1,0 +1,32 @@
+<br/>
+<uib-tabset>
+    <uib-tab heading="{{'Local'|translate}}">
+		<br />
+		<progress-spinner ng:hide="blockDevices != null"></progress-spinner>
+		<div class="list-group">
+			<div ng:repeat="device in blockDevices" class="list-group-item list-group-item-large">
+				<div class="list-group-main">
+					<div class="list-group-icon" ng:show="device.rota == '1'">
+						<i class="fa fa-database"></i>
+					</div>
+					<div class="list-group-icon" ng:show="device.rota == '0'">
+						<i class="fa fa-microchip"></i>
+					</div>
+					<h4>{{device.name}}</h4>
+				</div>
+			</div>
+		</div>
+	</uib-tab>
+    <uib-tab heading="{{'Monitors'|translate}}">
+		
+	</uib-tab>
+    <uib-tab heading="{{'Object Block Stores'|translate}}">
+		
+	</uib-tab>
+    <uib-tab heading="{{'File Systems'|translate}}">
+		
+	</uib-tab>
+    <uib-tab heading="{{'Rados Block Devices'|translate}}">
+		
+	</uib-tab>
+</uib-tabset>

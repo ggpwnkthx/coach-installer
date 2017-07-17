@@ -2,7 +2,7 @@
 
 if [ -z "$(command -v wget)" ]
 then
-  apt-get -y install wget
+  apt-get -y install wget btrfs-tools
 fi
 
 #wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/download_and_run -O download_and_run

@@ -3,8 +3,53 @@
     <uib-tab heading="{{'Local'|translate}}">
 		<br />
 		<progress-spinner ng:hide="blockDevices != null"></progress-spinner>
+		<label>Active OSDs</label>
 		<div class="list-group">
-			<div ng:repeat="device in blockDevices" class="list-group-item list-group-item-large">
+			<div ng:repeat="device in blockDevices" ng:show="device.ceph.osd" class="list-group-item list-group-item-large">
+                <a class="list-group-btn" ng:click="$parent.deviceDetails = device" title="Details">
+                    <i class="fa fa-question"></i>
+                </a>
+				<a class="list-group-btn has-warning" ng:click="toggleRemoveOSD(device)" title="Remove from Cluster">
+					<i class="fa fa-minus"></i>
+				</a>
+				<div class="list-group-main">
+					<div class="list-group-icon" ng:show="device.rota">
+						<i class="fa fa-database"></i>
+					</div>
+					<div class="list-group-icon" ng:hide="device.rota">
+						<i class="fa fa-microchip"></i>
+					</div>
+					<h4 class="list-group-item-heading"><span ng:hide="device.bay">{{device.name}}</span><span ng:show="device.bay">SLOT {{device.bay}} <small><small>{{device.name}}</small></small></span></h4>
+					<p class="list-group-item-text">
+                        <span class="label label-info" ng:show="device.size">
+                            {{device.size}}
+                        </span>
+                        <span class="label label-success">
+                            {{device.ceph.details.cluster}}@{{device.ceph.details.id}}
+                        </span>
+					</p>
+				</div>
+			</div>
+		</div>
+		<dialog ng:show="removeOSD">
+            <div class="modal-header">
+                <h4><span ng:hide="removeOSD.bay">{{removeOSD.name}}</span><span ng:show="removeOSD.bay">SLOT {{removeOSD.bay}} <small><small>{{removeOSD.name}}</small></small></span></h4>
+            </div>
+			<div class="modal-body">
+				<label>Are you ABSOLUTELY sure you want to remove this device from the storage cluster?</label>
+				<progress-spinner ng:show="cephRemoveOsdProcessing"></progress-spinner>
+			</div>
+            <div class="modal-footer">
+                <a ng:hide="cephRemoveOsdProcessing" ng:click="cephRemoveOsd(removeOSD);" class="btn btn-default btn-flat" translate>Remove</a>
+                <a ng:hide="cephRemoveOsdProcessing" ng:click="toggleRemoveOSD();" class="btn btn-default btn-flat" translate>Cancel</a>
+            </div>
+        </dialog>
+		<label>Active Journals</label>
+		<div class="list-group">
+			<div ng:repeat="device in blockDevices"  ng:show="device.ceph.journal" class="list-group-item list-group-item-large">
+				<a class="list-group-btn" ng:click="$parent.deviceDetails = device" title="Details">
+					<i class="fa fa-question"></i>
+				</a>
 				<div class="list-group-main">
 					<div class="list-group-icon" ng:show="device.rota == '1'">
 						<i class="fa fa-database"></i>
@@ -12,16 +57,179 @@
 					<div class="list-group-icon" ng:show="device.rota == '0'">
 						<i class="fa fa-microchip"></i>
 					</div>
-					<h4>{{device.name}}</h4>
+					<h4 class="list-group-item-heading"><span ng:hide="device.bay">{{device.name}}</span><span ng:show="device.bay">SLOT {{device.bay}} <small><small>{{device.name}}</small></small></span></h4>
+					<p class="list-group-item-text">
+						<span class="label label-info" ng:show="device.size">
+							{{device.size}}
+						</span>
+						<span ng:repeat="journalFor in device.ceph.journalFor" class="label label-success" ng:show="journalFor">
+							{{journalFor}}
+						</span>
+					</p>
 				</div>
 			</div>
 		</div>
+		<label>Available Devices</label>
+		<div class="list-group">
+			<div ng:repeat="device in blockDevices" ng:show="device.available" class="list-group-item list-group-item-large">
+                <a class="list-group-btn" ng:click="$parent.deviceDetails = device" title="Details">
+                    <i class="fa fa-question"></i>
+                </a>
+				<a class="list-group-btn" ng:click="toggleAddOSD(device)" title="Add to Cluster">
+					<i class="fa fa-plus"></i>
+				</a>
+				<div class="list-group-main">
+					<div class="list-group-icon" ng:show="device.rota == '1'">
+						<i class="fa fa-database"></i>
+					</div>
+					<div class="list-group-icon" ng:show="device.rota == '0'">
+						<i class="fa fa-microchip"></i>
+					</div>
+					<h4 class="list-group-item-heading"><span ng:hide="device.bay">{{device.name}}</span><span ng:show="device.bay">SLOT {{device.bay}} <small><small>{{device.name}}</small></small></span></h4>
+					<p class="list-group-item-text">
+                        <span class="label label-info" ng:show="device.size">
+                            {{device.size}}
+                        </span>
+                        <span class="label label-warning" style="text-transform:uppercase" ng:show="device.tran">
+                            {{device.tran}}
+                        </span>
+                        <span class="label label-success" style="text-transform:uppercase" ng:show="device.state == 'running'">
+                            {{device.state}}
+                        </span>
+                        <span class="label label-error" style="text-transform:uppercase" ng:show="device.state != 'running'">
+                            {{device.state}}
+                        </span>
+					</p>
+				</div>
+			</div>
+		</div>
+		<dialog ng:show="addOSD">
+            <div class="modal-header">
+                <h4><span ng:hide="addOSD.bay">{{addOSD.name}}</span><span ng:show="addOSD.bay">SLOT {{addOSD.bay}} <small><small>{{addOSD.name}}</small></small></span></h4>
+            </div>
+			<div class="modal-body scrollable">
+				<label>Click "Add" to have data and journaling on the same device, or choose an available SSD below as a journaling device.</label>
+				<div class="list-group" ng:hide="cephAddOsdProcessing">
+					<div ng:repeat="device in blockDevices" ng:show="device.ceph.canBeJournal" class="list-group-item list-group-item-large">
+						<a class="list-group-main" ng:click="cephAddOsd(addOSD, device);">
+							<div class="list-group-icon">
+								<i class="fa fa-microchip"></i>
+							</div>
+							<h4 class="list-group-item-heading"><span ng:hide="device.bay">{{device.name}}</span><span ng:show="device.bay">SLOT {{device.bay}} <small><small>{{device.name}}</small></small></span></h4>
+							<p class="list-group-item-text">
+								<span class="label label-info" ng:show="device.size">
+									{{device.size}}
+								</span>
+								<span class="label label-warning" style="text-transform:uppercase" ng:show="device.tran">
+									{{device.tran}}
+								</span>
+								<span class="label label-success" style="text-transform:uppercase" ng:show="device.state == 'running'">
+									{{device.state}}
+								</span>
+								<span class="label label-error" style="text-transform:uppercase" ng:show="device.state != 'running'">
+									{{device.state}}
+								</span>
+							</p>
+						</a>
+					</div>
+				</div>
+				<progress-spinner ng:show="cephAddOsdProcessing"></progress-spinner>
+			</div>
+            <div class="modal-footer">
+                <a ng:hide="cephAddOsdProcessing" ng:click="cephAddOsd(addOSD);" class="btn btn-default btn-flat" translate>Add</a>
+                <a ng:hide="cephAddOsdProcessing" ng:click="toggleAddOSD();" class="btn btn-default btn-flat" translate>Cancel</a>
+            </div>
+        </dialog>
+		<dialog ng:show="deviceDetails">
+            <div class="modal-header">
+                <h4>{{deviceDetails.name}}</h4>
+            </div>
+			<div class="modal-body scrollable">
+				<div ng:repeat="(key, value) in deviceDetails" class="list-group-item">
+					<label>{{key}}:</label>
+					<span>{{value}}</span>
+				</div>
+			</div>
+            <div class="modal-footer">
+                <a ng:click="$parent.deviceDetails = null;" class="btn btn-default btn-flat" translate>Close</a>
+            </div>
+        </dialog>
+		<dialog ng:show="megaraidBuilding">
+			<div class="modal-header">
+				<h4>MegaRaid</h4>
+			</div>
+			<div class="modal-body">
+				<p>Ceph works best with individual disk, but your controller does not support this.</p>
+				<p>The controller is now being set up so that each disk is in it's own RAID 0.</p>
+				<p>Although this is not ideal, it is better than than setting up multi-disk RAIDs</p>
+				<p>The page will reload when it the process is complete. Please wait... </p>
+				<progress-spinner></progress-spinner>
+			</div>
+			<div class="modal-footer"></div>
+		</dialog>
+		
+		<floating-toolbar>
+			<a ng:show="megaraidExists" ng:click="$parent.megaraidBuilding = true; $scope.MegaRAID_build();" class="btn btn-default btn-flat" translate>Setup Non-JBOD</a>
+		</floating-toolbar>
 	</uib-tab>
     <uib-tab heading="{{'Monitors'|translate}}">
-		
-	</uib-tab>
-    <uib-tab heading="{{'Object Block Stores'|translate}}">
-		
+		<uib-tabset>
+			<uib-tab heading="{{'List'|translate}}">
+			<progress-spinner ng:hide="monitors"></progress-spinner>
+				<h4 style="text-align:right">Cluster Age: {{age}}</h4>
+				<div class="list-group">
+					<div ng:repeat="mon in monitors.monmap.mons" ng:show="monitors" class="list-group-item list-group-item-large">
+						<div class="list-group-main">
+							<div class="list-group-icon">
+								<i class="fa fa-desktop"></i>
+							</div>
+							<h4 class="list-group-item-heading">{{mon.name}}</h4>
+							<p class="list-group-item-text">
+								<span class="label label-info">
+									{{mon.addr}}
+								</span>
+							</p>
+						</div>
+					</div>
+				</div>
+			</uib-tab>
+			<uib-tab heading="{{'Object Storage Device Map'|translate}}" ng:click="cephOsdTree()">
+				<style>
+					.node {
+					  cursor: pointer;
+					}
+					.node square {
+					  fill: #55aeba;
+					  stroke: #55aeba;
+					  //stroke-width: 2px;
+					}
+					.node text {
+						font: 16px/1.2 Helvetica, Arial, sans-serif;
+						fill: #37424a;
+					}
+					.link {
+					  fill: none;
+					  stroke: #dae2e2;
+					  stroke-width: 2px;
+					}
+				</style>
+				<div id="osd" />
+			</uib-tab>
+			<uib-tab heading="{{'Page Group Status'|translate}}" ng:click="cephPgStat()">
+				<style>
+					path {
+					  stroke: #e6e8e8;
+					  fill-rule: evenodd;
+					}
+					text {
+					  font: 12px/1.2 Helvetica, Arial, sans-serif;
+					}
+					text.center {
+					  font: 16px/1.2 Helvetica, Arial, sans-serif;
+					}
+				</style>
+				<div id="pgs" />
+			</uib-tab>
 	</uib-tab>
     <uib-tab heading="{{'File Systems'|translate}}">
 		
@@ -30,3 +238,4 @@
 		
 	</uib-tab>
 </uib-tabset>
+

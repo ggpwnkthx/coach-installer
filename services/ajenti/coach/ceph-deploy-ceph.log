@@ -1,0 +1,64 @@
+[2017-07-17 13:26:47,896][ceph_deploy.conf][DEBUG ] found configuration file at: /home/mindhead/.cephdeploy.conf
+[2017-07-17 13:26:47,896][ceph_deploy.cli][INFO  ] Invoked (1.5.32): /usr/bin/ceph-deploy osd prepare --fs-type btrfs store01:/dev/sdc
+[2017-07-17 13:26:47,896][ceph_deploy.cli][INFO  ] ceph-deploy options:
+[2017-07-17 13:26:47,896][ceph_deploy.cli][INFO  ]  username                      : None
+[2017-07-17 13:26:47,896][ceph_deploy.cli][INFO  ]  disk                          : [('store01', '/dev/sdc', None)]
+[2017-07-17 13:26:47,897][ceph_deploy.cli][INFO  ]  dmcrypt                       : False
+[2017-07-17 13:26:47,897][ceph_deploy.cli][INFO  ]  verbose                       : False
+[2017-07-17 13:26:47,897][ceph_deploy.cli][INFO  ]  bluestore                     : None
+[2017-07-17 13:26:47,897][ceph_deploy.cli][INFO  ]  overwrite_conf                : False
+[2017-07-17 13:26:47,897][ceph_deploy.cli][INFO  ]  subcommand                    : prepare
+[2017-07-17 13:26:47,897][ceph_deploy.cli][INFO  ]  dmcrypt_key_dir               : /etc/ceph/dmcrypt-keys
+[2017-07-17 13:26:47,897][ceph_deploy.cli][INFO  ]  quiet                         : False
+[2017-07-17 13:26:47,897][ceph_deploy.cli][INFO  ]  cd_conf                       : <ceph_deploy.conf.cephdeploy.Conf instance at 0x7f257ef915f0>
+[2017-07-17 13:26:47,897][ceph_deploy.cli][INFO  ]  cluster                       : ceph
+[2017-07-17 13:26:47,897][ceph_deploy.cli][INFO  ]  fs_type                       : btrfs
+[2017-07-17 13:26:47,897][ceph_deploy.cli][INFO  ]  func                          : <function osd at 0x7f257e575050>
+[2017-07-17 13:26:47,898][ceph_deploy.cli][INFO  ]  ceph_conf                     : None
+[2017-07-17 13:26:47,898][ceph_deploy.cli][INFO  ]  default_release               : False
+[2017-07-17 13:26:47,898][ceph_deploy.cli][INFO  ]  zap_disk                      : False
+[2017-07-17 13:26:47,898][ceph_deploy][ERROR ] ConfigError: Cannot load config: [Errno 2] No such file or directory: 'ceph.conf'; has `ceph-deploy new` been run in this directory?
+
+[2017-07-17 13:46:08,422][ceph_deploy.conf][DEBUG ] found configuration file at: /home/mindhead/.cephdeploy.conf
+[2017-07-17 13:46:08,422][ceph_deploy.cli][INFO  ] Invoked (1.5.32): /usr/bin/ceph-deploy osd prepare --fs-type btrfs store01:/dev/sdc
+[2017-07-17 13:46:08,422][ceph_deploy.cli][INFO  ] ceph-deploy options:
+[2017-07-17 13:46:08,422][ceph_deploy.cli][INFO  ]  username                      : None
+[2017-07-17 13:46:08,422][ceph_deploy.cli][INFO  ]  disk                          : [('store01', '/dev/sdc', None)]
+[2017-07-17 13:46:08,422][ceph_deploy.cli][INFO  ]  dmcrypt                       : False
+[2017-07-17 13:46:08,422][ceph_deploy.cli][INFO  ]  verbose                       : False
+[2017-07-17 13:46:08,423][ceph_deploy.cli][INFO  ]  bluestore                     : None
+[2017-07-17 13:46:08,423][ceph_deploy.cli][INFO  ]  overwrite_conf                : False
+[2017-07-17 13:46:08,423][ceph_deploy.cli][INFO  ]  subcommand                    : prepare
+[2017-07-17 13:46:08,423][ceph_deploy.cli][INFO  ]  dmcrypt_key_dir               : /etc/ceph/dmcrypt-keys
+[2017-07-17 13:46:08,423][ceph_deploy.cli][INFO  ]  quiet                         : False
+[2017-07-17 13:46:08,423][ceph_deploy.cli][INFO  ]  cd_conf                       : <ceph_deploy.conf.cephdeploy.Conf instance at 0x7f3accb075f0>
+[2017-07-17 13:46:08,423][ceph_deploy.cli][INFO  ]  cluster                       : ceph
+[2017-07-17 13:46:08,423][ceph_deploy.cli][INFO  ]  fs_type                       : btrfs
+[2017-07-17 13:46:08,423][ceph_deploy.cli][INFO  ]  func                          : <function osd at 0x7f3acc0eb050>
+[2017-07-17 13:46:08,423][ceph_deploy.cli][INFO  ]  ceph_conf                     : None
+[2017-07-17 13:46:08,423][ceph_deploy.cli][INFO  ]  default_release               : False
+[2017-07-17 13:46:08,424][ceph_deploy.cli][INFO  ]  zap_disk                      : False
+[2017-07-17 13:46:08,424][ceph_deploy][ERROR ] ConfigError: Cannot load config: [Errno 2] No such file or directory: 'ceph.conf'; has `ceph-deploy new` been run in this directory?
+
+[2017-07-17 13:46:56,225][ceph_deploy.conf][DEBUG ] found configuration file at: /home/mindhead/.cephdeploy.conf
+[2017-07-17 13:46:56,225][ceph_deploy.cli][INFO  ] Invoked (1.5.32): /usr/bin/ceph-deploy --ceph-conf /etc/ceph/ceph.conf osd prepare --fs-type btrfs store01:/dev/sdc
+[2017-07-17 13:46:56,225][ceph_deploy.cli][INFO  ] ceph-deploy options:
+[2017-07-17 13:46:56,225][ceph_deploy.cli][INFO  ]  username                      : None
+[2017-07-17 13:46:56,225][ceph_deploy.cli][INFO  ]  disk                          : [('store01', '/dev/sdc', None)]
+[2017-07-17 13:46:56,225][ceph_deploy.cli][INFO  ]  dmcrypt                       : False
+[2017-07-17 13:46:56,225][ceph_deploy.cli][INFO  ]  verbose                       : False
+[2017-07-17 13:46:56,226][ceph_deploy.cli][INFO  ]  bluestore                     : None
+[2017-07-17 13:46:56,226][ceph_deploy.cli][INFO  ]  overwrite_conf                : False
+[2017-07-17 13:46:56,226][ceph_deploy.cli][INFO  ]  subcommand                    : prepare
+[2017-07-17 13:46:56,226][ceph_deploy.cli][INFO  ]  dmcrypt_key_dir               : /etc/ceph/dmcrypt-keys
+[2017-07-17 13:46:56,226][ceph_deploy.cli][INFO  ]  quiet                         : False
+[2017-07-17 13:46:56,226][ceph_deploy.cli][INFO  ]  cd_conf                       : <ceph_deploy.conf.cephdeploy.Conf instance at 0x7f2a6610d5f0>
+[2017-07-17 13:46:56,226][ceph_deploy.cli][INFO  ]  cluster                       : ceph
+[2017-07-17 13:46:56,226][ceph_deploy.cli][INFO  ]  fs_type                       : btrfs
+[2017-07-17 13:46:56,226][ceph_deploy.cli][INFO  ]  func                          : <function osd at 0x7f2a656f1050>
+[2017-07-17 13:46:56,226][ceph_deploy.cli][INFO  ]  ceph_conf                     : /etc/ceph/ceph.conf
+[2017-07-17 13:46:56,226][ceph_deploy.cli][INFO  ]  default_release               : False
+[2017-07-17 13:46:56,227][ceph_deploy.cli][INFO  ]  zap_disk                      : False
+[2017-07-17 13:46:56,227][ceph_deploy.osd][DEBUG ] Preparing cluster ceph disks store01:/dev/sdc:
+[2017-07-17 13:46:56,227][ceph_deploy][ERROR ] RuntimeError: bootstrap-osd keyring not found; run 'gatherkeys'
+

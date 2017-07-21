@@ -9,9 +9,13 @@ dependencies:
     - !!python/object:aj.plugins.PluginDependency {
         plugin_name: core
     }
+    - !!python/object:aj.plugins.PluginDependency {
+        plugin_name: dashboard
+    }
 resources:
     - 'resources/js/module.es'
     - 'resources/js/router.es'
+    - 'resources/vendor/d3/d3.v3.min.js'
     - 'resources/partial/bootstrap.html'
     - 'resources/js/controllers/bootstrap.controller.es'
     - 'resources/js/services/bootstrap.service.es'
@@ -23,4 +27,7 @@ resources:
     - 'resources/partial/storage.html'
     - 'resources/js/controllers/storage.controller.es'
     - 'resources/js/services/storage.service.es'
+    - 'resources/partial/widget.html'
+    - 'resources/partial/widget.config.html'
+    - 'resources/js/controllers/widget.controller.es'
     - 'ng:coach'

@@ -31,21 +31,22 @@
 					</div>
 					<h4 class="list-group-item-heading">
 						{{iface.name}}
-						
 					</h4>
 					<p class="list-group-item-text">
+						<span class="label label-info" ng:show="iface.type">
+							{{iface.type}}
+						</span>
 						<span class="label label-success" ng:show="iface.state == 'up'">
 							<i class="fa fa-fw fa-check"></i> UP
 						</span>
 						<span class="label label-warning" ng:show="iface.state == 'down'">
 							<i class="fa fa-fw fa-warning"></i> DOWN
 						</span>
-						
-						<span class="label label-info" ng:show="iface.ipv4">
-							{{iface.ipv4}}
+						<span ng:repeat="ipv4 in iface.ipv4" class="label label-info" ng:show="ipv4">
+							{{ipv4}}
 						</span>
-						<span class="label label-info" ng:show="iface.ipv6">
-							{{iface.ipv6}}
+						<span ng:repeat="ipv6 in iface.ipv6" class="label label-info" ng:show="ipv6">
+							{{ipv6}}
 						</span>
 					</p>
 				</div>

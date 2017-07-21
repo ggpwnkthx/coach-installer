@@ -5,6 +5,8 @@ then
   apt-get -y install wget btrfs-tools
 fi
 
+apt-get -y install btrfs-tools
+
 #wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/download_and_run -O download_and_run
 chmod +x download_and_run
 

@@ -1,11 +1,15 @@
 #!/bin/bash
+apt-get -y update
 
 if [ -z "$(command -v wget)" ]
 then
   apt-get -y install wget btrfs-tools
 fi
 
-apt-get -y install btrfs-tools
+if [ "$(apt-cache policy btrfs-tools | grep Installed | awk '{print $2}'" == "(none)" ]
+then
+  apt-get -y install btrfs-tools
+fi
 
 #wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/download_and_run -O download_and_run
 chmod +x download_and_run

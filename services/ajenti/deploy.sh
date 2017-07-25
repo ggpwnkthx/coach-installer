@@ -2,7 +2,7 @@
 
 if [ -z "$(command -v curl)" ]
 then
-  apt-get -y install curl git
+  apt-get -y install curl
 fi
 
 curl https://raw.githubusercontent.com/ajenti/ajenti/master/scripts/install.sh | bash -s -

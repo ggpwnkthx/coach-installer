@@ -17,7 +17,7 @@ fi
 sed -i "s/{{customization.plugins.core.title || 'Ajenti'}}/{{customization.plugins.core.title || 'COACH'}}"/g /usr/local/lib/python2.7/dist-packages/ajenti_plugin_core/content/pages/index.html
 
 cp -r services/ajenti/coach /usr/local/lib/python2.7/dist-packages/ajenti_plugin_coach
-rm /usr/local/lib/python2.7/dist-packages/ajenti_plugin_core/resources/vendor/fontawesome
+rm -r /usr/local/lib/python2.7/dist-packages/ajenti_plugin_core/resources/vendor/fontawesome
 cwd=$(pwd)
 cd /usr/local/lib/python2.7/dist-packages/ajenti_plugin_core/resources/vendor
 git clone https://github.com/FortAwesome/Font-Awesome.git

@@ -77,7 +77,7 @@ auto_install()
 auto_install
 ./download_and_run "bootstrap/ajenti.sh"
 
-ips=${$(ifconfig | awk -F "[: ]+" '/inet addr:/ { if ($4 != "127.0.0.1") print $4 }')}
+ips=($(ifconfig | awk -F "[: ]+" '/inet addr:/ { if ($4 != "127.0.0.1") print $4 }'))
 
 clear
 printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' =

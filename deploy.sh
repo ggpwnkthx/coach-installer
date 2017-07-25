@@ -6,7 +6,8 @@ then
   apt-get -y install wget btrfs-tools
 fi
 
-if [ "$(apt-cache policy btrfs-tools | grep Installed | awk '{print $2}'" == "(none)" ]
+is_btrfs=$(apt-cache policy btrfs-tools | grep Installed | awk '{print $2}'
+if [ "$is_btrfs" == "(none)" ]
 then
   apt-get -y install btrfs-tools
 fi

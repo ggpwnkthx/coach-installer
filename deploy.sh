@@ -3,7 +3,7 @@ apt-get -y update
 
 if [ -z "$(command -v wget)" ]
 then
-  apt-get -y install wget btrfs-tools
+  apt-get -y install wget
 fi
 
 is_btrfs=$(apt-cache policy btrfs-tools | grep Installed | awk '{print $2}')

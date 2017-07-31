@@ -20,7 +20,7 @@
 						<div class="list-group-icon" ng:hide="device.rota">
 							<i class="fa fa-microchip"></i>
 						</div>
-						<h4 class="list-group-item-heading"><span ng:hide="device.bay">{{device.name}}</span><span ng:show="device.bay">SLOT {{device.bay}} <small><small>{{device.name}}</small></small></span></h4>
+						<h4 class="list-group-item-heading"><span ng:show="device.bay === 'undefined'">{{device.name}}</span><span ng:show="device.bay !== 'undefined'">SLOT {{device.bay}} <small><small>{{device.name}}</small></small></span></h4>
 						<p class="list-group-item-text">
 							<span class="label label-info" ng:show="device.size">
 								{{device.size}}
@@ -34,7 +34,7 @@
 			</div>
 			<dialog ng:show="removeOSD">
 				<div class="modal-header">
-					<h4><span ng:hide="removeOSD.bay">{{removeOSD.name}}</span><span ng:show="removeOSD.bay">SLOT {{removeOSD.bay}} <small><small>{{removeOSD.name}}</small></small></span></h4>
+					<h4><span ng:show="removeOSD.bay === 'undefined'">{{removeOSD.name}}</span><span ng:show="removeOSD.bay !== 'undefined'">SLOT {{removeOSD.bay}} <small><small>{{removeOSD.name}}</small></small></span></h4>
 				</div>
 				<div class="modal-body">
 					<label>Are you ABSOLUTELY sure you want to remove this device from the storage cluster?</label>
@@ -58,7 +58,7 @@
 						<div class="list-group-icon" ng:show="device.rota == '0'">
 							<i class="fa fa-microchip"></i>
 						</div>
-						<h4 class="list-group-item-heading"><span ng:hide="device.bay">{{device.name}}</span><span ng:show="device.bay">SLOT {{device.bay}} <small><small>{{device.name}}</small></small></span></h4>
+						<h4 class="list-group-item-heading"><span ng:show="device.bay === 'undefined'">{{device.name}}</span><span ng:show="device.bay !== 'undefined'">SLOT {{device.bay}} <small><small>{{device.name}}</small></small></span></h4>
 						<p class="list-group-item-text">
 							<span class="label label-info" ng:show="device.size">
 								{{device.size}}
@@ -86,7 +86,7 @@
 						<div class="list-group-icon" ng:show="device.rota == '0'">
 							<i class="fa fa-microchip"></i>
 						</div>
-						<h4 class="list-group-item-heading"><span ng:hide="device.bay">{{device.name}}</span><span ng:show="device.bay">SLOT {{device.bay}} <small><small>{{device.name}}</small></small></span></h4>
+						<h4 class="list-group-item-heading"><span ng:show="device.bay === 'undefined'">{{device.name}}</span><span ng:show="device.bay !== 'undefined'">SLOT {{device.bay}} <small><small>{{device.name}}</small></small></span></h4>
 						<p class="list-group-item-text">
 							<span class="label label-info" ng:show="device.size">
 								{{device.size}}
@@ -106,7 +106,7 @@
 			</div>
 			<dialog ng:show="addOSD">
 				<div class="modal-header">
-					<h4><span ng:hide="addOSD.bay">{{addOSD.name}}</span><span ng:show="addOSD.bay">SLOT {{addOSD.bay}} <small><small>{{addOSD.name}}</small></small></span></h4>
+					<h4><span ng:show="addOSD.bay === 'undefined'">{{addOSD.name}}</span><span ng:show="addOSD.bay !== 'undefined'">SLOT {{addOSD.bay}} <small><small>{{addOSD.name}}</small></small></span></h4>
 				</div>
 				<div class="modal-body scrollable">
 					<label>Click "Add" to have data and journaling on the same device, or choose an available SSD below as a journaling device.</label>
@@ -116,7 +116,7 @@
 								<div class="list-group-icon">
 									<i class="fa fa-microchip"></i>
 								</div>
-								<h4 class="list-group-item-heading"><span ng:hide="device.bay">{{device.name}}</span><span ng:show="device.bay">SLOT {{device.bay}} <small><small>{{device.name}}</small></small></span></h4>
+								<h4 class="list-group-item-heading"><span ng:show="device.bay === 'undefined'">{{device.name}}</span><span ng:show="device.bay !== 'undefined'">SLOT {{device.bay}} <small><small>{{device.name}}</small></small></span></h4>
 								<p class="list-group-item-text">
 									<span class="label label-info" ng:show="device.size">
 										{{device.size}}

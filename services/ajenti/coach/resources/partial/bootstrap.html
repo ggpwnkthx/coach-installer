@@ -1,78 +1,80 @@
-<br/>
-<h1 translate>Cluster Bootstrap</h1>
-<hr></hr>
-<h2 translate>Storage Fabric</h2>
-<hr></hr>
-<label translate>Select the interface that will be used for your storage fabric.</label>
-<br/>
-<progress-spinner ng:hide="links != null"></progress-spinner>
+<div root-access>
+	<br/>
+	<h1 translate>Cluster Bootstrap</h1>
+	<hr></hr>
+	<h2 translate>Storage Fabric</h2>
+	<hr></hr>
+	<label translate>Select the interface that will be used for your storage fabric.</label>
+	<br/>
+	<progress-spinner ng:hide="links != null"></progress-spinner>
 
-<div class="list-group">
-	<a href="#" ng:repeat="iface in links" class="list-group-item" ng:click="$parent.configuringInterface = iface; dhcpSearch(configuringInterface.name); console.log(iface)">
-		<h4 class="mb-1">{{iface.name}}</h4>
-		<span class="label label-info" ng:show="iface.type">
-			{{iface.type}}
-		</span>
-		<span ng:repeat="ipv4 in iface.ipv4" class="label label-info" ng:show="ipv4">
-			{{ipv4}}
-		</span>
-		<span ng:repeat="ipv6 in iface.ipv6" class="label label-info" ng:show="ipv6">
-			{{ipv6}}
-		</span>
-	</a>
+	<div class="list-group">
+		<a href="#" ng:repeat="iface in links" class="list-group-item" ng:click="$parent.configuringInterface = iface; dhcpSearch(configuringInterface.name); console.log(iface)">
+			<h4 class="mb-1">{{iface.name}}</h4>
+			<span class="label label-info" ng:show="iface.type">
+				{{iface.type}}
+			</span>
+			<span ng:repeat="ipv4 in iface.ipv4" class="label label-info" ng:show="ipv4">
+				{{ipv4}}
+			</span>
+			<span ng:repeat="ipv6 in iface.ipv6" class="label label-info" ng:show="ipv6">
+				{{ipv6}}
+			</span>
+		</a>
+	</div>
+	<dialog ng:show="configuringInterface">
+		<div class="modal-header">
+			<h4>{{configuringInterface.name}}</h4>
+		</div>
+		<div class="modal-body">
+			<div ng-show="gaterthingData">
+				<label translate>Gathering data from this interface about its fabric. Please wait...</label>
+				<progress-spinner></progress-spinner>
+			</div>
+			<div ng:show="dhcpFoundBut">
+				<label translate>A DHCP server was found on this fabric, but no COACH data was found.</label>
+				<label translate>To add this device to a cluster, please use an interface that has a COACH prepared DHCP server.</label>
+				<label translate>To start a new cluster, use an interface that does not have a DHCP server on it's fabric.</label>
+			</div>
+			<div ng:show="dhcpFound">
+				<label translate>We're ready to add this device to the cluster.</label>
+			</div>
+			<div ng:show="dhcpNotFound">
+				<label translate>No cluster data found on this fabric.</label>
+				<label translate>Would you like to bootstrap a new cluster?</label>
+			</div>
+			<div class="form-group" ng:show="showBootstrap">
+				<label translate>Fully Qualified Domain Name (FQDN) for this server:</label><br />
+				<input ng:model="configuringInterface.fqdn" type="text" class="form-control" />
+				<div ng:hide="configuringInterface.fqdn">
+					<small>Explanation: hostname.domain.tdl</small><br />
+					<small>Example: {{fqdn}}</small>
+				</div>
+				<br /><br />
+				<label translate>Classless Inter-Domain Routing (CIDR) address for the storge fabric:</label><br />
+				<input ng:model="configuringInterface.ipv4[0]" type="text" class="form-control" placeholder="192.168.0.0/24" />
+				<div ng:hide="configuringInterface.ipv4[0]">
+					<small>Explanation: [Network IP]/[Netmask Bits] or [Network IP]/[Netmask]</small><br />
+					<small>Example: 192.168.0.0/24 or 192.168.0.0/255.255.255.0</small>
+				</div>
+			</div>
+			<div ng-show="creatingFabric">
+				<label translate>Setting up the new fabric and all of its supporting services.</label><br />
+				<label translate>This is going to take a little while, so hang tight!</label><br />
+				<small>If you accidentally close the page, you can restart the process and it will try to pick up where it left off.</small>
+				<progress-spinner></progress-spinner>
+			</div>
+			<div ng-show="bootstrapDone">
+				<label translate>The bootstrap process has finished!</label><br />
+				<label translate>Let's get some disk into our storage cluster.</label>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<a ng:show="dhcpFound" ng:click="dhcpSearch(configuringInterface.name)" class="btn btn-default btn-flat" translate>Do it!</a>
+			<a ng:show="dhcpNotFound" ng:click="bootstrap()" class="btn btn-default btn-flat" translate>Yes</a>
+			<a ng:show="showBootstrap" ng:click="createCluster($parent.configuringInterface)" class="btn btn-default btn-flat" translate>Create</a>
+			<a ng:hide="processingBootstrap" ng:click="$parent.configuringInterface = null; reload()" class="btn btn-default btn-flat" translate>Close</a>
+			<a ng:show="bootstrapDone" ng:click="gotoStorage()" class="btn btn-default btn-flat" translate>Finish</a>
+		</div>
+	</dialog>
 </div>
-<dialog ng:show="configuringInterface">
-	<div class="modal-header">
-		<h4>{{configuringInterface.name}}</h4>
-	</div>
-	<div class="modal-body">
-		<div ng-show="gaterthingData">
-			<label translate>Gathering data from this interface about its fabric. Please wait...</label>
-			<progress-spinner></progress-spinner>
-		</div>
-		<div ng:show="dhcpFoundBut">
-			<label translate>A DHCP server was found on this fabric, but no COACH data was found.</label>
-			<label translate>To add this device to a cluster, please use an interface that has a COACH prepared DHCP server.</label>
-			<label translate>To start a new cluster, use an interface that does not have a DHCP server on it's fabric.</label>
-		</div>
-		<div ng:show="dhcpFound">
-			<label translate>We're ready to add this device to the cluster.</label>
-		</div>
-		<div ng:show="dhcpNotFound">
-			<label translate>No cluster data found on this fabric.</label>
-			<label translate>Would you like to bootstrap a new cluster?</label>
-		</div>
-		<div class="form-group" ng:show="showBootstrap">
-			<label translate>Fully Qualified Domain Name (FQDN) for this server:</label><br />
-			<input ng:model="configuringInterface.fqdn" type="text" class="form-control" />
-			<div ng:hide="configuringInterface.fqdn">
-				<small>Explanation: hostname.domain.tdl</small><br />
-				<small>Example: {{fqdn}}</small>
-			</div>
-			<br /><br />
-			<label translate>Classless Inter-Domain Routing (CIDR) address for the storge fabric:</label><br />
-			<input ng:model="configuringInterface.ipv4[0]" type="text" class="form-control" placeholder="192.168.0.0/24" />
-			<div ng:hide="configuringInterface.ipv4[0]">
-				<small>Explanation: [Network IP]/[Netmask Bits] or [Network IP]/[Netmask]</small><br />
-				<small>Example: 192.168.0.0/24 or 192.168.0.0/255.255.255.0</small>
-			</div>
-		</div>
-		<div ng-show="creatingFabric">
-			<label translate>Setting up the new fabric and all of its supporting services.</label><br />
-			<label translate>This is going to take a little while, so hang tight!</label><br />
-			<small>If you accidentally close the page, you can restart the process and it will try to pick up where it left off.</small>
-			<progress-spinner></progress-spinner>
-		</div>
-		<div ng-show="bootstrapDone">
-			<label translate>The bootstrap process has finished!</label><br />
-			<label translate>Let's get some disk into our storage cluster.</label>
-		</div>
-	</div>
-	<div class="modal-footer">
-		<a ng:show="dhcpFound" ng:click="dhcpSearch(configuringInterface.name)" class="btn btn-default btn-flat" translate>Do it!</a>
-		<a ng:show="dhcpNotFound" ng:click="bootstrap()" class="btn btn-default btn-flat" translate>Yes</a>
-		<a ng:show="showBootstrap" ng:click="createCluster($parent.configuringInterface)" class="btn btn-default btn-flat" translate>Create</a>
-		<a ng:hide="processingBootstrap" ng:click="$parent.configuringInterface = null; reload()" class="btn btn-default btn-flat" translate>Close</a>
-		<a ng:show="bootstrapDone" ng:click="gotoStorage()" class="btn btn-default btn-flat" translate>Finish</a>
-	</div>
-</dialog>

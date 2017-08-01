@@ -38,7 +38,10 @@ class Handler(HttpPlugin):
 	def handle_api_storage_local_bays(self, http_context):
 		self.runCMD("chmod +x "+self.getPluginPath()+"/scripts/find_bays.sh")
 		output = self.runCMD(self.getPluginPath()+"/scripts/find_bays.sh").replace("\n", ",")
-		return json.loads("{"+output[:-1]+"}")
+		if output:
+			return json.loads("{"+output[:-1]+"}")
+		else:
+			return json.loads("{}")
 		
 	@url(r'/api/coach/storage/local/megaraid/exists')
 	@endpoint(api=True)

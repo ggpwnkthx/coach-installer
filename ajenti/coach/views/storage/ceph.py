@@ -27,7 +27,10 @@ class Handler(HttpPlugin):
 	@url(r'/api/coach/storage/ceph/mon/status')
 	@endpoint(api=True)
 	def handle_api_storage_monitor_status(self, http_context):
-		return json.loads(self.runCMD("ceph -f json mon_status"))
+		if self.runCMD("command -v ceph").replace("\n",""):
+			return json.loads(self.runCMD("ceph -f json mon_status"))
+		else:
+			return False
 
 	@url(r'/api/coach/storage/ceph/osd/details')
 	@endpoint(api=True)
@@ -96,28 +99,31 @@ class Handler(HttpPlugin):
 	@url(r'/api/coach/storage/ceph/osd/tree')
 	@endpoint(api=True)
 	def handle_api_storage_ceph_osd_tree(self, http_context):
-		osd_tree = json.loads(self.runCMD("ceph -f json osd tree"))
-		
-		for node in osd_tree['nodes']:
-			if node['type'] == 'root':
-				root = {
-					'name' : node['name'],
-					'children' : []
-				}
-			if node['type'] == 'host':
-				host = {
-					'name' : node['name'],
-					'children' : []
-				}
-				root['children'].append(host)
-			if node['type'] == 'osd':
-				host['children'].append({
-					'name' : node['name'],
-					'status' : node['status'],
-					'children' : []
-				})
-		
-		return root
+		if self.runCMD("command -v ceph").replace("\n",""):
+			osd_tree = json.loads(self.runCMD("ceph -f json osd tree"))
+			
+			for node in osd_tree['nodes']:
+				if node['type'] == 'root':
+					root = {
+						'name' : node['name'],
+						'children' : []
+					}
+				if node['type'] == 'host':
+					host = {
+						'name' : node['name'],
+						'children' : []
+					}
+					root['children'].append(host)
+				if node['type'] == 'osd':
+					host['children'].append({
+						'name' : node['name'],
+						'status' : node['status'],
+						'children' : []
+					})
+			
+			return root
+		else:
+			return False
 	
 	@url(r'/api/coach/storage/ceph/pg/tree')
 	@endpoint(api=True)

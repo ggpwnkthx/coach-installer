@@ -77,7 +77,7 @@ angular.module('coach').controller('CoachBootstrapController', function ($scope,
 			notify.info(data);
 			switch(data) {
 				case "Bootstrap completed.":
-					$scope.reload();
+					core.restart();
 					break;
 				default:
 					$scope.createCluster(config);

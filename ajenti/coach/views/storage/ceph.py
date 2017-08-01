@@ -195,6 +195,7 @@ class Handler(HttpPlugin):
 		if not config.has_key('cluster'):
 			config['cluster'] = 'ceph'
 		if not self.runCMD("ceph mds stat | grep $(hostname -s)").replace("\n",""):
+			self.runCMD("ceph-deploy --cluster "+config['cluster']+" gatherkeys $(hostname -s)")
 			self.runCMD("ceph-deploy --cluster "+config['cluster']+" mds create $(hostname -s)")
 			os.chdir(cwd)
 			return "Ceph Metadata services installed on this device."

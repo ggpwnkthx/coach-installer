@@ -20,7 +20,7 @@ ask_system_admin()
 {
   system_vendor=$(dmidecode | grep "Vendor: " | sed 's/^.*: //')
   case $system_vendor in
-    "Dell Inc.") ./download_and_run "sofware/dell/omsa.sh" -y ;;
+    "Dell Inc.") ./download_and_run "software/dell/omsa.sh" -y ;;
   esac
 }
 # Storage specific software and drivers

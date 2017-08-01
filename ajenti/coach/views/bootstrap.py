@@ -22,13 +22,39 @@ class Handler(HttpPlugin):
 		ps = subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
 		output = ps.communicate()[0]
 		return output
+	
+	@url(r'/api/coach/isCephInstalled')
+	@endpoint(api=True)
+	def handle_api_coach_isCephInstalled(self, http_context):
+		return os.path.isfile("/etc/ceph/ceph.conf");
+		
+	@url(r'/api/coach/installNetworkServices')
+	@endpoint(api=True)
+	def handle_api_coach_installNetworkServices(self, http_context):
+		if not self.runCMD("command -v docker").replace("\n",""):
+			self.runCMD("apt-get -y install docker.io")
+			return "Docker installed."
+		if not os.path.isfile("/etc/systemd/system/provisioner-dnsmasq.service"):
+			self.runCMD("chmod +x "+self.getPluginPath()+"/docker/provisioner/dnsmasq/deploy.sh")
+			self.runCMD(self.getPluginPath()+"/docker/provisioner/dnsmasq/deploy.sh")
+			return "DNS and DHCP services installed and running."
+		
+		return "Ready."
+			
+	@url(r'/api/coach/isCephFS')
+	@endpoint(api=True)
+	def handle_api_coach_isCephFS(self, http_context):
+		if self.runCMD("df -h | grep /mnt/ceph/fs").replace("\n","") == "":
+			return False
+		else:
+			return True
 		
 	@url(r'/api/coach/bootstrap')
 	@endpoint(api=True)
 	def handle_api_coach_bootstrap(self, http_context):
 		config = json.loads(http_context.body)
 		
-		is_ipcalc = self.runCMD("command -v ipcalc")
+		is_ipcalc = self.runCMD("command -v ipcalc").replace("\n","")
 		if not is_ipcalc:
 			self.runCMD("apt-get -y install ipcalc")
 			return "Networking dependancies were installed."

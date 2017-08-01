@@ -2,6 +2,18 @@ angular.module('coach').controller('CoachBootstrapController', function ($scope,
 	pageTitle.set('Fabric');
 
 	$scope.reload = () => {
+		$scope.task = "fabric";
+		bootstrap.isCephInstalled().then((data) => {
+			if(data){
+				$scope.task = "storage";
+			}
+		});
+		bootstrap.isCephFS().then((data) => {
+			if(data){
+				$scope.task = "network";
+				$scope.installNetworkServices();
+			}
+		});
 		fabric.getFQDN().then((data) => {
 			$scope.fqdn = data;
 		});
@@ -65,8 +77,7 @@ angular.module('coach').controller('CoachBootstrapController', function ($scope,
 			notify.info(data);
 			switch(data) {
 				case "Bootstrap completed.":
-					$scope.creatingFabric = false;
-					$scope.bootstrapDone = true;
+					$scope.reload();
 					break;
 				default:
 					$scope.createCluster(config);
@@ -75,8 +86,53 @@ angular.module('coach').controller('CoachBootstrapController', function ($scope,
 		});
 	}
 	
-	$scope.gotoStorage = () => {
-		core.restart();
-		$location.path("/view/cluster/storage");
+	$scope.installCephFS = (config = null) => {
+		$scope.task = "cephfs";
+		if(config == null) {
+			config = {
+				'cluster': 'ceph',
+				'fs': 'cephfs'
+			};
+		}
+		bootstrap.installCephFS(config).then((data) => {
+			notify.info(data);
+			switch(data) {
+				case "Clustered file system ready.":
+					$scope.mountCephFS();
+					break;
+				default:
+					$scope.installCephFS(config);
+					break;
+			}
+		});
+	}
+	
+	$scope.mountCephFS = () => {
+		bootstrap.mountCephFS().then((data) => {
+			notify.info(data);
+			switch(data) {
+				case "CephFS Ready.":
+					$scope.reload();
+					break;
+				default:
+					$scope.mountCephFS(config);
+					break;
+			}
+		});
+	}
+	
+	$scope.installNetworkServices = () => {
+		$scope.task = "network";
+		bootstrap.installNetworkServices().then((data) => {
+			notify.info(data);
+			switch(data) {
+				case "Ready.":
+					$scope.task = "done"
+					break;
+				default:
+					$scope.installNetworkServices();
+					break;
+			}
+		});
 	}
 });

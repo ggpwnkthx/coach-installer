@@ -7,6 +7,7 @@ import subprocess
 import os.path
 import json
 import re
+import shutil
 
 @component(HttpPlugin)
 class Handler(HttpPlugin):
@@ -177,3 +178,61 @@ class Handler(HttpPlugin):
 	def handle_api_storage_ceph_iops(self, http_context):
 		status = json.loads(self.runCMD("ceph -s -f json"))
 		return status
+		
+	@url(r'/api/coach/storage/ceph/fs/add')
+	@endpoint(api=True)
+	def handle_api_storage_ceph_fs_add(self, http_context):
+		cwd = os.getcwd()
+		os.chdir(self.getPluginPath()+"/ceph")
+		
+		config = json.loads(http_context.body)
+		if not config.has_key('cluster'):
+			config['cluster'] = 'ceph'
+		if self.runCMD("ceph mds stat | awk '{print $2}'").replace("\n","") == "":
+			self.runCMD("ceph-deploy --cluster "+config['cluster']+" ceph-deploy mds create $(hostname -s)")
+			os.chdir(cwd)
+		if config['fs'] not in self.runCMD("ceph fs ls"):
+			if "Error" in self.runCMD("ceph osd pool stats "+config['fs']+"_data"):
+				self.runCMD("ceph osd pool create "+config['fs']+"_data 128")
+				os.chdir(cwd)
+				return "OSD Pool '"+config['fs']+"_data' was created."
+			if "Error" in self.runCMD("ceph osd pool stats "+config['fs']+"_meta"):
+				self.runCMD("ceph osd pool create "+config['fs']+"_meta 128")
+				os.chdir(cwd)
+				return "OSD Pool '"+config['fs']+"_meta' was created."
+			self.runCMD("ceph fs new "+config['fs']+" "+config['fs']+"_meta "+config['fs']+"_data")
+			os.chdir(cwd)
+			return "Clustered file system '"+config['fs']+"' has been created."
+		
+		os.chdir(cwd)
+		return "Clustered file system ready."
+		
+	@url(r'/api/coach/storage/ceph/fs/mount')
+	@endpoint(api=True)
+	def handle_api_storage_ceph_fs_mount(self, http_context):
+		if not os.path.isdir("/mnt/ceph"):
+			os.makedirs("/mnt/ceph")
+			return "Created directory '/mnt/ceph'"
+		if not os.path.isdir("/mnt/ceph/fs"):
+			os.makedirs("/mnt/ceph/fs")
+			return "Created directory '/mnt/ceph/fs'"
+		if not os.path.isfile("/etc/systemd/system/ceph-client.service"):
+			shutil.copy2(self.getPluginPath()+"/ceph/services/ceph-client.service", "/etc/systemd/system/ceph-client.service")
+			self.runCMD("systemctl daemon-reload")
+			self.runCMD("systemctl stop ceph-client.service")
+			self.runCMD("systemctl enable ceph-client.service")
+			self.runCMD("systemctl start ceph-client.service")
+			return "Ceph client service installed and started."
+		if not os.path.isfile("/etc/ceph/mnt-ceph-fs.sh"):
+			shutil.copy2(self.getPluginPath()+"/ceph/services/mnt-ceph-fs.sh", "/etc/ceph/mnt-ceph-fs.sh")
+			self.runCMD("chmod +x /etc/ceph/mnt-ceph-fs.sh")
+			return "CephFS mounting script installed."
+		if not os.path.isfile("/etc/systemd/system/mnt-ceph-fs.service"):
+			shutil.copy2(self.getPluginPath()+"/ceph/services/mnt-ceph-fs.service", "/etc/systemd/system/mnt-ceph-fs.service")
+			self.runCMD("systemctl daemon-reload")
+			self.runCMD("systemctl stop mnt-ceph-fs.service")
+			self.runCMD("systemctl enable mnt-ceph-fs.service")
+			self.runCMD("systemctl start mnt-ceph-fs.service")
+			return "CephFS mounting service installed and started."
+		return "CephFS Ready."
+			

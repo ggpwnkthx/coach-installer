@@ -195,7 +195,7 @@ class Handler(HttpPlugin):
 		if not config.has_key('cluster'):
 			config['cluster'] = 'ceph'
 		if self.runCMD("systemctl | grep "+config['cluster']+"-mds@$(hostname -s).service | grep Active | awk '{print $2}'").replace("\n","") == "inactive":
-			self.runCMD("ceph-deploy --cluster "+config['cluster']+" mds create $(hostname -s)")
+			self.runCMD("ceph-deploy mds create $(hostname -s)")
 			os.chdir(cwd)
 			return "Ceph Metadata services installed on this device."
 		if config['fs'] not in self.runCMD("ceph fs ls"):

@@ -13,54 +13,56 @@ angular.module('coach').controller('CoachStorageController', function ($scope, n
 		storage.getDriveBays().then((bays) => {
 			storage.getBlockDevices().then((data) => {
 				$scope.blockDevices = data.blockdevices;
-				$scope.blockDevices.forEach(function(device, index) {
-					device.ceph = {};
-					device.bay = ""+bays[device.name]
-					if (typeof device.bay === 'undefined') {
-						device.bay = null;
-					}
-					if (device.children) {
-						device.available = false;
-						device.children.forEach(function(partition, index) {
-							if (partition.partlabel == "ceph data") {
-								device.ceph.osd = true;
-								config = {};
-								config.osd = device;
-								storage.getCephOsdDetails(config).then((details) => {
-									device.ceph.details = details;
-									$scope.blockDevices.forEach(function(deviceB, index) {
-										if (deviceB.name == device.ceph.details.journal) {
-											if (typeof deviceB.ceph.journalFor == "undefined") {
-												deviceB.ceph.journalFor = [device.name]
-											} else {
-												deviceB.ceph.journalFor.push(device.name)
-											}
-										}
-									});
-								});
-							}
-							if (partition.partlabel == "ceph journal") {
-								device.ceph.journal = true;
-								if (device.ceph.osd) {
-									device.ceph.journal = false;
-									device.ceph.canBeJournal = false;
-								} else {
-									device.ceph.canBeJournal = true;
-								}
-							}
-						});
-					} else {
-						device.available = true;
-						if (device.rota == 1) {
-							device.ceph.canBeJournal = false;
-						} else {
-							device.ceph.canBeJournal = true;
+				if($scope.blockDevices.length){
+					$scope.blockDevices.forEach(function(device, index) {
+						device.ceph = {};
+						device.bay = ""+bays[device.name]
+						if (typeof device.bay === 'undefined') {
+							device.bay = null;
 						}
-					}
-				});
-				$scope.blockDevices.sort(function(a, b) {
-					return parseFloat(a.bay) - parseFloat(b.bay);
-				});
+						if (device.children) {
+							device.available = false;
+							device.children.forEach(function(partition, index) {
+								if (partition.partlabel == "ceph data") {
+									device.ceph.osd = true;
+									config = {};
+									config.osd = device;
+									storage.getCephOsdDetails(config).then((details) => {
+										device.ceph.details = details;
+										$scope.blockDevices.forEach(function(deviceB, index) {
+											if (deviceB.name == device.ceph.details.journal) {
+												if (typeof deviceB.ceph.journalFor == "undefined") {
+													deviceB.ceph.journalFor = [device.name]
+												} else {
+													deviceB.ceph.journalFor.push(device.name)
+												}
+											}
+										});
+									});
+								}
+								if (partition.partlabel == "ceph journal") {
+									device.ceph.journal = true;
+									if (device.ceph.osd) {
+										device.ceph.journal = false;
+										device.ceph.canBeJournal = false;
+									} else {
+										device.ceph.canBeJournal = true;
+									}
+								}
+							});
+						} else {
+							device.available = true;
+							if (device.rota == 1) {
+								device.ceph.canBeJournal = false;
+							} else {
+								device.ceph.canBeJournal = true;
+							}
+						}
+					});
+					$scope.blockDevices.sort(function(a, b) {
+						return parseFloat(a.bay) - parseFloat(b.bay);
+					});
+				}
 			});
         });
 		if ($("#osd").length) {

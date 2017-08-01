@@ -1,0 +1,11 @@
+[Unit]
+Description=Ceph Client Prerequisite
+After=ceph-mds.target ceph-mon.target ceph.service
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/ceph -s
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

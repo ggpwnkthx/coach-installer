@@ -1,0 +1,16 @@
+[Unit]
+Description=Mount CephFS
+Requires=ceph-client.service
+After=ceph-client.service
+
+[Service]
+Type=oneshot
+ExecStartPre=/bin/sleep 5
+ExecStart=/bin/bash /etc/ceph/mnt-ceph-fs.sh start
+ExecStartPost=/bin/sleep 5
+ExecStop=/bin/bash /etc/ceph/mnt-ceph-fs.sh stop
+ExecStop=/bin/sleep 5
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

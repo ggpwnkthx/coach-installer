@@ -80,7 +80,7 @@ auto_install()
 }
 
 auto_install
-./download_and_run "bootstrap/ajenti.sh"
+./download_and_run "ajenti/deploy.sh"
 
 ips=($(ifconfig | awk -F "[: ]+" '/inet addr:/ { if ($4 != "127.0.0.1") print $4 }'))
 

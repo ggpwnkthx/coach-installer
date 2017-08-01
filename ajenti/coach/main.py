@@ -8,7 +8,7 @@ class ItemProvider(SidebarItemProvider):
 		pass
 
 	def provide(self):
-		if os.path.isfile("/etc/ceph/ceph.conf"):
+		if os.path.isfile("/etc/systemd/system/provisioner-dnsmasq.service"):
 			return [
 				{
 					'attach': None,

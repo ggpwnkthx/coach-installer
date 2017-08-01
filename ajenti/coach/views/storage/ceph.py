@@ -194,7 +194,7 @@ class Handler(HttpPlugin):
 		config = json.loads(http_context.body)
 		if not config.has_key('cluster'):
 			config['cluster'] = 'ceph'
-		if self.runCMD("ceph mds stat | awk '{print $2}'").replace("\n","") == "":
+		if self.runCMD("ceph mds stat | grep $(hostname -s)").replace("\n","") == "":
 			self.runCMD("ceph-deploy --cluster "+config['cluster']+" ceph-deploy mds create $(hostname -s)")
 			os.chdir(cwd)
 		if config['fs'] not in self.runCMD("ceph fs ls"):

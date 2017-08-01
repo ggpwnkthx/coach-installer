@@ -1,21 +1,10 @@
 # COACH
 ## How To
 ### First Use
-#### Method 1:
 This method will download all scripts at once, and will ignore any updates. This is best for production environments.
 ```bash
 git clone https://github.com/ggpwnkthx/coach.git
 cd coach
-chmod +x deploy.sh
-sudo ./deploy.sh
-```
-#### Method 2:
-This method will automatically download the latest version of each script as it is called. This is best for developmental needs.
-```bash
-git clone https://github.com/ggpwnkthx/coach.git
-cd coach
-sed -i 's/^#wget/wget/g' deploy.sh
-sed -i 's/^#get_latest/get_latest/g' download_and_run
 chmod +x deploy.sh
 sudo ./deploy.sh
 ```
@@ -25,11 +14,6 @@ sudo ./deploy.sh
 * sshd - Needed to communicate with other nodes.
 ```bash
 sudo apt-get install git wget sshd
-```
-
-### Consecutive uses:
-```bash
-sudo ./deploy.sh
 ```
 
 ## About

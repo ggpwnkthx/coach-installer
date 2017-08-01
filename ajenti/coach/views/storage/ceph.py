@@ -194,7 +194,8 @@ class Handler(HttpPlugin):
 		config = json.loads(http_context.body)
 		if not config.has_key('cluster'):
 			config['cluster'] = 'ceph'
-		if self.runCMD("systemctl | grep "+config['cluster']+"-mds@$(hostname -s).service | grep Active | awk '{print $2}'").replace("\n","") == "inactive":
+		isMDS = self.runCMD("systemctl status "+config['cluster']+"-mds@$(hostname -s).service | grep Active | awk '{print $2}'").replace("\n","")
+		if isMDS == "inactive":
 			self.runCMD("ceph-deploy mds create $(hostname -s)")
 			os.chdir(cwd)
 			return "Ceph Metadata services installed on this device."

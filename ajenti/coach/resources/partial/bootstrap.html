@@ -188,7 +188,7 @@
 			<div class="modal-header">
 				<h4><span ng:show="addOSD.bay === 'undefined'">{{addOSD.name}}</span><span ng:show="addOSD.bay !== 'undefined'">SLOT {{addOSD.bay}} <small><small>{{addOSD.name}}</small></small></span></h4>
 			</div>
-			<div class="modal-body scrollable">
+			<div class="modal-body">
 				<label>Click "Add" to have data and journaling on the same device, or choose an available SSD below as a journaling device.</label>
 				<div class="list-group" ng:hide="cephAddOsdProcessing">
 					<div ng:repeat="device in blockDevices" ng:show="device.ceph.canBeJournal" class="list-group-item list-group-item-large">

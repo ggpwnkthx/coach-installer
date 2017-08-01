@@ -174,87 +174,17 @@ angular.module('coach').controller('CoachBootstrapController', function ($scope,
 
 'use strict';
 
-angular.module('coach').service('bootstrap', function ($http, $q, tasks) {
-
-	this.start = function (config) {
-		return $http.post("/api/coach/bootstrap", config).then(function (response) {
-			return response.data;
-		});
-	};
-	this.isCephInstalled = function () {
-		return $http.get("/api/coach/isCephInstalled").then(function (response) {
-			return response.data;
-		});
-	};
-	this.isCephFS = function () {
-		return $http.get("/api/coach/isCephFS").then(function (response) {
-			return response.data;
-		});
-	};
-	this.installCephFS = function (config) {
-		return $http.post("/api/coach/storage/ceph/fs/add", config).then(function (response) {
-			return response.data;
-		});
-	};
-	this.mountCephFS = function (config) {
-		return $http.get("/api/coach/storage/ceph/fs/mount").then(function (response) {
-			return response.data;
-		});
-	};
-
-	this.installNetworkServices = function () {
-		return $http.get("/api/coach/installNetworkServices").then(function (response) {
-			return response.data;
-		});
-	};
-
-	return this;
-});
-
-
-'use strict';
-
 angular.module('coach').controller('CoachFabricController', function ($scope, notify, pageTitle, fabric, config) {
-  pageTitle.set('Fabric');
+    pageTitle.set('Fabric');
 
-  $scope.reload = function () {
-    $scope.links = null;
-    fabric.getLinks().then(function (data) {
-      $scope.links = data;
-    });
-  };
+    $scope.reload = function () {
+        $scope.links = null;
+        fabric.getLinks().then(function (data) {
+            $scope.links = data;
+        });
+    };
 
-  $scope.reload();
-});
-
-
-'use strict';
-
-angular.module('coach').service('fabric', function ($http, $q, tasks) {
-				this.getLinks = function () {
-								return $http.get("/api/coach/fabric/get/links").then(function (response) {
-												return response.data;
-								});
-				};
-				this.getFQDN = function () {
-								return $http.get("/api/coach/fabric/get/fqdn").then(function (response) {
-												return response.data;
-								});
-				};
-
-				this.dhcpSearch = function (iface) {
-								return $http.get("/api/coach/fabric/dhcp_search/" + iface).then(function (response) {
-												return response.data;
-								});
-				};
-
-				this.connectToFabric = function (iface, fabric) {
-								return $http.get("/api/coach/fabric/connect/" + iface + "/" + fabric).then(function (response) {
-												return response.data;
-								});
-				};
-
-				return this;
+    $scope.reload();
 });
 
 
@@ -289,111 +219,114 @@ angular.module('coach').controller('CoachStorageController', function ($scope, n
 		storage.getDriveBays().then(function (bays) {
 			storage.getBlockDevices().then(function (data) {
 				$scope.blockDevices = data.blockdevices;
-				$scope.blockDevices.forEach(function (device, index) {
-					device.ceph = {};
-					device.bay = "" + bays[device.name];
-					if (typeof device.bay === 'undefined') {
-						device.bay = null;
-					}
-					if (device.children) {
-						device.available = false;
-						device.children.forEach(function (partition, index) {
-							if (partition.partlabel == "ceph data") {
-								device.ceph.osd = true;
-								config = {};
-								config.osd = device;
-								storage.getCephOsdDetails(config).then(function (details) {
-									device.ceph.details = details;
-									$scope.blockDevices.forEach(function (deviceB, index) {
-										if (deviceB.name == device.ceph.details.journal) {
-											if (typeof deviceB.ceph.journalFor == "undefined") {
-												deviceB.ceph.journalFor = [device.name];
-											} else {
-												deviceB.ceph.journalFor.push(device.name);
-											}
-										}
-									});
-								});
-							}
-							if (partition.partlabel == "ceph journal") {
-								device.ceph.journal = true;
-								if (device.ceph.osd) {
-									device.ceph.journal = false;
-									device.ceph.canBeJournal = false;
-								} else {
-									device.ceph.canBeJournal = true;
-								}
-							}
-						});
-					} else {
-						device.available = true;
-						if (device.rota == 1) {
-							device.ceph.canBeJournal = false;
-						} else {
-							device.ceph.canBeJournal = true;
+				if ($scope.blockDevices.length) {
+					$scope.blockDevices.forEach(function (device, index) {
+						device.ceph = {};
+						device.bay = "" + bays[device.name];
+						if (typeof device.bay === 'undefined') {
+							device.bay = null;
 						}
-					}
-				});
-				$scope.blockDevices.sort(function (a, b) {
-					return parseFloat(a.bay) - parseFloat(b.bay);
-				});
+						if (device.children) {
+							device.available = false;
+							device.children.forEach(function (partition, index) {
+								if (partition.partlabel == "ceph data") {
+									device.ceph.osd = true;
+									config = {};
+									config.osd = device;
+									storage.getCephOsdDetails(config).then(function (details) {
+										device.ceph.details = details;
+										$scope.blockDevices.forEach(function (deviceB, index) {
+											if (deviceB.name == device.ceph.details.journal) {
+												if (typeof deviceB.ceph.journalFor == "undefined") {
+													deviceB.ceph.journalFor = [device.name];
+												} else {
+													deviceB.ceph.journalFor.push(device.name);
+												}
+											}
+										});
+									});
+								}
+								if (partition.partlabel == "ceph journal") {
+									device.ceph.journal = true;
+									if (device.ceph.osd) {
+										device.ceph.journal = false;
+										device.ceph.canBeJournal = false;
+									} else {
+										device.ceph.canBeJournal = true;
+									}
+								}
+							});
+						} else {
+							device.available = true;
+							if (device.rota == 1) {
+								device.ceph.canBeJournal = false;
+							} else {
+								device.ceph.canBeJournal = true;
+							}
+						}
+					});
+					$scope.blockDevices.sort(function (a, b) {
+						return parseFloat(a.bay) - parseFloat(b.bay);
+					});
+				}
 			});
 		});
+		if ($("#osd").length) {
+			storage.getCephMonStat().then(function (monitors) {
+				$scope.monitors = monitors;
+				var now = new Date();
+				var today = new Date(now.getYear(), now.getMonth(), now.getDate());
 
-		storage.getCephMonStat().then(function (monitors) {
-			$scope.monitors = monitors;
-			var now = new Date();
-			var today = new Date(now.getYear(), now.getMonth(), now.getDate());
+				var yearNow = now.getYear();
+				var monthNow = now.getMonth();
+				var dateNow = now.getDate();
 
-			var yearNow = now.getYear();
-			var monthNow = now.getMonth();
-			var dateNow = now.getDate();
+				var dob = new Date(Date.parse($scope.monitors.monmap.created));
 
-			var dob = new Date(Date.parse($scope.monitors.monmap.created));
+				var yearDob = dob.getYear();
+				var monthDob = dob.getMonth();
+				var dateDob = dob.getDate();
+				var age = {};
+				var ageString = "";
+				var yearString = "";
+				var monthString = "";
+				var dayString = "";
 
-			var yearDob = dob.getYear();
-			var monthDob = dob.getMonth();
-			var dateDob = dob.getDate();
-			var age = {};
-			var ageString = "";
-			var yearString = "";
-			var monthString = "";
-			var dayString = "";
+				yearAge = yearNow - yearDob;
 
-			yearAge = yearNow - yearDob;
-
-			if (monthNow >= monthDob) monthAge = monthNow - monthDob;else {
-				yearAge--;
-				var monthAge = 12 + monthNow - monthDob;
-			}
-
-			if (dateNow >= dateDob) var dateAge = dateNow - dateDob;else {
-				monthAge--;
-				var dateAge = 31 + dateNow - dateDob;
-
-				if (monthAge < 0) {
-					monthAge = 11;
+				if (monthNow >= monthDob) monthAge = monthNow - monthDob;else {
 					yearAge--;
+					var monthAge = 12 + monthNow - monthDob;
 				}
-			}
 
-			age = {
-				years: yearAge,
-				months: monthAge,
-				days: dateAge
-			};
+				if (dateNow >= dateDob) var dateAge = dateNow - dateDob;else {
+					monthAge--;
+					var dateAge = 31 + dateNow - dateDob;
 
-			if (age.years > 1) yearString = " years";else yearString = " year";
-			if (age.months > 1) monthString = " months";else monthString = " month";
-			if (age.days > 1) dayString = " days";else dayString = " day";
+					if (monthAge < 0) {
+						monthAge = 11;
+						yearAge--;
+					}
+				}
 
-			if (age.years > 0 && age.months > 0 && age.days > 0) ageString = age.years + yearString + ", " + age.months + monthString + ", and " + age.days + dayString + " old.";else if (age.years == 0 && age.months == 0 && age.days > 0) ageString = "Only " + age.days + dayString + " old!";else if (age.years > 0 && age.months == 0 && age.days == 0) ageString = age.years + yearString + " old. Happy Birthday!!";else if (age.years > 0 && age.months > 0 && age.days == 0) ageString = age.years + yearString + " and " + age.months + monthString + " old.";else if (age.years == 0 && age.months > 0 && age.days > 0) ageString = age.months + monthString + " and " + age.days + dayString + " old.";else if (age.years > 0 && age.months == 0 && age.days > 0) ageString = age.years + yearString + " and " + age.days + dayString + " old.";else if (age.years == 0 && age.months > 0 && age.days == 0) ageString = age.months + monthString + " old.";else ageString = "Oops! Could not calculate age!";
-			$scope.age = ageString;
-		});
+				age = {
+					years: yearAge,
+					months: monthAge,
+					days: dateAge
+				};
 
-		storage.getCephOsdTree().then(function (osd_tree) {
-			$scope.cephOSDs = osd_tree;
-		});
+				if (age.years > 1) yearString = " years";else yearString = " year";
+				if (age.months > 1) monthString = " months";else monthString = " month";
+				if (age.days > 1) dayString = " days";else dayString = " day";
+
+				if (age.years > 0 && age.months > 0 && age.days > 0) ageString = age.years + yearString + ", " + age.months + monthString + ", and " + age.days + dayString + " old.";else if (age.years == 0 && age.months == 0 && age.days > 0) ageString = "Only " + age.days + dayString + " old!";else if (age.years > 0 && age.months == 0 && age.days == 0) ageString = age.years + yearString + " old. Happy Birthday!!";else if (age.years > 0 && age.months > 0 && age.days == 0) ageString = age.years + yearString + " and " + age.months + monthString + " old.";else if (age.years == 0 && age.months > 0 && age.days > 0) ageString = age.months + monthString + " and " + age.days + dayString + " old.";else if (age.years > 0 && age.months == 0 && age.days > 0) ageString = age.years + yearString + " and " + age.days + dayString + " old.";else if (age.years == 0 && age.months > 0 && age.days == 0) ageString = age.months + monthString + " old.";else ageString = "Oops! Could not calculate age!";
+				$scope.age = ageString;
+			});
+
+			storage.getCephOsdTree().then(function (osd_tree) {
+				$scope.cephOSDs = osd_tree;
+			});
+		}
 	};
 
 	$scope.reload();
@@ -713,77 +646,6 @@ angular.module('coach').controller('CoachStorageController', function ($scope, n
 
 'use strict';
 
-angular.module('coach').service('storage', function ($http, $q, tasks) {
-
-	this.getBlockDevices = function () {
-		return $http.get("/api/coach/storage/local/list/block_devices").then(function (response) {
-			return response.data;
-		});
-	};
-	this.getDriveBays = function () {
-		return $http.get("/api/coach/storage/local/list/bays").then(function (response) {
-			return response.data;
-		});
-	};
-
-	this.getCephMonStat = function () {
-		return $http.get("/api/coach/storage/ceph/mon/status").then(function (response) {
-			return response.data;
-		});
-	};
-	this.getCephOsdDetails = function (config) {
-		return $http.post("/api/coach/storage/ceph/osd/details", config).then(function (response) {
-			return response.data;
-		});
-	};
-	this.getCephOsdTree = function (config) {
-		return $http.get("/api/coach/storage/ceph/osd/tree", config).then(function (response) {
-			return response.data;
-		});
-	};
-	this.cephAddOsd = function (config) {
-		return $http.post("/api/coach/storage/ceph/osd/add", config).then(function (response) {
-			return response.data;
-		});
-	};
-	this.cephRemoveOsd = function (config) {
-		return $http.post("/api/coach/storage/ceph/osd/remove", config).then(function (response) {
-			return response.data;
-		});
-	};
-	this.getCephPgTree = function () {
-		return $http.get("/api/coach/storage/ceph/pg/tree").then(function (response) {
-			return response.data;
-		});
-	};
-	this.getCephPgMap = function () {
-		return $http.get("/api/coach/storage/ceph/pg/map").then(function (response) {
-			return response.data;
-		});
-	};
-	this.getCephIops = function () {
-		return $http.get("/api/coach/storage/ceph/iops").then(function (response) {
-			return response.data;
-		});
-	};
-
-	this.megaraidExists = function () {
-		return $http.get("/api/coach/storage/local/megaraid/exists").then(function (response) {
-			return response.data;
-		});
-	};
-	this.megaraidBuild = function () {
-		return $http.get("/api/coach/storage/local/megaraid/build").then(function (response) {
-			return response.data;
-		});
-	};
-
-	return this;
-});
-
-
-'use strict';
-
 angular.module('coach').controller('CephPagesController', function ($scope, storage) {
 	$scope.$on('widget-update', function ($event, id, data) {
 		if (id !== $scope.widget.id) {
@@ -932,6 +794,147 @@ angular.module('coach').controller('CephPagesController', function ($scope, stor
 
 angular.module('coach').controller('CephPagesConfigController', function ($scope) {
 	$scope.configuredWidget.config.name = "ceph";
+});
+
+
+'use strict';
+
+angular.module('coach').service('bootstrap', function ($http, $q, tasks) {
+
+	this.start = function (config) {
+		return $http.post("/api/coach/bootstrap", config).then(function (response) {
+			return response.data;
+		});
+	};
+	this.isCephInstalled = function () {
+		return $http.get("/api/coach/isCephInstalled").then(function (response) {
+			return response.data;
+		});
+	};
+	this.isCephFS = function () {
+		return $http.get("/api/coach/isCephFS").then(function (response) {
+			return response.data;
+		});
+	};
+	this.installCephFS = function (config) {
+		return $http.post("/api/coach/storage/ceph/fs/add", config).then(function (response) {
+			return response.data;
+		});
+	};
+	this.mountCephFS = function (config) {
+		return $http.get("/api/coach/storage/ceph/fs/mount").then(function (response) {
+			return response.data;
+		});
+	};
+
+	this.installNetworkServices = function () {
+		return $http.get("/api/coach/installNetworkServices").then(function (response) {
+			return response.data;
+		});
+	};
+
+	return this;
+});
+
+
+'use strict';
+
+angular.module('coach').service('fabric', function ($http, $q, tasks) {
+				this.getLinks = function () {
+								return $http.get("/api/coach/fabric/get/links").then(function (response) {
+												return response.data;
+								});
+				};
+				this.getFQDN = function () {
+								return $http.get("/api/coach/fabric/get/fqdn").then(function (response) {
+												return response.data;
+								});
+				};
+
+				this.dhcpSearch = function (iface) {
+								return $http.get("/api/coach/fabric/dhcp_search/" + iface).then(function (response) {
+												return response.data;
+								});
+				};
+
+				this.connectToFabric = function (iface, fabric) {
+								return $http.get("/api/coach/fabric/connect/" + iface + "/" + fabric).then(function (response) {
+												return response.data;
+								});
+				};
+
+				return this;
+});
+
+
+'use strict';
+
+angular.module('coach').service('storage', function ($http, $q, tasks) {
+
+	this.getBlockDevices = function () {
+		return $http.get("/api/coach/storage/local/list/block_devices").then(function (response) {
+			return response.data;
+		});
+	};
+	this.getDriveBays = function () {
+		return $http.get("/api/coach/storage/local/list/bays").then(function (response) {
+			return response.data;
+		});
+	};
+
+	this.getCephMonStat = function () {
+		return $http.get("/api/coach/storage/ceph/mon/status").then(function (response) {
+			return response.data;
+		});
+	};
+	this.getCephOsdDetails = function (config) {
+		return $http.post("/api/coach/storage/ceph/osd/details", config).then(function (response) {
+			return response.data;
+		});
+	};
+	this.getCephOsdTree = function (config) {
+		return $http.get("/api/coach/storage/ceph/osd/tree", config).then(function (response) {
+			return response.data;
+		});
+	};
+	this.cephAddOsd = function (config) {
+		return $http.post("/api/coach/storage/ceph/osd/add", config).then(function (response) {
+			return response.data;
+		});
+	};
+	this.cephRemoveOsd = function (config) {
+		return $http.post("/api/coach/storage/ceph/osd/remove", config).then(function (response) {
+			return response.data;
+		});
+	};
+	this.getCephPgTree = function () {
+		return $http.get("/api/coach/storage/ceph/pg/tree").then(function (response) {
+			return response.data;
+		});
+	};
+	this.getCephPgMap = function () {
+		return $http.get("/api/coach/storage/ceph/pg/map").then(function (response) {
+			return response.data;
+		});
+	};
+	this.getCephIops = function () {
+		return $http.get("/api/coach/storage/ceph/iops").then(function (response) {
+			return response.data;
+		});
+	};
+
+	this.megaraidExists = function () {
+		return $http.get("/api/coach/storage/local/megaraid/exists").then(function (response) {
+			return response.data;
+		});
+	};
+	this.megaraidBuild = function () {
+		return $http.get("/api/coach/storage/local/megaraid/build").then(function (response) {
+			return response.data;
+		});
+	};
+
+	return this;
 });
 
 

@@ -28,6 +28,9 @@ angular.module('coach').controller('CoachStorageController', function ($scope, n
 									config = {};
 									config.osd = device;
 									storage.getCephOsdDetails(config).then((details) => {
+										if (data == "Root permission required") {
+											return
+										}
 										device.ceph.details = details;
 										$scope.blockDevices.forEach(function(deviceB, index) {
 											if (deviceB.name == device.ceph.details.journal) {
@@ -67,6 +70,9 @@ angular.module('coach').controller('CoachStorageController', function ($scope, n
         });
 		if ($("#osd").length) {
 			storage.getCephMonStat().then((monitors) => {
+				if (data == "Root permission required") {
+					return
+				}
 				$scope.monitors = monitors;
 				var now = new Date();
 				var today = new Date(now.getYear(),now.getMonth(),now.getDate());
@@ -141,6 +147,9 @@ angular.module('coach').controller('CoachStorageController', function ($scope, n
 			});
 			
 			storage.getCephOsdTree().then((osd_tree) => {
+				if (data == "Root permission required") {
+					return
+				}
 				$scope.cephOSDs = osd_tree;
 			});
 		}

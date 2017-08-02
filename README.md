@@ -1,24 +1,20 @@
 # COACH
 ## How To
 ### First Use
-This method will download all scripts at once, and will ignore any updates. This is best for production environments.
+##### Prerequisites
+If you're not familiar with Github, or git in general, you need to make sure you have a git client installed on your target machine.
+```bash
+sudo apt-get install git wget sshd
+```
+Once you have a git client installed use the following commands to pull all the necessary files over and start the installation.
 ```bash
 git clone https://github.com/ggpwnkthx/coach.git
 cd coach
 chmod +x deploy.sh
 sudo ./deploy.sh
 ```
-##### Prerequisites
-* git - Need for the initial download.
-* wget - Needed to download 3rd party libraries.
-* sshd - Needed to communicate with other nodes.
-```bash
-sudo apt-get install git wget sshd
-```
 
 ## About
-Maybe I have a unique situation, but I wrote a script to help me deploy my new servers into my cluster.
-
 I call it "COACH - Cluster Of Arbitrary, Cheap, Hardware", and this is what it does so far:
 
 ### Auto-Installer

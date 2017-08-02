@@ -22,7 +22,7 @@ To log in, use a local username and password.
 If you have not bootstrapped the device yet, the navigation bar will only show the "BOOTSTRAP" item under the "CLUSTER" section. 
 
 To start the bootstrap process, you must eleveate your permission level. To do that, click on the blue circle at the top right of the page. Then select "Elevate". Then click on the "BOOTSTRAP" navigation menu item.
-### Bootstap
+## Bootstap
 ### Fabric
 To start the bootstrap process, you must first select a network interface that you want to use for your storage fabric. Due to how ceph (the storage clustering service) monitors work, these settings cannot be changed in the future. Once a static IP address has been defined for a monitor, if it ever changes the monitor will be degraded.
 
@@ -48,7 +48,36 @@ Examples:
 172.16.10.0/24
 ```
 For the fabric bootstrap process, the first usable IP address in the provided CIDR will be used as the selected network interface's IP address.
-### Storage
+### Initial Storage Devices
+The bottom of this page will list the devices available to be used as Object Storage Devices (OSDs). Click the + to add a device to the storrage cluster. If you have any SSDs, they can be used as Journals for slower HDDs to speed up data writes.
+
+Only devices with no partitions on them can be used as OSDs. For safety, any devices with partitions are not included in the Available Devices lists because the process of crearting an OSD will wipe/zap the device and you will loose all data that was on that device.
+
+If you accidentally added an OSD, you can press the correspnding - in the Active OSDs list to remove the OSD from the cluster. This will NOT restore any lost data.
+
+When you are finished adding OSDs to the cluster, click "CREATE CLLUSTERED FILE SYSTEM" at the bottom right of the interface.
+### Clustered File System
+No interaction is need here.
+
+It's going to take some time to get the services installed and set up. Just hang tight for about 5 min.
+
+### Network Services
+No interaction is need here, either.
+
+This too will take some time to get Docker installed and DNSMasq bootstrapped and configured for the storage fabric. By default, DNSMasq will use the domain name you used in the beginning.
+
+For example, if you used...
+```
+store01.us-ga.mycluster.info
+```
+...DNSMasq will set the local domain name to...
+```
+us-ga.mycluster.info
+```
+...so that any local DNS lookup will automatically have the domain name appended to it.
+
+### Finished
+That's it for the bootstrap process.
 
 ## About
 I call it "COACH - Cluster Of Arbitrary, Cheap, Hardware", and this is what it does so far:

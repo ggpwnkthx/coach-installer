@@ -1,7 +1,7 @@
 # COACH
 ## How To
 ### First Use
-##### Prerequisites
+#### Prerequisites
 If you're not familiar with Github, or git in general, you need to make sure you have a git client installed on your target machine.
 ```bash
 sudo apt-get install git wget sshd
@@ -13,6 +13,43 @@ cd coach
 chmod +x deploy.sh
 sudo ./deploy.sh
 ```
+#### Web Interface
+To log into the web interface, go to:
+```
+http://[ip-address]:8000
+```
+To log in, use a local username and password.
+
+If you have not bootstrapped the device yet, the navigation bar will only show the "BOOTSTRAP" item under the "CLUSTER" section. 
+
+To start the bootstrap process, you must eleveate your permission level. To do that, click on the blue circle at the top right of the page. Then select "Elevate". Then click on the "BOOTSTRAP" navigation menu item.
+#### Bootstap
+##### Fabric
+To start the bootstrap process, you must first select a network interface that you want to use for your storage fabric. Due to how ceph (the storage clustering service) monitors work, these settings cannot be changed in the future. Once a static IP address has been defined for a monitor, if it ever changes the monitor will be degraded.
+
+After selecting a network interface for the storage fabric, a dialog will appear. Enter in a fully qualified domain name for the device. Minimum requirements are {hostname}.{domainname}.{tld}
+
+Examples:
+```
+storage01.example.local
+```
+```
+seed001.mycluster.com
+```
+You are also required to define a Classless Inter-Domain Routing (CIDR). This should be an isolated subnet. Keeping it on it's own pysical network without any internet access is even better for security.
+
+Examples:
+```
+192.168.0.0/24
+```
+```
+172.16.0.0/16
+```
+```
+172.16.10.0/24
+```
+For the fabric bootstrap process, the first usable IP address in the provided CIDR will be used as the selected network interface's IP address.
+##### Storage
 
 ## About
 I call it "COACH - Cluster Of Arbitrary, Cheap, Hardware", and this is what it does so far:

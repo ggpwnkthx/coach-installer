@@ -36,6 +36,8 @@ class Handler(HttpPlugin):
 	@url(r'/api/coach/storage/local/list/bays')
 	@endpoint(api=True)
 	def handle_api_storage_local_bays(self, http_context):
+		if os.geteuid() != 0:
+			return "Root permission required."
 		self.runCMD("chmod +x "+self.getPluginPath()+"/scripts/find_bays.sh")
 		output = self.runCMD(self.getPluginPath()+"/scripts/find_bays.sh").replace("\n", ",")
 		if output == ",":

@@ -1,37 +1,39 @@
 #!/bin/bash
-wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/dnsmasq/Dockerfile -O Dockerfile
-sudo docker build -t "coach/dnsmasq" .
-if [ ! -z "$(sudo docker ps | grep provisioner_dnsmasq)" ]
+DIR=$(pwd)
+cd $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+
+docker build -t "coach/dnsmasq" .
+if [ ! -z "$(docker ps | grep provisioner_dnsmasq)" ]
 then
-  sudo docker kill provisioner_dnsmasq
+  docker kill provisioner_dnsmasq
 fi
-if [ ! -z "$(sudo docker ps -a | grep provisioner_dnsmasq)" ]
+if [ ! -z "$(docker ps -a | grep provisioner_dnsmasq)" ]
 then
-  sudo docker rm provisioner_dnsmasq
+  docker rm provisioner_dnsmasq
 fi
 
 if [ ! -d /mnt/ceph/fs/containers/provisioner ]
 then
-  sudo mkdir -p /mnt/ceph/fs/containers/provisioner
+  mkdir -p /mnt/ceph/fs/containers/provisioner
 fi
-sudo chmod +rw /mnt/ceph/fs/containers/provisioner
+chmod +rw /mnt/ceph/fs/containers/provisioner
 
 if [ ! -f /mnt/ceph/fs/containers/provisioner/leases ]
 then
-  sudo touch /mnt/ceph/fs/containers/provisioner/leases
+  touch /mnt/ceph/fs/containers/provisioner/leases
 fi
-sudo chmod +rw /mnt/ceph/fs/containers/provisioner/leases
+chmod +rw /mnt/ceph/fs/containers/provisioner/leases
 
 if [ ! -f /mnt/ceph/fs/containers/provisioner/conf ]
 then
-#  echo "domain-needed" | sudo tee /mnt/ceph/fs/containers/provisioner/conf
-  echo "bogus-priv" | sudo tee --append /mnt/ceph/fs/containers/provisioner/conf
-  echo "no-resolv" | sudo tee --append /mnt/ceph/fs/containers/provisioner/conf
-  echo "no-poll" | sudo tee --append /mnt/ceph/fs/containers/provisioner/conf
-  echo "no-hosts" | sudo tee --append /mnt/ceph/fs/containers/provisioner/conf
-  echo "expand-hosts" | sudo tee --append /mnt/ceph/fs/containers/provisioner/conf
+#  echo "domain-needed" | tee /mnt/ceph/fs/containers/provisioner/conf
+  echo "bogus-priv" | tee --append /mnt/ceph/fs/containers/provisioner/conf
+  echo "no-resolv" | tee --append /mnt/ceph/fs/containers/provisioner/conf
+  echo "no-poll" | tee --append /mnt/ceph/fs/containers/provisioner/conf
+  echo "no-hosts" | tee --append /mnt/ceph/fs/containers/provisioner/conf
+  echo "expand-hosts" | tee --append /mnt/ceph/fs/containers/provisioner/conf
 fi
-sudo chmod +r /mnt/ceph/fs/containers/provisioner/conf
+chmod +r /mnt/ceph/fs/containers/provisioner/conf
 
 use_iface=""
 
@@ -59,7 +61,7 @@ do
   net=""
 done
 
-ceph_mon_ls=($(sudo ceph mon dump | grep mon | awk '{print $2}' | awk '{split($0,a,"/"); print a[1]}'))
+ceph_mon_ls=($(ceph mon dump | grep mon | awk '{print $2}' | awk '{split($0,a,"/"); print a[1]}'))
 ceph_mons="--dhcp-option=242"
 for i in ${ceph_mon_ls[@]}
 do
@@ -82,38 +84,40 @@ else
   domain_name=$1
 fi
 
-echo "#!/bin/bash" | sudo tee /etc/ceph/provisioner-dnsmasq.sh
-echo "case \$1 in" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "  start)" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "    if [ ! -z \"\$(docker ps -a | grep provisioner_dnsmasq)\" ]" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "    then" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "      docker rm -f provisioner_dnsmasq" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "    fi" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "    docker run -d \\" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "      --name provisioner_dnsmasq --net=host \\" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "      -v /mnt/ceph/fs/containers/provisioner/leases:/var/lib/misc/dnsmasq.leases \\" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "      -v /mnt/ceph/fs/containers/provisioner/conf:/etc/dnsmasq.conf \\" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "      coach/dnsmasq --dhcp-leasefile=/var/lib/misc/dnsmasq.leases \\" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "      --host-record=$(hostname -f),$advertize \\" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "      --dhcp-option=67,http://$(hostname -f)/ipxe.php \\" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "      --domain=$domain_name \\" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "      --local=/$domain_name/ \\" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "      $use_iface \\" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "      $use_range \\" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "      $ceph_mons" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "    ;;" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "  stop)" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "    docker stop provisioner_dnsmasq" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "    docker rm -f provisioner_dnsmasq" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "    ;;" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "  status)" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "    docker ps -a | grep provisioner_dnsmasq" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "    ;;" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
-echo "esac" | sudo tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "#!/bin/bash" | tee /etc/ceph/provisioner-dnsmasq.sh
+echo "case \$1 in" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "  start)" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "    if [ ! -z \"\$(docker ps -a | grep provisioner_dnsmasq)\" ]" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "    then" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "      docker rm -f provisioner_dnsmasq" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "    fi" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "    docker run -d \\" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "      --name provisioner_dnsmasq --net=host \\" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "      -v /mnt/ceph/fs/containers/provisioner/leases:/var/lib/misc/dnsmasq.leases \\" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "      -v /mnt/ceph/fs/containers/provisioner/conf:/etc/dnsmasq.conf \\" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "      coach/dnsmasq --dhcp-leasefile=/var/lib/misc/dnsmasq.leases \\" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "      --host-record=$(hostname -f),$advertize \\" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "      --dhcp-option=67,http://$(hostname -f)/ipxe.php \\" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "      --domain=$domain_name \\" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "      --local=/$domain_name/ \\" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "      $use_iface \\" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "      $use_range \\" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "      $ceph_mons" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "    ;;" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "  stop)" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "    docker stop provisioner_dnsmasq" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "    docker rm -f provisioner_dnsmasq" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "    ;;" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "  status)" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "    docker ps -a | grep provisioner_dnsmasq" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "    ;;" | tee --append /etc/ceph/provisioner-dnsmasq.sh
+echo "esac" | tee --append /etc/ceph/provisioner-dnsmasq.sh
 
-sudo chmod +x /etc/ceph/provisioner-dnsmasq.sh
+chmod +x /etc/ceph/provisioner-dnsmasq.sh
 
-sudo wget https://raw.githubusercontent.com/ggpwnkthx/coach/master/docker/provisioner/dnsmasq/provisioner-dnsmasq.service -O /etc/systemd/system/provisioner-dnsmasq.service
-sudo systemctl daemon-reload
-sudo systemctl enable provisioner-dnsmasq.service
-sudo systemctl restart provisioner-dnsmasq.service
+cp provisioner-dnsmasq.service /etc/systemd/system/provisioner-dnsmasq.service
+systemctl daemon-reload
+systemctl enable provisioner-dnsmasq.service
+systemctl restart provisioner-dnsmasq.service
+
+cd $DIR

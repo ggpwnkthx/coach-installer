@@ -27,6 +27,8 @@ class Handler(HttpPlugin):
 	@url(r'/api/coach/storage/ceph/mon/status')
 	@endpoint(api=True)
 	def handle_api_storage_monitor_status(self, http_context):
+		if os.geteuid() != 0:
+			return "Root permission required."
 		if self.runCMD("command -v ceph").replace("\n",""):
 			return json.loads(self.runCMD("ceph -f json mon_status"))
 		else:
@@ -35,6 +37,8 @@ class Handler(HttpPlugin):
 	@url(r'/api/coach/storage/ceph/osd/details')
 	@endpoint(api=True)
 	def handle_api_storage_ceph_osd_details(self, http_context):
+		if os.geteuid() != 0:
+			return "Root permission required."
 		config = json.loads(http_context.body)
 		if not config.has_key('cluster'):
 			config['cluster'] = 'ceph'
@@ -49,6 +53,8 @@ class Handler(HttpPlugin):
 	@url(r'/api/coach/storage/ceph/osd/add')
 	@endpoint(api=True)
 	def handle_api_storage_ceph_osd_add(self, http_context):
+		if os.geteuid() != 0:
+			return "Root permission required."
 		cwd = os.getcwd()
 		os.chdir(self.getPluginPath()+"/ceph")
 		
@@ -69,6 +75,8 @@ class Handler(HttpPlugin):
 	@url(r'/api/coach/storage/ceph/osd/remove')
 	@endpoint(api=True)
 	def handle_api_storage_ceph_osd_remove(self, http_context):
+		if os.geteuid() != 0:
+			return "Root permission required."
 		cwd = os.getcwd()
 		os.chdir(self.getPluginPath()+"/ceph")
 		
@@ -99,6 +107,8 @@ class Handler(HttpPlugin):
 	@url(r'/api/coach/storage/ceph/osd/tree')
 	@endpoint(api=True)
 	def handle_api_storage_ceph_osd_tree(self, http_context):
+		if os.geteuid() != 0:
+			return "Root permission required."
 		if self.runCMD("command -v ceph").replace("\n",""):
 			osd_tree = json.loads(self.runCMD("ceph -f json osd tree"))
 			
@@ -128,6 +138,8 @@ class Handler(HttpPlugin):
 	@url(r'/api/coach/storage/ceph/pg/tree')
 	@endpoint(api=True)
 	def handle_api_storage_ceph_pg_tree(self, http_context):
+		if os.geteuid() != 0:
+			return "Root permission required."
 		pools = {}
 		osd_dump = json.loads(self.runCMD("ceph osd dump --format=json"))
 		for pool in osd_dump['pools']:
@@ -182,12 +194,16 @@ class Handler(HttpPlugin):
 	@url(r'/api/coach/storage/ceph/iops')
 	@endpoint(api=True)
 	def handle_api_storage_ceph_iops(self, http_context):
+		if os.geteuid() != 0:
+			return "Root permission required."
 		status = json.loads(self.runCMD("ceph -s -f json"))
 		return status
 		
 	@url(r'/api/coach/storage/ceph/fs/add')
 	@endpoint(api=True)
 	def handle_api_storage_ceph_fs_add(self, http_context):
+		if os.geteuid() != 0:
+			return "Root permission required."
 		cwd = os.getcwd()
 		os.chdir(self.getPluginPath()+"/ceph")
 		
@@ -218,6 +234,8 @@ class Handler(HttpPlugin):
 	@url(r'/api/coach/storage/ceph/fs/mount')
 	@endpoint(api=True)
 	def handle_api_storage_ceph_fs_mount(self, http_context):
+		if os.geteuid() != 0:
+			return "Root permission required."
 		if not os.path.isdir("/mnt/ceph"):
 			os.makedirs("/mnt/ceph")
 			return "Created directory '/mnt/ceph'"
@@ -243,4 +261,4 @@ class Handler(HttpPlugin):
 			self.runCMD("systemctl start mnt-ceph-fs.service")
 			return "CephFS mounting service installed and started."
 		return "CephFS Ready."
-			
+	

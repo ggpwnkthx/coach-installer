@@ -3,7 +3,7 @@
 ### Prerequisites
 If you're not familiar with Github, or git in general, you need to make sure you have a git client installed on your target machine.
 ```bash
-sudo apt-get install git wget sshd
+sudo apt-get install git
 ```
 Once you have a git client installed use the following commands to pull all the necessary files over and start the installation.
 ```bash

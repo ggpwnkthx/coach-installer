@@ -217,7 +217,7 @@ angular.module('coach').controller('CoachStorageController', function ($scope, n
 		});
 
 		storage.getDriveBays().then(function (bays) {
-			if (data == "Root permission required") {
+			if (bays == "Root permission required") {
 				return;
 			}
 			storage.getBlockDevices().then(function (data) {
@@ -237,7 +237,7 @@ angular.module('coach').controller('CoachStorageController', function ($scope, n
 									config = {};
 									config.osd = device;
 									storage.getCephOsdDetails(config).then(function (details) {
-										if (data == "Root permission required") {
+										if (details == "Root permission required") {
 											return;
 										}
 										device.ceph.details = details;
@@ -279,7 +279,7 @@ angular.module('coach').controller('CoachStorageController', function ($scope, n
 		});
 		if ($("#osd").length) {
 			storage.getCephMonStat().then(function (monitors) {
-				if (data == "Root permission required") {
+				if (monitors == "Root permission required") {
 					return;
 				}
 				$scope.monitors = monitors;
@@ -333,7 +333,7 @@ angular.module('coach').controller('CoachStorageController', function ($scope, n
 			});
 
 			storage.getCephOsdTree().then(function (osd_tree) {
-				if (data == "Root permission required") {
+				if (osd_tree == "Root permission required") {
 					return;
 				}
 				$scope.cephOSDs = osd_tree;

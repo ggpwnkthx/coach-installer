@@ -8,6 +8,7 @@ import os.path
 import json
 import re
 import shutil
+import time
 
 @component(HttpPlugin)
 class Handler(HttpPlugin):
@@ -66,10 +67,12 @@ class Handler(HttpPlugin):
 		if config.has_key('journal'):
 			self.runCMD("ceph-deploy osd prepare --fs-type btrfs $(hostname -s):"+config['osd']+":"+config['journal'])
 			os.chdir(cwd)
+			time.sleep(.5)
 			return config['osd']+", with journal "+config['journal']+", has been added to the ceph cluster."
 		else:
 			self.runCMD("ceph-deploy osd prepare --fs-type btrfs $(hostname -s):"+config['osd'])
 			os.chdir(cwd)
+			time.sleep(.5)
 			return config['osd']+" has been added to the ceph cluster."
 
 	@url(r'/api/coach/storage/ceph/osd/remove')

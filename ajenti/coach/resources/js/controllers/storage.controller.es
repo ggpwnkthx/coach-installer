@@ -11,7 +11,7 @@ angular.module('coach').controller('CoachStorageController', function ($scope, n
 		});
 		
 		storage.getDriveBays().then((bays) => {
-			if (data == "Root permission required") {
+			if (bays == "Root permission required") {
 				return
 			}
 			storage.getBlockDevices().then((data) => {

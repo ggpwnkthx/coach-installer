@@ -138,6 +138,27 @@ class Handler(HttpPlugin):
 		else:
 			return False
 	
+	@url(r'/api/coach/storage/ceph/osd/pool/list')
+	@endpoint(api=True)
+	def handle_api_storage_ceph_osd_pool_list(self, http_context):
+		if os.geteuid() != 0:
+			return "Root permission required."
+		if self.runCMD("command -v ceph").replace("\n",""):
+			return json.loads(self.runCMD("ceph -f json osd pool ls").replace("\n",""))
+			
+	@url(r'/api/coach/storage/ceph/osd/pool/(?P<pool>\w+)')
+	@endpoint(api=True)
+	def handle_api_storage_ceph_osd_pool_details(self, http_context, pool):
+		if os.geteuid() != 0:
+			return "Root permission required."
+		if self.runCMD("command -v ceph").replace("\n",""):
+			details = {}
+			all_d = json.loads("["+self.runCMD("ceph -f json osd pool get "+pool+" all").replace("\n","").replace("}{","},{")+"]")
+			for detail in all_d:
+				for key, value in detail.iteritems():
+					details[key] = value
+			return details
+	
 	@url(r'/api/coach/storage/ceph/pg/tree')
 	@endpoint(api=True)
 	def handle_api_storage_ceph_pg_tree(self, http_context):

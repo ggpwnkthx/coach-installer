@@ -174,66 +174,71 @@
 			</floating-toolbar>
 		</uib-tab>
 		<uib-tab heading="{{'Monitors'|translate}}">
-			<uib-tabset>
-				<uib-tab heading="{{'List'|translate}}">
-				<progress-spinner ng:hide="monitors"></progress-spinner>
-					<h4 style="text-align:right">Cluster Age: {{age}}</h4>
-					<div class="list-group">
-						<div ng:repeat="mon in monitors.monmap.mons" ng:show="monitors" class="list-group-item list-group-item-large">
-							<div class="list-group-main">
-								<div class="list-group-icon">
-									<i class="fa fa-desktop"></i>
-								</div>
-								<h4 class="list-group-item-heading">{{mon.name}}</h4>
-								<p class="list-group-item-text">
-									<span class="label label-info">
-										{{mon.addr}}
-									</span>
-								</p>
-							</div>
+			<progress-spinner ng:hide="monitors"></progress-spinner>
+			<h4 style="text-align:right">Cluster Age: {{age}}</h4>
+			<div class="list-group">
+				<div ng:repeat="mon in monitors.monmap.mons" ng:show="monitors" class="list-group-item list-group-item-large">
+					<div class="list-group-main">
+						<div class="list-group-icon">
+							<i class="fa fa-desktop"></i>
 						</div>
+						<h4 class="list-group-item-heading">{{mon.name}}</h4>
+						<p class="list-group-item-text">
+							<span class="label label-info">
+								{{mon.addr}}
+							</span>
+						</p>
 					</div>
-				</uib-tab>
-				<uib-tab heading="{{'Object Storage Device Map'|translate}}" ng:click="cephOsdTree()">
-					<style>
-						.node {
-						  cursor: pointer;
-						}
-						.node square {
-						  fill: #55aeba;
-						  stroke: #55aeba;
-						  //stroke-width: 2px;
-						}
-						.node text {
-							font: 16px/1.2 Helvetica, Arial, sans-serif;
-							fill: #37424a;
-						}
-						.link {
-						  fill: none;
-						  stroke: #dae2e2;
-						  stroke-width: 2px;
-						}
-					</style>
-					<div id="osd" />
-				</uib-tab>
-				<uib-tab heading="{{'Page Group Status'|translate}}" ng:click="cephPgStat()">
-					<style>
-						path {
-						  stroke: #e6e8e8;
-						  fill-rule: evenodd;
-						}
-						text {
-						  font: 12px/1.2 Helvetica, Arial, sans-serif;
-						}
-						text.center {
-						  font: 16px/1.2 Helvetica, Arial, sans-serif;
-						}
-					</style>
-					<div id="pgs" />
-				</uib-tab>
+				</div>
+			</div>
 		</uib-tab>
-		<uib-tab heading="{{'File Systems'|translate}}">
-			
+		<uib-tab heading="{{'Pools'|translate}}">
+			<br />
+			<progress-spinner ng:hide="pools.length"></progress-spinner>
+			<div class="list-group">
+				<div ng:repeat="pool in pools" ng:show="pools.length" class="list-group-item list-group-item-large">
+					<a class="list-group-btn" ng:click="$parent.poolDetails = pool" title="Details">
+						<i class="fa fa-question"></i>
+					</a>
+					<a class="list-group-btn" ng:click="removePool(pool.pool)" title="Remove Pool">
+						<i class="fa fa-minus"></i>
+					</a>
+					<div class="list-group-main">
+						<div class="list-group-icon">
+							<i class="fa fa-pie-chart"></i>
+						</div>
+						<h4 class="list-group-item-heading">{{pool.pool}}</h4>
+						<p class="list-group-item-text">
+							<span class="label label-info">
+								Size: {{pool.size}}/{{pool.min_size}}
+							</span>
+							<span class="label label-info">
+								PG: {{pool.pg_num}}
+							</span>
+							<span class="label label-info">
+								PGP: {{pool.pgp_num}}
+							</span>
+						</p>
+					</div>
+				</div>
+			</div>
+			<dialog ng:show="poolDetails">
+				<div class="modal-header">
+					<h4>{{poolDetails.pool}}</h4>
+				</div>
+				<div class="modal-body scrollable">
+					<div ng:repeat="(key, value) in poolDetails" class="list-group-item">
+						<label>{{key}}:</label>
+						<span>{{value}}</span>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<a ng:click="$parent.poolDetails = null;" class="btn btn-default btn-flat" translate>Close</a>
+				</div>
+			</dialog>
+			<floating-toolbar>
+				<a ng:click="cephPoolAdd();" class="btn btn-default btn-flat pull-right" translate>Create New Pool</a>
+			</floating-toolbar>
 		</uib-tab>
 		<uib-tab heading="{{'Rados Block Devices'|translate}}">
 			

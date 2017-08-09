@@ -99,8 +99,8 @@ do
 done
 echo ""
 echo "Login using the same credentials you used to login to this terminal."
+echo "Then click on 'BOOTSTRAP', under 'CLUSTER', in the navigation menu."
 echo "Click on the circle in the upper right hand corner."
 echo "Click 'Elevate' (similar to sudo for the GUI)."
 echo "Type in your password for sudo."
-echo "Then click on 'BOOTSTRAP', under 'CLUSTER', in the navigation menu."
 echo ""

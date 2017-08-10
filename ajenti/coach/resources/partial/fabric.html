@@ -1,59 +1,5 @@
 <br/>
 <uib-tabset>
-    <uib-tab heading="{{'Local'|translate}}">
-		<br/>
-		<label translate>Interfaces</label>
-
-		<progress-spinner ng:hide="links != null"></progress-spinner>
-
-		<div class="list-group">
-			<div ng:repeat="iface in links" class="list-group-item list-group-item-large">
-			<!--
-				<a class="list-group-btn" ng:click="$parent.configuringInterface = iface" title="Configure">
-					<i class="fa fa-cog"></i>
-				</a>
-				<a class="list-group-btn" ng:click="upInterface(iface)" ng:show="state[iface.name].up === false" title="{{'Activate (up) interface'|translate}}">
-					<i class="fa fa-arrow-up"></i>
-				</a>
-				<a class="list-group-btn" ng:click="downInterface(iface)" ng:show="state[iface.name].up === true" title="{{'Deactivate (down) interface'|translate}}">
-					<i class="fa fa-arrow-down"></i>
-				</a>
-				<a class="list-group-btn" ng:click="restartInterface(iface)" ng:show="state[iface.name].up === true" title="{{'Restart interface'|translate}}">
-					<i class="fa fa-refresh"></i>
-				</a>
-			-->
-				<div class="list-group-main">
-					<div class="list-group-icon" ng:show="iface.state == 'up'">
-						<i class="fa fa-link"></i>
-					</div>
-					<div class="list-group-icon" ng:show="iface.state == 'down'">
-						<i class="fa fa-unlink"></i>
-					</div>
-					<h4 class="list-group-item-heading">
-						{{iface.name}}
-					</h4>
-					<p class="list-group-item-text">
-						<span class="label label-info" ng:show="iface.type">
-							{{iface.type}}
-						</span>
-						<span class="label label-success" ng:show="iface.state == 'up'">
-							<i class="fa fa-fw fa-check"></i> UP
-						</span>
-						<span class="label label-warning" ng:show="iface.state == 'down'">
-							<i class="fa fa-fw fa-warning"></i> DOWN
-						</span>
-						<span ng:repeat="ipv4 in iface.ipv4" class="label label-info" ng:show="ipv4">
-							{{ipv4}}
-						</span>
-						<span ng:repeat="ipv6 in iface.ipv6" class="label label-info" ng:show="ipv6">
-							{{ipv6}}
-						</span>
-					</p>
-				</div>
-			</div>
-		</div>
-	</uib-tab>
-
     <uib-tab heading="{{'Storage'|translate}}" root-access>
 	</uib-tab>
     <uib-tab heading="{{'Management'|translate}}" root-access>

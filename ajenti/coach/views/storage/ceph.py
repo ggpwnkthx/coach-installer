@@ -107,6 +107,14 @@ class Handler(HttpPlugin):
 		os.chdir(cwd)
 		return "The device "+config['osd']+", OSD #"+id+", has been removed from the storage cluster."
 		
+	@url(r'/api/coach/storage/ceph/osd/stat')
+	@endpoint(api=True)
+	def handle_api_storage_ceph_osd_stat(self, http_context):
+		if os.geteuid() != 0:
+			return "Root permission required."
+		if self.runCMD("command -v ceph").replace("\n",""):
+			return json.loads(self.runCMD("ceph -f json osd stat"))
+	
 	@url(r'/api/coach/storage/ceph/osd/tree')
 	@endpoint(api=True)
 	def handle_api_storage_ceph_osd_tree(self, http_context):
@@ -145,7 +153,27 @@ class Handler(HttpPlugin):
 			return "Root permission required."
 		if self.runCMD("command -v ceph").replace("\n",""):
 			return json.loads(self.runCMD("ceph -f json osd pool ls").replace("\n",""))
-			
+	
+	@url(r'/api/coach/storage/ceph/osd/pool/remove/(?P<pool>\w+)')
+	@endpoint(api=True)
+	def handle_api_storage_ceph_osd_pool_remove(self, http_context, pool):
+		if os.geteuid() != 0:
+			return "Root permission required."
+		if self.runCMD("command -v ceph").replace("\n",""):
+			if not self.runCMD("ceph fs ls | grep "+pool).replace("\n",""):
+				return self.runCMD("ceph osd pool rm "+pool+" "+pool+" --yes-i-really-really-mean-it").replace("\n","")
+			else:
+				return "You cannot remove a pool that is being used by a File System."
+	
+	@url(r'/api/coach/storage/ceph/osd/pool/create/')
+	@endpoint(api=True)
+	def handle_api_storage_ceph_osd_pool_create(self, http_context):
+		if os.geteuid() != 0:
+			return "Root permission required."
+		if self.runCMD("command -v ceph").replace("\n",""):
+			config = json.loads(http_context.body)
+			return self.runCMD("ceph osd pool create "+config['name']+" "+str(config['pg_num'])+" "+str(config['pg_num'])).replace("\n","")
+		
 	@url(r'/api/coach/storage/ceph/osd/pool/(?P<pool>\w+)')
 	@endpoint(api=True)
 	def handle_api_storage_ceph_osd_pool_details(self, http_context, pool):

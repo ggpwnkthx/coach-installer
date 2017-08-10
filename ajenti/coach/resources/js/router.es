@@ -18,4 +18,9 @@ angular.module('coach').config(($routeProvider) => {
         templateUrl: '/coach:resources/partial/storage.html',
         controller: 'CoachStorageController'
     });
+	
+    $routeProvider.when('/view/cluster/storage/ceph', {
+        templateUrl: '/coach:resources/partial/storage/ceph.html',
+        controller: 'CoachStorageCephController'
+    });
 });

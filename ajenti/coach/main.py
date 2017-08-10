@@ -21,14 +21,23 @@ class ItemProvider(SidebarItemProvider):
 							'icon': 'sitemap',
 							'url': '/view/cluster/fabric',
 							'children': []
-							},
+						},
 						{
 							'attach': 'category:cluster',
 							'name': 'Storage',
 							'icon': 'hdd-o',
 							'url': '/view/cluster/storage',
-							'children': []
-							},
+							'children': 
+							[
+								{
+									'attach': 'category:cluster',
+									'name': 'Ceph',
+									'icon': 'podcast',
+									'url': '/view/cluster/storage/ceph',
+									'children': []
+								},
+							]
+						},
 						{
 							'attach': 'category:cluster',
 							'name': 'Nodes',

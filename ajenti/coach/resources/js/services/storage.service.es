@@ -13,11 +13,20 @@ angular.module('coach').service('storage', function($http, $q, tasks) {
 	this.getCephOsdDetails = (config) => {
 		return $http.post("/api/coach/storage/ceph/osd/details", config).then(response => response.data)
 	}
+	this.getCephOsdStat = () => {
+		return $http.get("/api/coach/storage/ceph/osd/stat", ).then(response => response.data)
+	}
 	this.getCephOsdPoolList = () => {
 		return $http.get("/api/coach/storage/ceph/osd/pool/list").then(response => response.data)
 	}
 	this.getCephOsdPoolDetails = (pool) => {
 		return $http.get("/api/coach/storage/ceph/osd/pool/"+pool).then(response => response.data)
+	}
+	this.cephOsdPoolRemove = (pool) => {
+		return $http.get("/api/coach/storage/ceph/osd/pool/remove/"+pool).then(response => response.data)
+	}
+	this.cephOsdPoolCreate = (config) => {
+		return $http.post("/api/coach/storage/ceph/osd/pool/create/", config).then(response => response.data)
 	}
 	this.getCephOsdTree = (config) => {
 		return $http.get("/api/coach/storage/ceph/osd/tree", config).then(response => response.data)

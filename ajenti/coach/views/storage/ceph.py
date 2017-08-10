@@ -52,7 +52,8 @@ class Handler(HttpPlugin):
 		config = json.loads(http_context.body)
 		if not config.has_key('cluster'):
 			config['cluster'] = 'ceph'
-		config['id'] = self.runCMD("lsblk -lp | grep \"/var/lib/ceph/osd/"+config['cluster']+"-*\" | grep \""+config['osd']['name']+"\"").replace("\n", "").split("/var/lib/ceph/osd/"+config['cluster']+"-",1)[1]
+		while not config['id']:
+			config['id'] = self.runCMD("lsblk -lp | grep \"/var/lib/ceph/osd/"+config['cluster']+"-*\" | grep \""+config['osd']['name']+"\"").replace("\n", "").split("/var/lib/ceph/osd/"+config['cluster']+"-",1)[1]
 		config['journal'] = self.runCMD("readlink /var/lib/ceph/osd/"+config['cluster']+"-"+config['id']+"/journal").replace("\n", "")
 		config['journal'] = self.runCMD("readlink "+config['journal']).replace("\n", "")
 		config['journal_part'] = re.search(r'\d+$',config['journal']).group()

@@ -220,7 +220,7 @@ angular.module('coach').controller('CoachStorageController', function ($scope, n
 
 'use strict';
 
-angular.module('coach').controller('CoachStorageCephController', function ($scope, notify, pageTitle, storage, bootstrap) {
+angular.module('coach').controller('CoachStorageCephController', function ($scope, notify, pageTitle, storage, ceph, bootstrap) {
 	pageTitle.set('Storage');
 
 	$scope.reload = function () {
@@ -272,7 +272,7 @@ angular.module('coach').controller('CoachStorageCephController', function ($scop
 								device.ceph.osd = true;
 								config = {};
 								config.osd = device;
-								storage.getCephOsdDetails(config).then(function (details) {
+								ceph.getCephOsdDetails(config).then(function (details) {
 									if (details == "Root permission required") {
 										return;
 									}
@@ -327,7 +327,7 @@ angular.module('coach').controller('CoachStorageCephController', function ($scop
 		if (journal) {
 			config.journal = journal.name;
 		}
-		storage.cephAddOsd(config).then(function (data) {
+		ceph.cephAddOsd(config).then(function (data) {
 			notify.info(data);
 			$scope.cephAddOsdProcessing = false;
 			$scope.addOSD = null;
@@ -343,7 +343,7 @@ angular.module('coach').controller('CoachStorageCephController', function ($scop
 		$scope.cephRemoveOsdProcessing = true;
 		config = {};
 		config.osd = osd.name;
-		storage.cephRemoveOsd(config).then(function (data) {
+		ceph.cephRemoveOsd(config).then(function (data) {
 			notify.info(data);
 			$scope.cephRemoveOsdProcessing = false;
 			$scope.removeOSD = null;
@@ -352,7 +352,7 @@ angular.module('coach').controller('CoachStorageCephController', function ($scop
 	};
 
 	$scope.setClusterAge = function () {
-		storage.getCephMonStat().then(function (monitors) {
+		ceph.getCephMonStat().then(function (monitors) {
 			if (monitors == "Root permission required") {
 				return;
 			}
@@ -408,26 +408,26 @@ angular.module('coach').controller('CoachStorageCephController', function ($scop
 	};
 
 	$scope.setCephPools = function () {
-		storage.getCephOsdPoolList().then(function (pools) {
+		ceph.getCephOsdPoolList().then(function (pools) {
 			if (pools == "Root permission required") {
 				return;
 			}
 			$scope.pools = [];
 			pools.forEach(function (value, index) {
-				storage.getCephOsdPoolDetails(value).then(function (data) {
+				ceph.getCephOsdPoolDetails(value).then(function (data) {
 					$scope.pools.push(data);
 				});
 			});
 		});
 	};
 	$scope.cephRemovePool = function (pool) {
-		storage.cephOsdPoolRemove(pool).then(function (data) {
+		ceph.cephOsdPoolRemove(pool).then(function (data) {
 			notify.info(data);
 			$scope.setCephPools();
 		});
 	};
 	$scope.setCephPgNum = function () {
-		storage.getCephOsdStat().then(function (data) {
+		ceph.getCephOsdStat().then(function (data) {
 			if (data.num_osds < 5) {
 				$scope.pg_num = 128;
 			} else if (data.num_osds < 10) {
@@ -443,7 +443,7 @@ angular.module('coach').controller('CoachStorageCephController', function ($scop
 		});
 	};
 	$scope.cephCreatePool = function (config) {
-		storage.cephOsdPoolCreate(config).then(function (data) {
+		ceph.cephOsdPoolCreate(config).then(function (data) {
 			notify.info(data);
 			$scope.setCephPools();
 			$scope.cephAddPool.name = null;
@@ -690,6 +690,25 @@ angular.module('coach').service('storage', function ($http, $q, tasks) {
 		});
 	};
 
+	this.megaraidExists = function () {
+		return $http.get("/api/coach/storage/local/megaraid/exists").then(function (response) {
+			return response.data;
+		});
+	};
+	this.megaraidBuild = function () {
+		return $http.get("/api/coach/storage/local/megaraid/build").then(function (response) {
+			return response.data;
+		});
+	};
+
+	return this;
+});
+
+
+'use strict';
+
+angular.module('coach').service('ceph', function ($http, $q, tasks) {
+
 	this.getCephMonStat = function () {
 		return $http.get("/api/coach/storage/ceph/mon/status").then(function (response) {
 			return response.data;
@@ -752,17 +771,6 @@ angular.module('coach').service('storage', function ($http, $q, tasks) {
 	};
 	this.getCephIops = function () {
 		return $http.get("/api/coach/storage/ceph/iops").then(function (response) {
-			return response.data;
-		});
-	};
-
-	this.megaraidExists = function () {
-		return $http.get("/api/coach/storage/local/megaraid/exists").then(function (response) {
-			return response.data;
-		});
-	};
-	this.megaraidBuild = function () {
-		return $http.get("/api/coach/storage/local/megaraid/build").then(function (response) {
 			return response.data;
 		});
 	};

@@ -1,4 +1,4 @@
-angular.module('coach').controller('CoachStorageCephController', function ($scope, notify, pageTitle, storage, bootstrap) {
+angular.module('coach').controller('CoachStorageCephController', function ($scope, notify, pageTitle, storage, ceph, bootstrap) {
 	pageTitle.set('Storage');
 
 	$scope.reload = () => {
@@ -50,7 +50,7 @@ angular.module('coach').controller('CoachStorageCephController', function ($scop
 								device.ceph.osd = true;
 								config = {};
 								config.osd = device;
-								storage.getCephOsdDetails(config).then((details) => {
+								ceph.getCephOsdDetails(config).then((details) => {
 									if (details == "Root permission required") {
 										return
 									}
@@ -101,7 +101,7 @@ angular.module('coach').controller('CoachStorageCephController', function ($scop
 		if (journal) {
 			config.journal = journal.name;
 		}
-		storage.cephAddOsd(config).then((data) => {
+		ceph.cephAddOsd(config).then((data) => {
 			notify.info(data);
 			$scope.cephAddOsdProcessing = false;
 			$scope.addOSD = null;
@@ -115,7 +115,7 @@ angular.module('coach').controller('CoachStorageCephController', function ($scop
 		$scope.cephRemoveOsdProcessing = true;
 		config = {};
 		config.osd = osd.name;
-		storage.cephRemoveOsd(config).then((data) => {
+		ceph.cephRemoveOsd(config).then((data) => {
 			notify.info(data);
 			$scope.cephRemoveOsdProcessing = false;
 			$scope.removeOSD = null;
@@ -124,7 +124,7 @@ angular.module('coach').controller('CoachStorageCephController', function ($scop
 	}
 	
 	$scope.setClusterAge = () => {
-		storage.getCephMonStat().then((monitors) => {
+		ceph.getCephMonStat().then((monitors) => {
 			if (monitors == "Root permission required") {
 				return
 			}
@@ -203,26 +203,26 @@ angular.module('coach').controller('CoachStorageCephController', function ($scop
 	}
 	
 	$scope.setCephPools = () => {
-		storage.getCephOsdPoolList().then((pools) => {
+		ceph.getCephOsdPoolList().then((pools) => {
 			if (pools == "Root permission required") {
 				return
 			}
 			$scope.pools = [];
 			pools.forEach(function(value, index) {
-				storage.getCephOsdPoolDetails(value).then((data) => {
+				ceph.getCephOsdPoolDetails(value).then((data) => {
 					$scope.pools.push(data)
 				});
 			});
 		});
 	}
 	$scope.cephRemovePool = (pool) => {
-		storage.cephOsdPoolRemove(pool).then((data) => {
+		ceph.cephOsdPoolRemove(pool).then((data) => {
 			notify.info(data);
 			$scope.setCephPools();
 		});
 	}
 	$scope.setCephPgNum = () => {
-		storage.getCephOsdStat().then((data) => {
+		ceph.getCephOsdStat().then((data) => {
 			if (data.num_osds < 5) {
 				$scope.pg_num = 128;
 			} else if (data.num_osds < 10) {
@@ -238,7 +238,7 @@ angular.module('coach').controller('CoachStorageCephController', function ($scop
 		});
 	}
 	$scope.cephCreatePool = (config) => {
-		storage.cephOsdPoolCreate(config).then((data) => {
+		ceph.cephOsdPoolCreate(config).then((data) => {
 			notify.info(data);
 			$scope.setCephPools();
 			$scope.cephAddPool.name = null;

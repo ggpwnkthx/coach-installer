@@ -25,6 +25,7 @@ resources:
     - 'resources/js/services/bootstrap.service.es'
     - 'resources/js/services/fabric.service.es'
     - 'resources/js/services/storage.service.es'
+    - 'resources/js/services/storage/ceph.service.es'
     - 'resources/partial/bootstrap.html'
     - 'resources/partial/fabric.html'
     - 'resources/partial/nodes.html'

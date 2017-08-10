@@ -1,6 +1,9 @@
 <div root-access>
 	<br/>
 	<uib-tabset>
+		<uib-tab heading="{{'Status'|translate}}">
+			{{ceph_status}}
+		</uib-tab>
 		<uib-tab heading="{{'OSD Map'|translate}}">
 			<br />
 			<style>

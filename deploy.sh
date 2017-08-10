@@ -78,9 +78,32 @@ auto_install()
   printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -
   sys_prep
 }
+install_dev_mode()
+{
+	chmod +x ajenti/dev_mode.sh
+	ajenti/dev_mode.sh
+}
+ask_dev_mode()
+{
+	echo -n "Would you like to enable developer mode? [y/n]"
+	read dev
+	case $dev in
+      y|Y)
+        install_dev_mode()
+	    ;;
+      n|N)
+        echo
+        ;;
+      *)
+        ask_dev_mode()
+        ;;
+    esac
+}
 
 auto_install
 ./download_and_run "ajenti/deploy.sh"
+
+
 
 ips=($(ifconfig | awk -F "[: ]+" '/inet addr:/ { if ($4 != "127.0.0.1") print $4 }'))
 

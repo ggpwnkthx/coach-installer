@@ -13,7 +13,7 @@ install_dell_omsa()
   service dataeng start
 }
 
-if [ "$1" == "-y"]
+if [ "$1" == "-y" ]
 then
   install_dell_omsa
 else

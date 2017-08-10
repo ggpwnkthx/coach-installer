@@ -89,13 +89,13 @@ ask_dev_mode()
 	read dev
 	case $dev in
       y|Y)
-        install_dev_mode()
+        install_dev_mode
 	    ;;
       n|N)
-        echo
+        echo ""
         ;;
       *)
-        ask_dev_mode()
+        ask_dev_mode
         ;;
     esac
 }

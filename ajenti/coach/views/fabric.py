@@ -4,6 +4,7 @@ from aj.api.http import url, HttpPlugin
 from aj.api.endpoint import endpoint, EndpointError, EndpointReturn
 import subprocess
 import json
+import os
 
 @component(HttpPlugin)
 class Handler(HttpPlugin):
@@ -76,13 +77,15 @@ class Handler(HttpPlugin):
 			dhcp_server = ''
 		
 		if dhcp_server:
+			if os.path.isfile('/var/lib/dhcp/dhclient.leases'):
+				os.remove('/var/lib/dhcp/dhclient.leases')
+				self.runCMD("dhclient -r "+iface)
 			self.runCMD("dhclient "+iface)
 			dhclient_lease = False
 			for line in file("/var/lib/dhcp/dhclient.leases"):
 				if "option coach-data" in line:
 					dhclient_lease = True
 					break
-			os.remove('/var/lib/dhcp/dhclient.leases')
 		
 		if(net_state == "down"):
 			self.runCMD("ip link set dev "+iface+" down")

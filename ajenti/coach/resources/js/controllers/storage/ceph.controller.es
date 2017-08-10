@@ -386,5 +386,7 @@ angular.module('coach').controller('CoachStorageCephController', function ($scop
 			$scope.cephAddPool.name = null;
 		});
 	}
-	setInterval(function(){ $scope.updateClusterStatus(); }, 5000);
+	if ($("#storage-ceph").length) {
+		setInterval(function(){ $scope.updateClusterStatus(); }, 5000);
+	}
 });

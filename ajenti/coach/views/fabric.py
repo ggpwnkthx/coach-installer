@@ -59,10 +59,10 @@ class Handler(HttpPlugin):
 				break
 		
 		if not dhclient_patch:
-			dhclient = open("/etc/dhcp/dhclient.conf", "r+")
-			dhclient.write("option coach-data code 242 = text;\n")
-			dhclient.write("also request coach-data;\n")
-			dhclient.close()
+			with file('/etc/dhcp/dhclient.conf', 'r') as original: 
+				data = original.read()
+			with file('/etc/dhcp/dhclient.conf', 'w') as modified: 
+				modified.write("option coach-data code 242 = text;\nalso request coach-data;\n" + data)
 		
 		net_state = self.runCMD("cat /sys/class/net/"+iface+"/operstate").replace('\n', '')
 		if(net_state == "down"):

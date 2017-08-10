@@ -1,5 +1,8 @@
 angular.module('coach').service('ceph', function($http, $q, tasks) {
 	
+	this.getCephStat = () => {
+		return $http.get("/api/coach/storage/ceph/status").then(response => response.data)
+	};
 	this.getCephMonStat = () => {
 		return $http.get("/api/coach/storage/ceph/mon/status").then(response => response.data)
 	};

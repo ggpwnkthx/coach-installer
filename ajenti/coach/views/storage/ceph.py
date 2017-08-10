@@ -25,9 +25,18 @@ class Handler(HttpPlugin):
 		output = ps.communicate()[0]
 		return output
 		
+	@url(r'/api/coach/storage/ceph/status')
+	@endpoint(api=True)
+	def handle_api_storage_ceph_status(self, http_context):
+		if os.geteuid() != 0:
+			return "Root permission required."
+		if self.runCMD("command -v ceph").replace("\n",""):
+			return json.loads(self.runCMD("ceph -f json -s"))
+		else:
+			return False	
 	@url(r'/api/coach/storage/ceph/mon/status')
 	@endpoint(api=True)
-	def handle_api_storage_monitor_status(self, http_context):
+	def handle_api_storage_ceph_monitor_status(self, http_context):
 		if os.geteuid() != 0:
 			return "Root permission required."
 		if self.runCMD("command -v ceph").replace("\n",""):
@@ -152,7 +161,17 @@ class Handler(HttpPlugin):
 		if os.geteuid() != 0:
 			return "Root permission required."
 		if self.runCMD("command -v ceph").replace("\n",""):
-			return json.loads(self.runCMD("ceph -f json osd pool ls").replace("\n",""))
+			pools = []
+			_pools = json.loads(self.runCMD("ceph -f json osd pool ls").replace("\n",""))
+			for pool in _pools:
+				details = {}
+				all_d = json.loads("["+self.runCMD("ceph -f json osd pool get "+pool+" all").replace("\n","").replace("}{","},{")+"]")
+				for detail in all_d:
+					for key, value in detail.iteritems():
+						details[key] = value
+				pools.append(details)
+			return pools
+				
 	
 	@url(r'/api/coach/storage/ceph/osd/pool/remove/(?P<pool>\w+)')
 	@endpoint(api=True)

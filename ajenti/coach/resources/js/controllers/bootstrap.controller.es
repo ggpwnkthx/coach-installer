@@ -85,7 +85,19 @@ angular.module('coach').controller('CoachBootstrapController', function ($scope,
 			}
 		});
 	}
-	
+	$scope.prepNetwork = (iface) => {
+		bootstrap.prepNetwork(iface).then((data) => {
+			notify.info(data);
+			switch(data) {
+				case "Networking Ready.":
+					$scope.task = "join";
+					break;
+				default:
+					$scope.prepNetwork(iface);
+					break;
+			}
+		});
+	}
 	$scope.installCephFS = (config = null) => {
 		$scope.task = "cephfs";
 		if(config == null) {

@@ -38,7 +38,13 @@
 					<label translate>To start a new cluster, use an interface that does not have a DHCP server on it's fabric.</label>
 				</div>
 				<div ng:show="dhcpFound">
-					<label translate>We're ready to add this device to the cluster.</label>
+					<label translate>We're ready to add this device to the cluster. Please enter a cluster admin's username and password.</label>
+					<br />
+					<br />
+					<label translage>Username:</label>
+					<input ng:model="join.username" type="text" class="form-control" />
+					<label translage>Password:</label>
+					<input ng:model="join.password" type="password" class="form-control" />
 				</div>
 				<div ng:show="dhcpNotFound">
 					<label translate>No cluster data found on this fabric.</label>
@@ -71,7 +77,7 @@
 				</div>
 			</div>
 			<div class="modal-footer">
-				<a ng:show="dhcpFound" ng:click="dhcpSearch(configuringInterface.name)" class="btn btn-default btn-flat" translate>Do it!</a>
+				<a ng:show="dhcpFound" ng:click="prepNetwork(configuringInterface.name, join.username, join.password)" class="btn btn-default btn-flat" translate>Join</a>
 				<a ng:show="dhcpNotFound" ng:click="bootstrap()" class="btn btn-default btn-flat" translate>Yes</a>
 				<a ng:show="showBootstrap" ng:click="createCluster($parent.configuringInterface)" class="btn btn-default btn-flat" translate>Create</a>
 				<a ng:hide="processingBootstrap" ng:click="$parent.configuringInterface = null; reload()" class="btn btn-default btn-flat" translate>Close</a>

@@ -8,6 +8,8 @@ import subprocess
 import time
 import json
 
+from pyroute2 import IPRoute
+
 @component(HttpPlugin)
 class Handler(HttpPlugin):
 	def __init__(self, context):
@@ -32,8 +34,11 @@ class Handler(HttpPlugin):
 	@endpoint(api=True)
 	def handle_api_coach_installNetworkServices(self, http_context):
 		if not self.runCMD("command -v docker").replace("\n",""):
-			self.runCMD("apt-get -y install docker.io")
+			self.runCMD("curl -fsSL https://get.docker.com/ | sh")
 			return "Docker installed."
+		if self.runCMD("docker node ls").replace("\n","") === "Cannot connect to the Docker daemon. Is the docker daemon running on this host?":
+			self.runCMD("docker swarm init --advertise-addr x.x.x.x")
+			return "Docker swarm initilized."
 		if not os.path.isfile("/etc/systemd/system/provisioner-dnsmasq.service"):
 			self.runCMD("chmod +x "+self.getPluginPath()+"/docker/provisioner/dnsmasq/deploy.sh")
 			self.runCMD(self.getPluginPath()+"/docker/provisioner/dnsmasq/deploy.sh")
@@ -48,22 +53,38 @@ class Handler(HttpPlugin):
 			return False
 		else:
 			return True
-		
-	@url(r'/api/coach/bootstrap')
+	
+	@url(r'/api/coach/bootstrap/join')
 	@endpoint(api=True)
-	def handle_api_coach_bootstrap(self, http_context):
+	def handle_api_coach_bootstrap_join(self, http_context):
 		config = json.loads(http_context.body)
+		return config
 		
+	@url(r'/api/coach/bootstrap/(?P<iface>\w+)')
+	@endpoint(api=True)
+	def handle_api_coach_bootstrap_net(self, http_context, iface):		
 		is_ipcalc = self.runCMD("command -v ipcalc").replace("\n","")
 		if not is_ipcalc:
 			self.runCMD("apt-get -y install ipcalc")
 			return "Networking dependancies were installed."
+			
+		ip = IPRoute()
+		config = [{'iface': x['index'],
+			'cidr': str(x.get_attr('IFA_ADDRESS'))+"/"+str(x['prefixlen'])} for x in ip.get_addr(label=iface)]
+		ip.close()
+		config = config[0]
+		config['iface'] = iface
 		
 		net_state = self.runCMD("cat /sys/class/net/"+config['iface']+"/operstate").replace('\n', '')
 		net_min = self.runCMD("ipcalc -n "+config['cidr']+" | grep HostMin | awk '{print $2}'").replace('\n', '')
 		net_mask = self.runCMD("ipcalc -n "+config['cidr']+" | grep Netmask | awk '{print $2}'").replace('\n', '')
 		net_cidr = self.runCMD("ipcalc -n "+config['cidr']+" | grep Netmask | awk '{print $4}'").replace('\n', '')
 		net_work = self.runCMD("ipcalc -n "+config['cidr']+" | grep Network | awk '{print $2}'").replace('\n', '')
+		net_bot = self.runCMD("ipcalc -n "+config['cidr']+" | grep Network | awk -F/ '{print $1}' | awk '{print $2}'").replace('\n', '')
+		net_use = self.runCMD("ipcalc -n "+config['cidr']+" | grep Address | awk '{print $2}'").replace('\n', '')
+		
+		if net_bot == net_use:
+			net_use = net_min
 		
 		iface_in_file = False
 		ip_in_file = False
@@ -72,7 +93,7 @@ class Handler(HttpPlugin):
 				if config['iface'] in line:
 					iface_in_file = True
 					
-				if net_min in line:
+				if net_use in line:
 					ip_in_file = True
 					
 			if iface_in_file & ip_in_file:
@@ -91,13 +112,13 @@ class Handler(HttpPlugin):
 					self.runCMD("ip addr del "+ip+" dev "+config['iface'])
 				for ip in net_6:
 					self.runCMD("ip addr del "+ip+" dev "+config['iface'])
-				self.runCMD("ip addr add "+net_min+"/"+net_cidr+" dev "+config['iface'])
+				self.runCMD("ip addr add "+net_use+"/"+net_cidr+" dev "+config['iface'])
 				self.runCMD("ip link set dev "+config['iface']+" up")
 				
 				store_fab_file.truncate()
 				store_fab_file.write("auto "+config['iface']+"\n")
 				store_fab_file.write("iface "+config['iface']+" inet static\n")
-				store_fab_file.write("address "+net_min+"\n")
+				store_fab_file.write("address "+net_use+"\n")
 				store_fab_file.write("netmask "+net_mask+"\n")
 				store_fab_file.close()
 				
@@ -116,13 +137,128 @@ class Handler(HttpPlugin):
 				self.runCMD("ip addr del "+ip+" dev "+config['iface'])
 			for ip in net_6:
 				self.runCMD("ip addr del "+ip+" dev "+config['iface'])
-			self.runCMD("ip addr add "+net_min+"/"+net_cidr+" dev "+config['iface'])
+			self.runCMD("ip addr add "+net_use+"/"+net_cidr+" dev "+config['iface'])
 			self.runCMD("ip link set dev "+config['iface']+" up")
 			
 			store_fab_file.write("auto "+config['iface']+"\n")
 			store_fab_file.write("iface "+config['iface']+" inet static\n")
-			store_fab_file.write("address "+net_min+"\n")
-			store_fab_file.write("netmask "+net_mask+"\n")
+			store_fab_file.write("address "+net_use+"\n")
+			store_fab_file.write("netmask "+net_use+"\n")
+			store_fab_file.close()
+			
+			return "The storage fabric configuration has been created.";
+		
+		domain = self.runCMD("cat /var/lib/dhcp/dhclient.leases | grep 'option domain-name ' | cut -d '\"' -f2").replace('\n', '')
+		fqdn = self.runCMD("hostname -f").replace('\n', '')
+		hostname = self.runCMD("hostname -s").replace('\n', '')
+		config['fqdn'] = hostname+"."+domain
+		if fqdn != config['fqdn']:
+			self.runCMD('sed -i "/'+hostname+'/ s/.*//g" /etc/hosts')
+			self.runCMD("hostname -b "+config['fqdn'])
+			fqdn = self.runCMD("hostname -f").replace('\n', '')
+			hostname = self.runCMD("hostname -s").replace('\n', '')
+			return "FQDN updated."
+		
+		fqdn_file = open("/etc/hostname", 'r+')
+		fqdn_old = fqdn_file.readline().strip()
+		if fqdn_old != fqdn:
+			fqdn_file.seek(0)
+			fqdn_file.truncate()
+			fqdn_file.write(fqdn+"\n")
+			return fqdn_old != fqdn
+		
+		fqdn_in_file = False
+		for line in file("/etc/hosts"):
+			if net_min+"	"+fqdn+"	"+hostname+"	#coach-storage" in line:
+				fqdn_in_file = True
+				break
+		if not fqdn_in_file:
+			self.runCMD('sed -i "/'+hostname+'/ s/.*//g" /etc/hosts')
+			store_fab_file = open("/etc/hosts", 'a')
+			store_fab_file.write(net_min+'	'+fqdn+'	'+hostname+"	#coach-storage\n");
+			return "Hosts file updated."
+			
+		return "Networking Ready."
+	
+	@url(r'/api/coach/bootstrap')
+	@endpoint(api=True)
+	def handle_api_coach_bootstrap(self, http_context):
+		config = json.loads(http_context.body)
+		
+		is_ipcalc = self.runCMD("command -v ipcalc").replace("\n","")
+		if not is_ipcalc:
+			self.runCMD("apt-get -y install ipcalc")
+			return "Networking dependancies were installed."
+		
+		net_state = self.runCMD("cat /sys/class/net/"+config['iface']+"/operstate").replace('\n', '')
+		net_min = self.runCMD("ipcalc -n "+config['cidr']+" | grep HostMin | awk '{print $2}'").replace('\n', '')
+		net_mask = self.runCMD("ipcalc -n "+config['cidr']+" | grep Netmask | awk '{print $2}'").replace('\n', '')
+		net_cidr = self.runCMD("ipcalc -n "+config['cidr']+" | grep Netmask | awk '{print $4}'").replace('\n', '')
+		net_work = self.runCMD("ipcalc -n "+config['cidr']+" | grep Network | awk '{print $2}'").replace('\n', '')
+		net_bot = self.runCMD("ipcalc -n "+config['cidr']+" | grep Network | awk -F/ '{print $1}' | awk '{print $2}'").replace('\n', '')
+		net_use = self.runCMD("ipcalc -n "+config['cidr']+" | grep Address | awk '{print $2}'").replace('\n', '')
+		
+		if net_bot == net_use:
+			net_use = net_min
+		
+		iface_in_file = False
+		ip_in_file = False
+		if os.path.isfile("/etc/network/interfaces.d/storage"):
+			for line in file("/etc/network/interfaces.d/storage"):
+				if config['iface'] in line:
+					iface_in_file = True
+					
+				if net_use in line:
+					ip_in_file = True
+					
+			if iface_in_file & ip_in_file:
+				storage_fabric_ready = True;
+			else:
+				store_fab_file = open("/etc/network/interfaces.d/storage", 'r+')
+				
+				net_4 = '["' + self.runCMD("ip -4 -o address show dev "+config['iface']+" | awk '{print $4}'").replace("\n", '", "') + '"]'
+				net_4 = json.loads(net_4.replace(', ""', ''))
+				net_6 = '["' + self.runCMD("ip -6 -o address show dev "+config['iface']+" | awk '{print $4}'").replace("\n", '", "') + '"]'
+				net_6 = json.loads(net_6.replace(', ""', ''))
+				
+				if net_state == "up":
+					self.runCMD("ip link set dev "+config['iface']+" down")
+				for ip in net_4:
+					self.runCMD("ip addr del "+ip+" dev "+config['iface'])
+				for ip in net_6:
+					self.runCMD("ip addr del "+ip+" dev "+config['iface'])
+				self.runCMD("ip addr add "+net_use+"/"+net_cidr+" dev "+config['iface'])
+				self.runCMD("ip link set dev "+config['iface']+" up")
+				
+				store_fab_file.truncate()
+				store_fab_file.write("auto "+config['iface']+"\n")
+				store_fab_file.write("iface "+config['iface']+" inet static\n")
+				store_fab_file.write("address "+net_use+"\n")
+				store_fab_file.write("netmask "+net_mask+"\n")
+				store_fab_file.close()
+				
+				return "The storage fabric configuration has been updated.";
+		else:
+			store_fab_file = open("/etc/network/interfaces.d/storage", 'w')
+			
+			net_4 = '["' + self.runCMD("ip -4 -o address show dev "+config['iface']+" | awk '{print $4}'").replace("\n", '", "') + '"]'
+			net_4 = json.loads(net_4.replace(', ""', ''))
+			net_6 = '["' + self.runCMD("ip -6 -o address show dev "+config['iface']+" | awk '{print $4}'").replace("\n", '", "') + '"]'
+			net_6 = json.loads(net_6.replace(', ""', ''))
+			
+			if net_state == "up":
+				self.runCMD("ip link set dev "+config['iface']+" down")
+			for ip in net_4:
+				self.runCMD("ip addr del "+ip+" dev "+config['iface'])
+			for ip in net_6:
+				self.runCMD("ip addr del "+ip+" dev "+config['iface'])
+			self.runCMD("ip addr add "+net_use+"/"+net_cidr+" dev "+config['iface'])
+			self.runCMD("ip link set dev "+config['iface']+" up")
+			
+			store_fab_file.write("auto "+config['iface']+"\n")
+			store_fab_file.write("iface "+config['iface']+" inet static\n")
+			store_fab_file.write("address "+net_use+"\n")
+			store_fab_file.write("netmask "+net_use+"\n")
 			store_fab_file.close()
 			
 			return "The storage fabric configuration has been created.";
@@ -216,3 +352,4 @@ class Handler(HttpPlugin):
 			return "Ceph monitor initialized on this host."
 			
 		return "Bootstrap completed."
+	

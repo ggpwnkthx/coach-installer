@@ -122,7 +122,19 @@ angular.module('coach').controller('CoachBootstrapController', function ($scope,
 			}
 		});
 	};
-
+	$scope.prepNetwork = function (iface) {
+		bootstrap.prepNetwork(iface).then(function (data) {
+			notify.info(data);
+			switch (data) {
+				case "Networking Ready.":
+					$scope.task = "join";
+					break;
+				default:
+					$scope.prepNetwork(iface);
+					break;
+			}
+		});
+	};
 	$scope.installCephFS = function () {
 		var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 
@@ -748,6 +760,17 @@ angular.module('coach').service('bootstrap', function ($http, $q, tasks) {
 			return response.data;
 		});
 	};
+	this.prepNetwork = function (iface) {
+		return $http.get("/api/coach/bootstrap/" + iface).then(function (response) {
+			return response.data;
+		});
+	};
+	this.joinCluster = function (config) {
+		return $http.post("/api/coach/bootstrap/join", config).then(function (response) {
+			return response.data;
+		});
+	};
+
 	this.isCephInstalled = function () {
 		return $http.get("/api/coach/isCephInstalled").then(function (response) {
 			return response.data;

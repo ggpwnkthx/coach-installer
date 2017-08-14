@@ -32,7 +32,6 @@ then
   echo "no-poll" | tee --append /mnt/ceph/fs/containers/provisioner/conf
   echo "no-hosts" | tee --append /mnt/ceph/fs/containers/provisioner/conf
   echo "expand-hosts" | tee --append /mnt/ceph/fs/containers/provisioner/conf
-  echo "option coach-data code 242 = ready;" | tee --append /mnt/ceph/fs/containers/provisioner/conf
 fi
 chmod +r /mnt/ceph/fs/containers/provisioner/conf
 

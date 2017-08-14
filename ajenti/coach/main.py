@@ -17,6 +17,20 @@ class ItemProvider(SidebarItemProvider):
 					'children': [
 						{
 							'attach': 'category:cluster',
+							'name': 'Containers',
+							'icon': 'cubes',
+							'url': '/view/cluster/containers',
+							'children': []
+						},
+						{
+							'attach': 'category:cluster',
+							'name': 'Virtual Machines',
+							'icon': 'desktop',
+							'url': '/view/cluster/containers',
+							'children': []
+						},
+						{
+							'attach': 'category:cluster',
 							'name': 'Fabric',
 							'icon': 'sitemap',
 							'url': '/view/cluster/fabric',

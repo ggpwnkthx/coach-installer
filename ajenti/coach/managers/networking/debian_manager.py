@@ -3,7 +3,7 @@ import subprocess
 import aj
 from jadi import component
 from aj.plugins.augeas.api import Augeas
-from aj.plugins.coach.api import NetworkManager
+from aj.plugins.coach.api.networking import NetworkManager
 
 from .ifconfig import ifconfig_up, ifconfig_down, ifconfig_get_ip, ifconfig_get_up
 

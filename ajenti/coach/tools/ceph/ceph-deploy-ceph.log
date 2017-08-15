@@ -1,0 +1,16 @@
+[2017-08-11 12:58:45,898][ceph_deploy.conf][DEBUG ] found configuration file at: /home/mindhead/.cephdeploy.conf
+[2017-08-11 12:58:45,898][ceph_deploy.cli][INFO  ] Invoked (1.5.32): /usr/bin/ceph-deploy gatherkeys store01
+[2017-08-11 12:58:45,898][ceph_deploy.cli][INFO  ] ceph-deploy options:
+[2017-08-11 12:58:45,898][ceph_deploy.cli][INFO  ]  username                      : None
+[2017-08-11 12:58:45,899][ceph_deploy.cli][INFO  ]  verbose                       : False
+[2017-08-11 12:58:45,899][ceph_deploy.cli][INFO  ]  overwrite_conf                : False
+[2017-08-11 12:58:45,899][ceph_deploy.cli][INFO  ]  quiet                         : False
+[2017-08-11 12:58:45,899][ceph_deploy.cli][INFO  ]  cd_conf                       : <ceph_deploy.conf.cephdeploy.Conf instance at 0x7f2290aa0bd8>
+[2017-08-11 12:58:45,899][ceph_deploy.cli][INFO  ]  cluster                       : ceph
+[2017-08-11 12:58:45,899][ceph_deploy.cli][INFO  ]  mon                           : ['store01']
+[2017-08-11 12:58:45,899][ceph_deploy.cli][INFO  ]  func                          : <function gatherkeys at 0x7f2290a71e60>
+[2017-08-11 12:58:45,899][ceph_deploy.cli][INFO  ]  ceph_conf                     : None
+[2017-08-11 12:58:45,900][ceph_deploy.cli][INFO  ]  default_release               : False
+[2017-08-11 12:58:45,900][ceph_deploy.gatherkeys][DEBUG ] Checking store01 for /etc/ceph/ceph.client.admin.keyring
+[2017-08-11 13:00:45,862][ceph_deploy][ERROR ] KeyboardInterrupt
+

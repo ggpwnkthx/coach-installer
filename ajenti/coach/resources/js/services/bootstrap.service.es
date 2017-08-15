@@ -1,5 +1,18 @@
 angular.module('coach').service('bootstrap', function($http, $q, tasks) {
-
+	
+	this.networkCalculate = (config) => {
+		return $http.post("/api/coach/bootstrap/network/calculate", config).then(response => response.data)
+	};
+	this.getNetworking = () => {
+        return $http.get("/api/network/config/get").then(response => response.data)
+    };
+	this.setNetworking = (config) => {
+        return $http.post("/api/network/config/set", config).then(response => response.data)
+    };
+    this.setHostname = (hostname) => {
+        return $http.post("/api/network/hostname/set", hostname).then(response => response.data)
+    };
+	
 	this.start = (config) => {
 		return $http.post("/api/coach/bootstrap", config).then(response => response.data)
 	};
@@ -26,6 +39,7 @@ angular.module('coach').service('bootstrap', function($http, $q, tasks) {
 	this.installNetworkServices = () => {
 		return $http.get("/api/coach/installNetworkServices").then(response => response.data)
 	};
+
 	
     return this;
 });

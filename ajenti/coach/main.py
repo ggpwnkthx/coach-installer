@@ -20,13 +20,22 @@ class ItemProvider(SidebarItemProvider):
 							'name': 'Containers',
 							'icon': 'cubes',
 							'url': '/view/cluster/containers',
-							'children': []
+							'children': 
+							[
+								{
+									'attach': 'category:cluster',
+									'name': 'Docker',
+									'icon': 'podcast',
+									'url': '/view/cluster/containers/docker',
+									'children': []
+								},
+							]
 						},
 						{
 							'attach': 'category:cluster',
 							'name': 'Virtual Machines',
 							'icon': 'desktop',
-							'url': '/view/cluster/containers',
+							'url': '/view/cluster/virtual-machines',
 							'children': []
 						},
 						{

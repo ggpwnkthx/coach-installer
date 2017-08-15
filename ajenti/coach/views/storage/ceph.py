@@ -67,7 +67,7 @@ class Handler(HttpPlugin):
 		if os.geteuid() != 0:
 			return "Root permission required."
 		cwd = os.getcwd()
-		os.chdir(self.getPluginPath()+"/ceph")
+		os.chdir(self.getPluginPath()+"/tools/ceph")
 		
 		config = json.loads(http_context.body)
 		self.runCMD("sgdisk -z "+config['osd'])
@@ -91,7 +91,7 @@ class Handler(HttpPlugin):
 		if os.geteuid() != 0:
 			return "Root permission required."
 		cwd = os.getcwd()
-		os.chdir(self.getPluginPath()+"/ceph")
+		os.chdir(self.getPluginPath()+"/tools/ceph")
 		
 		config = json.loads(http_context.body)
 		if not config.has_key('cluster'):
@@ -277,7 +277,7 @@ class Handler(HttpPlugin):
 		if os.geteuid() != 0:
 			return "Root permission required."
 		cwd = os.getcwd()
-		os.chdir(self.getPluginPath()+"/ceph")
+		os.chdir(self.getPluginPath()+"/tools/ceph")
 		
 		config = json.loads(http_context.body)
 		if not config.has_key('cluster'):
@@ -316,18 +316,18 @@ class Handler(HttpPlugin):
 			os.makedirs("/mnt/ceph/fs")
 			return "Created directory '/mnt/ceph/fs'"
 		if not os.path.isfile("/etc/systemd/system/ceph-client.service"):
-			shutil.copy2(self.getPluginPath()+"/ceph/services/ceph-client.service", "/etc/systemd/system/ceph-client.service")
+			shutil.copy2(self.getPluginPath()+"/tools/ceph/services/ceph-client.service", "/etc/systemd/system/ceph-client.service")
 			self.runCMD("systemctl daemon-reload")
 			self.runCMD("systemctl stop ceph-client.service")
 			self.runCMD("systemctl enable ceph-client.service")
 			self.runCMD("systemctl start ceph-client.service")
 			return "Ceph client service installed and started."
 		if not os.path.isfile("/etc/ceph/mnt-ceph-fs.sh"):
-			shutil.copy2(self.getPluginPath()+"/ceph/services/mnt-ceph-fs.sh", "/etc/ceph/mnt-ceph-fs.sh")
+			shutil.copy2(self.getPluginPath()+"/tools/ceph/services/mnt-ceph-fs.sh", "/etc/ceph/mnt-ceph-fs.sh")
 			self.runCMD("chmod +x /etc/ceph/mnt-ceph-fs.sh")
 			return "CephFS mounting script installed."
 		if not os.path.isfile("/etc/systemd/system/mnt-ceph-fs.service"):
-			shutil.copy2(self.getPluginPath()+"/ceph/services/mnt-ceph-fs.service", "/etc/systemd/system/mnt-ceph-fs.service")
+			shutil.copy2(self.getPluginPath()+"/tools/ceph/services/mnt-ceph-fs.service", "/etc/systemd/system/mnt-ceph-fs.service")
 			self.runCMD("systemctl daemon-reload")
 			self.runCMD("systemctl stop mnt-ceph-fs.service")
 			self.runCMD("systemctl enable mnt-ceph-fs.service")

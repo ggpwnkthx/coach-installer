@@ -63,39 +63,51 @@ angular.module('coach').controller('CoachBootstrapController', function ($scope,
 		$scope.showBootstrap = true;
 	}
 	
-	$scope.connectToFabric = (iface, toFabric) => {
-		fabric.connectToFabric(iface, toFabric).then((data) => {
-			notify.info(data);
-		});
-	}
-	
 	$scope.createCluster = (config) => {
 		$scope.showBootstrap = false;
 		$scope.creatingFabric = true;
 		$scope.processingBootstrap = true;
-		bootstrap.start({'iface': config.name, 'cidr': config.ipv4[0], 'fqdn': config.fqdn}).then((data) => {
-			notify.info(data);
-			switch(data) {
-				case "Bootstrap completed.":
-					$scope.reload();
-					break;
-				default:
-					$scope.createCluster(config);
-					break;
-			}
+		bootstrap.networkCalculate({'iface': config.name, 'cidr': config.ipv4[0], 'fqdn': config.fqdn}).then((data) => {
+			$scope.networking = data;
+			$scope.createFabric();
 		});
 	}
-	$scope.prepNetwork = (iface) => {
-		bootstrap.prepNetwork(iface).then((data) => {
-			notify.info(data);
-			switch(data) {
-				case "Networking Ready.":
-					$scope.task = "join";
-					break;
-				default:
-					$scope.prepNetwork(iface);
-					break;
+	$scope.createFabric = () => {
+		iface = {
+			'address': $scope.networking.use,
+			'addressing': 'static',
+			'client': null,
+			'down_script': null,
+			'family': 'inet',
+			'gateway': null,
+			'hwaddress': null,
+			'mask': $scope.networking.netmask,
+			'metric': null,
+			'mtu': null,
+			'name': $scope.networking.name,
+			'post_down_script': null,
+			'post_up_script': null,
+			'pre_down_script': null,
+			'pre_up_script': null,
+			'scope': null,
+			'up_script': null
+		}
+		bootstrap.getNetworking().then((data) => {
+			exists = null;
+			$.each(data, function(i,v) {
+				if(v.name === $scope.networking.iface) {
+					exists = i;
+				}
+			});
+			if(exists) {
+				data[exists] = iface;
+			} else {
+				data.push(iface);
 			}
+			console.log(data);
+			bootstrap.setNetworking(data).then((response) => {
+				console.log(response);
+			});
 		});
 	}
 	$scope.installCephFS = (config = null) => {

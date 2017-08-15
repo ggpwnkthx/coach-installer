@@ -100,39 +100,51 @@ angular.module('coach').controller('CoachBootstrapController', function ($scope,
 		$scope.showBootstrap = true;
 	};
 
-	$scope.connectToFabric = function (iface, toFabric) {
-		fabric.connectToFabric(iface, toFabric).then(function (data) {
-			notify.info(data);
-		});
-	};
-
 	$scope.createCluster = function (config) {
 		$scope.showBootstrap = false;
 		$scope.creatingFabric = true;
 		$scope.processingBootstrap = true;
-		bootstrap.start({ 'iface': config.name, 'cidr': config.ipv4[0], 'fqdn': config.fqdn }).then(function (data) {
-			notify.info(data);
-			switch (data) {
-				case "Bootstrap completed.":
-					$scope.reload();
-					break;
-				default:
-					$scope.createCluster(config);
-					break;
-			}
+		bootstrap.networkCalculate({ 'iface': config.name, 'cidr': config.ipv4[0], 'fqdn': config.fqdn }).then(function (data) {
+			$scope.networking = data;
+			$scope.createFabric();
 		});
 	};
-	$scope.prepNetwork = function (iface) {
-		bootstrap.prepNetwork(iface).then(function (data) {
-			notify.info(data);
-			switch (data) {
-				case "Networking Ready.":
-					$scope.task = "join";
-					break;
-				default:
-					$scope.prepNetwork(iface);
-					break;
+	$scope.createFabric = function () {
+		iface = {
+			'address': $scope.networking.use,
+			'addressing': 'static',
+			'client': null,
+			'down_script': null,
+			'family': 'inet',
+			'gateway': null,
+			'hwaddress': null,
+			'mask': $scope.networking.netmask,
+			'metric': null,
+			'mtu': null,
+			'name': $scope.networking.name,
+			'post_down_script': null,
+			'post_up_script': null,
+			'pre_down_script': null,
+			'pre_up_script': null,
+			'scope': null,
+			'up_script': null
+		};
+		bootstrap.getNetworking().then(function (data) {
+			exists = null;
+			$.each(data, function (i, v) {
+				if (v.name === $scope.networking.iface) {
+					exists = i;
+				}
+			});
+			if (exists) {
+				data[exists] = iface;
+			} else {
+				data.push(iface);
 			}
+			console.log(data);
+			bootstrap.setNetworking(data).then(function (response) {
+				console.log(response);
+			});
 		});
 	};
 	$scope.installCephFS = function () {
@@ -754,6 +766,27 @@ angular.module('coach').controller('CephPagesConfigController', function ($scope
 'use strict';
 
 angular.module('coach').service('bootstrap', function ($http, $q, tasks) {
+
+	this.networkCalculate = function (config) {
+		return $http.post("/api/coach/bootstrap/network/calculate", config).then(function (response) {
+			return response.data;
+		});
+	};
+	this.getNetworking = function () {
+		return $http.get("/api/network/config/get").then(function (response) {
+			return response.data;
+		});
+	};
+	this.setNetworking = function (config) {
+		return $http.post("/api/network/config/set", config).then(function (response) {
+			return response.data;
+		});
+	};
+	this.setHostname = function (hostname) {
+		return $http.post("/api/network/hostname/set", hostname).then(function (response) {
+			return response.data;
+		});
+	};
 
 	this.start = function (config) {
 		return $http.post("/api/coach/bootstrap", config).then(function (response) {

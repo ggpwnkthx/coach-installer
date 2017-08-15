@@ -25,6 +25,39 @@ class Handler(HttpPlugin):
 		output = ps.communicate()[0]
 		return output
 	
+	
+	@url(r'/api/coach/bootstrap/network/calculate')
+	@endpoint(api=True)
+	def handle_api_coach_bootstrap_net_calc(self, http_context):
+		input = json.loads(http_context.body)
+		
+		ip = IPRoute()
+		config = [{'iface': x['index'],
+			'cidr': str(x.get_attr('IFA_ADDRESS'))+"/"+str(x['prefixlen'])} for x in ip.get_addr(label=input['iface'])]
+		ip.close()
+		if len(config) > 0:
+			input = config
+		
+		is_ipcalc = self.runCMD("command -v ipcalc").replace("\n","")
+		if not is_ipcalc:
+			self.runCMD("apt-get -y install ipcalc")
+			return "Networking dependancies were installed."
+		
+		output = {}
+		
+		output['name'] = input['iface']
+		output['minimum'] = self.runCMD("ipcalc -n "+input['cidr']+" | grep HostMin | awk '{print $2}'").replace('\n', '').replace('\n', '')
+		output['netmask'] = self.runCMD("ipcalc -n "+input['cidr']+" | grep Netmask | awk '{print $2}'").replace('\n', '').replace('\n', '')
+		output['cidr'] = self.runCMD("ipcalc -n "+input['cidr']+" | grep Netmask | awk '{print $4}'").replace('\n', '').replace('\n', '')
+		output['network'] = self.runCMD("ipcalc -n "+input['cidr']+" | grep Network | awk '{print $2}'").replace('\n', '').replace('\n', '')
+		output['bottom'] = self.runCMD("ipcalc -n "+input['cidr']+" | grep Network | awk -F/ '{print $1}' | awk '{print $2}'").replace('\n', '')
+		output['use'] = self.runCMD("ipcalc -n "+input['cidr']+" | grep Address | awk '{print $2}'").replace('\n', '').replace('\n', '')
+		
+		if output['bottom'] == output['use']:
+			output['use'] = output['minimum']
+		
+		return output
+	
 	@url(r'/api/coach/isCephInstalled')
 	@endpoint(api=True)
 	def handle_api_coach_isCephInstalled(self, http_context):
@@ -33,17 +66,11 @@ class Handler(HttpPlugin):
 	@url(r'/api/coach/installNetworkServices')
 	@endpoint(api=True)
 	def handle_api_coach_installNetworkServices(self, http_context):
-		if not self.runCMD("command -v docker").replace("\n",""):
-			self.runCMD("curl -fsSL https://get.docker.com/ | sh")
-			return "Docker installed."
-		if self.runCMD("docker node ls").replace("\n","") === "Cannot connect to the Docker daemon. Is the docker daemon running on this host?":
-			self.runCMD("docker swarm init --advertise-addr x.x.x.x")
-			return "Docker swarm initilized."
 		if not os.path.isfile("/etc/systemd/system/provisioner-dnsmasq.service"):
-			self.runCMD("chmod +x "+self.getPluginPath()+"/docker/provisioner/dnsmasq/deploy.sh")
-			self.runCMD(self.getPluginPath()+"/docker/provisioner/dnsmasq/deploy.sh")
+			self.runCMD("chmod +x "+self.getPluginPath()+"/tools/docker/provisioner/dnsmasq/deploy.sh")
+			self.runCMD(self.getPluginPath()+"/tools/docker/provisioner/dnsmasq/deploy.sh")
 			return "DNS and DHCP services installed and running."
-		
+		## Install BFCG2
 		return "Ready."
 			
 	@url(r'/api/coach/isCephFS')
@@ -60,36 +87,14 @@ class Handler(HttpPlugin):
 		config = json.loads(http_context.body)
 		return config
 		
-	@url(r'/api/coach/bootstrap/(?P<iface>\w+)')
+	@url(r'/api/coach/bootstrap/network/(?P<iface>\w+)')
 	@endpoint(api=True)
-	def handle_api_coach_bootstrap_net(self, http_context, iface):		
-		is_ipcalc = self.runCMD("command -v ipcalc").replace("\n","")
-		if not is_ipcalc:
-			self.runCMD("apt-get -y install ipcalc")
-			return "Networking dependancies were installed."
-			
-		ip = IPRoute()
-		config = [{'iface': x['index'],
-			'cidr': str(x.get_attr('IFA_ADDRESS'))+"/"+str(x['prefixlen'])} for x in ip.get_addr(label=iface)]
-		ip.close()
-		config = config[0]
-		config['iface'] = iface
-		
-		net_state = self.runCMD("cat /sys/class/net/"+config['iface']+"/operstate").replace('\n', '')
-		net_min = self.runCMD("ipcalc -n "+config['cidr']+" | grep HostMin | awk '{print $2}'").replace('\n', '')
-		net_mask = self.runCMD("ipcalc -n "+config['cidr']+" | grep Netmask | awk '{print $2}'").replace('\n', '')
-		net_cidr = self.runCMD("ipcalc -n "+config['cidr']+" | grep Netmask | awk '{print $4}'").replace('\n', '')
-		net_work = self.runCMD("ipcalc -n "+config['cidr']+" | grep Network | awk '{print $2}'").replace('\n', '')
-		net_bot = self.runCMD("ipcalc -n "+config['cidr']+" | grep Network | awk -F/ '{print $1}' | awk '{print $2}'").replace('\n', '')
-		net_use = self.runCMD("ipcalc -n "+config['cidr']+" | grep Address | awk '{print $2}'").replace('\n', '')
-		
-		if net_bot == net_use:
-			net_use = net_min
+	def handle_api_coach_bootstrap_net_join(self, http_context, iface):		
 		
 		iface_in_file = False
 		ip_in_file = False
-		if os.path.isfile("/etc/network/interfaces.d/storage"):
-			for line in file("/etc/network/interfaces.d/storage"):
+		if os.path.isfile("/etc/network/interfaces.d/management"):
+			for line in file("/etc/network/interfaces.d/management"):
 				if config['iface'] in line:
 					iface_in_file = True
 					
@@ -97,9 +102,9 @@ class Handler(HttpPlugin):
 					ip_in_file = True
 					
 			if iface_in_file & ip_in_file:
-				storage_fabric_ready = True;
+				management_fabric_ready = True;
 			else:
-				store_fab_file = open("/etc/network/interfaces.d/storage", 'r+')
+				store_fab_file = open("/etc/network/interfaces.d/management", 'r+')
 				
 				net_4 = '["' + self.runCMD("ip -4 -o address show dev "+config['iface']+" | awk '{print $4}'").replace("\n", '", "') + '"]'
 				net_4 = json.loads(net_4.replace(', ""', ''))
@@ -122,9 +127,9 @@ class Handler(HttpPlugin):
 				store_fab_file.write("netmask "+net_mask+"\n")
 				store_fab_file.close()
 				
-				return "The storage fabric configuration has been updated.";
+				return "The management fabric configuration has been updated.";
 		else:
-			store_fab_file = open("/etc/network/interfaces.d/storage", 'w')
+			store_fab_file = open("/etc/network/interfaces.d/management", 'w')
 			
 			net_4 = '["' + self.runCMD("ip -4 -o address show dev "+config['iface']+" | awk '{print $4}'").replace("\n", '", "') + '"]'
 			net_4 = json.loads(net_4.replace(', ""', ''))
@@ -146,7 +151,7 @@ class Handler(HttpPlugin):
 			store_fab_file.write("netmask "+net_use+"\n")
 			store_fab_file.close()
 			
-			return "The storage fabric configuration has been created.";
+			return "The management fabric configuration has been created.";
 		
 		domain = self.runCMD("cat /var/lib/dhcp/dhclient.leases | grep 'option domain-name ' | cut -d '\"' -f2").replace('\n', '')
 		fqdn = self.runCMD("hostname -f").replace('\n', '')
@@ -169,20 +174,20 @@ class Handler(HttpPlugin):
 		
 		fqdn_in_file = False
 		for line in file("/etc/hosts"):
-			if net_min+"	"+fqdn+"	"+hostname+"	#coach-storage" in line:
+			if net_min+"	"+fqdn+"	"+hostname+"	#coach-management" in line:
 				fqdn_in_file = True
 				break
 		if not fqdn_in_file:
 			self.runCMD('sed -i "/'+hostname+'/ s/.*//g" /etc/hosts')
 			store_fab_file = open("/etc/hosts", 'a')
-			store_fab_file.write(net_min+'	'+fqdn+'	'+hostname+"	#coach-storage\n");
+			store_fab_file.write(net_min+'	'+fqdn+'	'+hostname+"	#coach-management\n");
 			return "Hosts file updated."
 			
 		return "Networking Ready."
 	
-	@url(r'/api/coach/bootstrap')
+	@url(r'/api/coach/bootstrap/network')
 	@endpoint(api=True)
-	def handle_api_coach_bootstrap(self, http_context):
+	def handle_api_coach_bootstrap_net(self, http_context):
 		config = json.loads(http_context.body)
 		
 		is_ipcalc = self.runCMD("command -v ipcalc").replace("\n","")
@@ -198,13 +203,18 @@ class Handler(HttpPlugin):
 		net_bot = self.runCMD("ipcalc -n "+config['cidr']+" | grep Network | awk -F/ '{print $1}' | awk '{print $2}'").replace('\n', '')
 		net_use = self.runCMD("ipcalc -n "+config['cidr']+" | grep Address | awk '{print $2}'").replace('\n', '')
 		
+		
 		if net_bot == net_use:
 			net_use = net_min
 		
+		response = []
+		response['config'] = config
+		response['config']['net_use'] = net_use
+		
 		iface_in_file = False
 		ip_in_file = False
-		if os.path.isfile("/etc/network/interfaces.d/storage"):
-			for line in file("/etc/network/interfaces.d/storage"):
+		if os.path.isfile("/etc/network/interfaces.d/management"):
+			for line in file("/etc/network/interfaces.d/management"):
 				if config['iface'] in line:
 					iface_in_file = True
 					
@@ -212,9 +222,9 @@ class Handler(HttpPlugin):
 					ip_in_file = True
 					
 			if iface_in_file & ip_in_file:
-				storage_fabric_ready = True;
+				management_fabric_ready = True;
 			else:
-				store_fab_file = open("/etc/network/interfaces.d/storage", 'r+')
+				store_fab_file = open("/etc/network/interfaces.d/management", 'r+')
 				
 				net_4 = '["' + self.runCMD("ip -4 -o address show dev "+config['iface']+" | awk '{print $4}'").replace("\n", '", "') + '"]'
 				net_4 = json.loads(net_4.replace(', ""', ''))
@@ -237,9 +247,10 @@ class Handler(HttpPlugin):
 				store_fab_file.write("netmask "+net_mask+"\n")
 				store_fab_file.close()
 				
-				return "The storage fabric configuration has been updated.";
+				response['message'] = "The management fabric configuration has been updated."
+				return response;
 		else:
-			store_fab_file = open("/etc/network/interfaces.d/storage", 'w')
+			store_fab_file = open("/etc/network/interfaces.d/management", 'w')
 			
 			net_4 = '["' + self.runCMD("ip -4 -o address show dev "+config['iface']+" | awk '{print $4}'").replace("\n", '", "') + '"]'
 			net_4 = json.loads(net_4.replace(', ""', ''))
@@ -261,7 +272,7 @@ class Handler(HttpPlugin):
 			store_fab_file.write("netmask "+net_use+"\n")
 			store_fab_file.close()
 			
-			return "The storage fabric configuration has been created.";
+			return "The management fabric configuration has been created.";
 		
 		fqdn = self.runCMD("hostname -f").replace('\n', '')
 		hostname = self.runCMD("hostname -s").replace('\n', '')
@@ -282,25 +293,30 @@ class Handler(HttpPlugin):
 		
 		fqdn_in_file = False
 		for line in file("/etc/hosts"):
-			if net_min+"	"+fqdn+"	"+hostname+"	#coach-storage" in line:
+			if net_min+"	"+fqdn+"	"+hostname+"	#coach-management" in line:
 				fqdn_in_file = True
 				break
 		if not fqdn_in_file:
 			self.runCMD('sed -i "/'+hostname+'/ s/.*//g" /etc/hosts')
 			store_fab_file = open("/etc/hosts", 'a')
-			store_fab_file.write(net_min+'	'+fqdn+'	'+hostname+"	#coach-storage\n");
+			store_fab_file.write(net_min+'	'+fqdn+'	'+hostname+"	#coach-management\n");
 			return "Hosts file updated."
+			
+		return "Management fabric has been successfully bootstrapped."
 		
+	@url(r'/api/coach/bootstrap/storage')
+	@endpoint(api=True)
+	def handle_api_coach_bootstrap_store(self, http_context):
 		is_ceph_deploy = self.runCMD("command -v ceph-deploy")
 		if not is_ceph_deploy:
 			self.runCMD("env DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get -y install ceph-deploy ca-certificates apt-transport-https")
 			return "The ceph deployment toolkit has been installed."
 		
 		ceph_cluster_name = "ceph"
-		ceph_conf_path = self.getPluginPath()+"/ceph/"+ceph_cluster_name+".conf"
+		ceph_conf_path = self.getPluginPath()+"/tools/ceph/"+ceph_cluster_name+".conf"
 		if not os.path.isfile(ceph_conf_path):
 			cwd = os.getcwd()
-			os.chdir(self.getPluginPath()+"/ceph")
+			os.chdir(self.getPluginPath()+"/tools/ceph")
 			
 			self.runCMD("ceph-deploy new $(hostname -s)")
 			
@@ -315,7 +331,7 @@ class Handler(HttpPlugin):
 		is_ceph = self.runCMD("command -v ceph")
 		if not is_ceph:
 			cwd = os.getcwd()
-			os.chdir(self.getPluginPath()+"/ceph")
+			os.chdir(self.getPluginPath()+"/tools/ceph")
 			
 			self.runCMD("env DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get -y install ceph")
 				
@@ -325,7 +341,7 @@ class Handler(HttpPlugin):
 		is_ceph_mds = self.runCMD("command -v ceph-mds")
 		if not is_ceph_mds:
 			cwd = os.getcwd()
-			os.chdir(self.getPluginPath()+"/ceph")
+			os.chdir(self.getPluginPath()+"/tools/ceph")
 			
 			self.runCMD("env DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get -y install ceph-mds")
 				
@@ -335,7 +351,7 @@ class Handler(HttpPlugin):
 		is_radosgw = self.runCMD("command -v radosgw")
 		if not is_radosgw:
 			cwd = os.getcwd()
-			os.chdir(self.getPluginPath()+"/ceph")
+			os.chdir(self.getPluginPath()+"/tools/ceph")
 			
 			self.runCMD("env DEBIAN_FRONTEND=noninteractive DEBIAN_PRIORITY=critical apt-get -y install radosgw")
 				
@@ -344,12 +360,12 @@ class Handler(HttpPlugin):
 		
 		if not os.path.isfile("/etc/ceph/"+ceph_cluster_name+".conf"):
 			cwd = os.getcwd()
-			os.chdir(self.getPluginPath()+"/ceph")
+			os.chdir(self.getPluginPath()+"/tools/ceph")
 			
 			self.runCMD("ceph-deploy mon create-initial")
 			
 			os.chdir(cwd)
 			return "Ceph monitor initialized on this host."
 			
-		return "Bootstrap completed."
+		return "Ceph, clustered storage, has been successfully bootstrapped."
 	

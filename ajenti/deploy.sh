@@ -24,5 +24,6 @@ cd /usr/local/lib/python2.7/dist-packages/ajenti_plugin_core/resources/vendor
 git clone https://github.com/FortAwesome/Font-Awesome.git
 cd $cwd
 mv /usr/local/lib/python2.7/dist-packages/ajenti_plugin_core/resources/vendor/Font-Awesome /usr/local/lib/python2.7/dist-packages/ajenti_plugin_core/resources/vendor/fontawesome
+pip install pyroute2
 
 systemctl start ajenti.service

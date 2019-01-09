@@ -1,10 +1,13 @@
 #!/bin/bash
 # Install firmware burning tools
-sudo apt-get -y install gcc make dkms
+sudo apt-get -y install gcc make dkms *-headers-$(uname -r)
 cd /tmp
-wget http://www.mellanox.com/downloads/MFT/mft-4.5.0-31-x86_64-deb.tgz
-tar -xvzf mft-4.5.0-31-x86_64-deb.tgz
-cd mft-4.5.0-31-x86_64-deb
+#wget http://www.mellanox.com/downloads/MFT/mft-4.5.0-31-x86_64-deb.tgz
+#tar -xvzf mft-4.5.0-31-x86_64-deb.tgz
+#cd mft-4.5.0-31-x86_64-deb
+wget http://www.mellanox.com/downloads/MFT/mft-4.11.0-103-x86_64-deb.tgz
+tar mft-4.11.0-103-x86_64-deb.tgz
+cd mft-4.11.0-103-x86_64-deb.tgz
 sudo ./install.sh
 # Get firmware source
 cd /tmp
